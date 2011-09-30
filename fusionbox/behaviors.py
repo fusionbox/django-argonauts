@@ -2,6 +2,9 @@ from django.db import models
 from django.db.models.base import ModelBase
 
 class MetaBehavior(ModelBase):
+    '''
+    Base Metaclass for Behaviors
+    '''
     def __new__(cls, name, bases, attrs):
         new_class = super(MetaBehavior, cls).__new__(cls, name, bases, attrs)
         print new_class.__name__, new_class._meta.abstract
@@ -14,15 +17,58 @@ class MetaBehavior(ModelBase):
 
         return new_class
 
-class BehaviorSettingsBase:
-    pass
-
 class Behavior(models.Model):
+    '''
+    Base class for all Behaviors
+
+    Behaviors are implemented through model inheritance, and support
+    multi-inheritance as well.  Each behavior adds a set of default fields
+    and/or methods to the model.  Field names can be customized like example B.
+
+    EXAMPLE A
+    class MyModel(FooBehavior):
+        pass
+
+    MyModel will have whatever fields FooBehavior adds with default field
+    names.
+
+    EXAMPLE B
+    class MyModel(FooBehavior):
+        class FooBehavior:
+            bar_field_name = "bar"
+            baz_field_name = "baz"
+
+    MyModel will have the fields from FooBehavior added, but the field names
+    will be "bar" and "baz" respectively.
+
+    EXAMPLE C
+    class MyModel(FooBehavior, BarBehavior):
+        pass
+
+    MyModel will have the fields from both FooBehavior and BarBehavior, each
+    with default field names.  To customizing field names can be done just like
+    it was in example B.
+
+    '''
     class Meta:
         abstract = True
     __metaclass__ = MetaBehavior
 
 class TimeStampable(Behavior):
+    '''
+    Base class for adding timestamping behavior to a model.  
+
+    Added Fields:
+        Field 1:
+            field: DateTimeField(auto_now_add=True)
+            description: Timestamps set at the creation of the instance
+            default_name: created_at
+        Field 2:
+            field: DateTimeField(auto_now_add=True)
+            description: Timestamps set each time the save method is called on the instance
+            default_name: updated_at
+    
+    '''
     class Meta:
         abstract = True
 
@@ -45,13 +91,33 @@ class TimeStampable(Behavior):
                 setattr(child.TimeStampable, name, value)
 
 class SEO(Behavior):
+    '''
+    Base class for adding seo behavior to a model.  
+
+    Added Fields:
+        Field 1:
+            field: CharField(max_length = 255)
+            description: Char field intended for use in html <title> tag.
+            validation: Max Length 255 Characters
+            default_name: seo_title
+        Field 2:
+            field: TextField()
+            description: Text field intended for use in html <meta name="description"> tag.
+            default_name: seo_description
+        Field 3:
+            field: TextField()
+            description: Text field intended for use in html <meta name="keywords"> tag.
+            validation: comma separated text strings
+            default_name: seo_keywords
+    
+    '''
+    class Meta:
+        abstract = True
+
     class SEO:
         seo_title_field_name = 'seo_title'
         seo_description_field_name = 'seo_description'
         seo_keywords_field_name = 'seo_keywords'
-
-    class Meta:
-        abstract = True
 
     @classmethod
     def add_fields_to_child(cls, child):
