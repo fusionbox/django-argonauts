@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 import re
-from distutils.core import setup
+from setuptools import setup
 
 __doc__="""
 Useful stuff for django
@@ -18,11 +18,13 @@ setup(name='django-fusionbox',
     keywords='django boilerplate',
     long_description=__doc__,
     url='https://github.com/fusionbox/django-fusionbox',
-    packages=['fusionbox'],
+    packages=['fusionbox', 'fusionbox.templatetags'],
     platforms = "any",
     license='BSD',
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
     ],
+    install_requires = ['BeautifulSoup'],
+    requires = ['BeautifulSoup'],
 )

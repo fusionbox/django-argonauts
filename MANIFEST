@@ -1,5 +1,8 @@
 setup.py
 fusionbox/__init__.py
 fusionbox/middleware.py
+fusionbox/templatetags
+fusionbox/templatetags/__init__.py
+fusionbox/templatetags/fusionbox_tags.py
 README.md
 LICENSE
