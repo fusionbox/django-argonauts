@@ -9,11 +9,9 @@ class MetaBehavior(ModelBase):
         new_class = super(MetaBehavior, cls).__new__(cls, name, bases, attrs)
         print new_class.__name__, new_class._meta.abstract
         if not new_class._meta.abstract or False:
-            for base in bases:
-                if hasattr(base, 'merge_settings_with_child'):
-                    base.merge_settings_with_child(new_class)
-                if hasattr(base, 'add_fields_to_child'):
-                    base.add_fields_to_child(new_class)
+            new_class.merge_parent_settings()
+            for behavior in new_class.base_behaviors():
+                behavior.add_fields_to_child(new_class)
 
         return new_class
 
@@ -54,6 +52,29 @@ class Behavior(models.Model):
         abstract = True
     __metaclass__ = MetaBehavior
 
+    @classmethod
+    def merge_parent_settings(cls):
+        behaviors = [behavior.__name__ for behavior in cls.base_behaviors()]
+        for parent in reversed(cls.mro()):
+            for behavior in behaviors:
+                parent_settings = getattr(parent, behavior, None)
+                if not parent_settings == None:
+                    child_settings = getattr(cls, behavior)
+                    for name in dir(parent_settings):
+                        if name.startswith('__'):
+                            continue
+                        if not hasattr(child_settings, name):
+                            value = getattr(parent_settings, name)
+                            setattr(child_settings, name, value)
+
+    @classmethod
+    def base_behaviors(cls):
+        behaviors = []
+        for parent in cls.mro():
+            if hasattr(parent, parent.__name__):
+                behaviors.append(parent)
+        return behaviors
+
 class TimeStampable(Behavior):
     '''
     Base class for adding timestamping behavior to a model.  
@@ -80,15 +101,6 @@ class TimeStampable(Behavior):
     def add_fields_to_child(cls, child):
         child.add_to_class(child.TimeStampable.created_at_field_name, models.DateTimeField(auto_now_add=True))
         child.add_to_class(child.TimeStampable.updated_at_field_name, models.DateTimeField(auto_now=True))
-
-    @classmethod
-    def merge_settings_with_child(cls, child):
-        for name in dir(cls.TimeStampable):
-            if name.startswith('__'):
-                continue
-            if not hasattr(child.TimeStampable, name):
-                value = getattr(cls.TimeStampable, name)
-                setattr(child.TimeStampable, name, value)
 
 class SEO(Behavior):
     '''
@@ -124,12 +136,3 @@ class SEO(Behavior):
         child.add_to_class(child.SEO.seo_title_field_name, models.CharField(max_length = 255))
         child.add_to_class(child.SEO.seo_description_field_name, models.TextField())
         child.add_to_class(child.SEO.seo_keywords_field_name, models.TextField())
-
-    @classmethod
-    def merge_settings_with_child(cls, child):
-        for name in dir(cls.SEO):
-            if name.startswith('__'):
-                continue
-            if not hasattr(child.SEO, name):
-                value = getattr(cls.SEO, name)
-                setattr(child.SEO, name, value)
