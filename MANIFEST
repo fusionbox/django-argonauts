@@ -1,5 +1,8 @@
 setup.py
 fusionbox/__init__.py
 fusionbox/middleware.py
+fusionbox/behaviors.py
+fusionbox/tests.py
+fusionbox/models.py
 README.md
 LICENSE
