@@ -7,12 +7,12 @@ class MetaBehavior(ModelBase):
     '''
     def __new__(cls, name, bases, attrs):
         new_class = super(MetaBehavior, cls).__new__(cls, name, bases, attrs)
-        print new_class.__name__, new_class._meta.abstract
-        if not new_class._meta.abstract or False:
-            new_class.merge_parent_settings()
-            for behavior in new_class.base_behaviors():
-                behavior.add_fields_to_child(new_class)
-
+        new_class.merge_parent_settings()
+        try:
+            Behavior
+            new_class.modify_schema()
+        except NameError: # creating Behavior
+            pass
         return new_class
 
 class Behavior(models.Model):
@@ -53,19 +53,21 @@ class Behavior(models.Model):
     __metaclass__ = MetaBehavior
 
     @classmethod
+    def modify_schema(cls):
+        """
+        Hook for behaviors to modify their model class just after it's created
+        """
+        pass
+
+    @classmethod
     def merge_parent_settings(cls):
         behaviors = [behavior.__name__ for behavior in cls.base_behaviors()]
         for parent in reversed(cls.mro()):
             for behavior in behaviors:
-                parent_settings = getattr(parent, behavior, None)
-                if not parent_settings == None:
-                    child_settings = getattr(cls, behavior)
-                    for name in dir(parent_settings):
-                        if name.startswith('__'):
-                            continue
-                        if not hasattr(child_settings, name):
-                            value = getattr(parent_settings, name)
-                            setattr(child_settings, name, value)
+                parent_settings = dict(getattr(parent, behavior, object).__dict__)
+                child_settings = getattr(cls, behavior, object).__dict__
+                parent_settings.update(child_settings)
+                getattr(cls, behavior).__dict__ = parent_settings
 
     @classmethod
     def base_behaviors(cls):
@@ -75,9 +77,10 @@ class Behavior(models.Model):
                 behaviors.append(parent)
         return behaviors
 
+
 class TimeStampable(Behavior):
     '''
-    Base class for adding timestamping behavior to a model.  
+    Base class for adding timestamping behavior to a model.
 
     Added Fields:
         Field 1:
@@ -88,7 +91,7 @@ class TimeStampable(Behavior):
             field: DateTimeField(auto_now_add=True)
             description: Timestamps set each time the save method is called on the instance
             default_name: updated_at
-    
+
     '''
     class Meta:
         abstract = True
@@ -98,13 +101,15 @@ class TimeStampable(Behavior):
         updated_at_field_name = 'updated_at'
 
     @classmethod
-    def add_fields_to_child(cls, child):
-        child.add_to_class(child.TimeStampable.created_at_field_name, models.DateTimeField(auto_now_add=True))
-        child.add_to_class(child.TimeStampable.updated_at_field_name, models.DateTimeField(auto_now=True))
+    def modify_schema(cls):
+        cls.add_to_class(cls.TimeStampable.created_at_field_name, models.DateTimeField(auto_now_add=True))
+        cls.add_to_class(cls.TimeStampable.updated_at_field_name, models.DateTimeField(auto_now=True))
+        super(TimeStampable, cls).modify_schema()
+
 
 class SEO(Behavior):
     '''
-    Base class for adding seo behavior to a model.  
+    Base class for adding seo behavior to a model.
 
     Added Fields:
         Field 1:
@@ -121,7 +126,7 @@ class SEO(Behavior):
             description: Text field intended for use in html <meta name="keywords"> tag.
             validation: comma separated text strings
             default_name: seo_keywords
-    
+
     '''
     class Meta:
         abstract = True
@@ -132,7 +137,8 @@ class SEO(Behavior):
         seo_keywords_field_name = 'seo_keywords'
 
     @classmethod
-    def add_fields_to_child(cls, child):
-        child.add_to_class(child.SEO.seo_title_field_name, models.CharField(max_length = 255))
-        child.add_to_class(child.SEO.seo_description_field_name, models.TextField())
-        child.add_to_class(child.SEO.seo_keywords_field_name, models.TextField())
+    def modify_schema(cls):
+        cls.add_to_class(cls.SEO.seo_title_field_name, models.CharField(max_length = 255))
+        cls.add_to_class(cls.SEO.seo_description_field_name, models.TextField())
+        cls.add_to_class(cls.SEO.seo_keywords_field_name, models.TextField())
+        super(SEO, cls).modify_schema()
