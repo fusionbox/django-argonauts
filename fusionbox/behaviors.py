@@ -8,11 +8,12 @@ class MetaBehavior(ModelBase):
     def __new__(cls, name, bases, attrs):
         new_class = super(MetaBehavior, cls).__new__(cls, name, bases, attrs)
         new_class.merge_parent_settings()
-        try:
-            Behavior
-            new_class.modify_schema()
-        except NameError: # creating Behavior
-            pass
+        if not new_class._meta.abstract:
+            try:
+                Behavior
+                new_class.modify_schema()
+            except NameError: # creating Behavior
+                pass
         return new_class
 
 class Behavior(models.Model):
