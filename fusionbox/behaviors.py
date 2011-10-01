@@ -63,7 +63,7 @@ class Behavior(models.Model):
     @classmethod
     def merge_parent_settings(cls):
         behaviors = [behavior.__name__ for behavior in cls.base_behaviors()]
-        for parent in reversed(cls.mro()):
+        for parent in cls.mro():
             for behavior in behaviors:
                 parent_settings = dict(getattr(parent, behavior, object).__dict__)
                 child_settings = getattr(cls, behavior, object).__dict__
