@@ -7,9 +7,12 @@ class MetaBehavior(ModelBase):
     '''
     def __new__(cls, name, bases, attrs):
         new_class = super(MetaBehavior, cls).__new__(cls, name, bases, attrs)
-        if not new_class._meta.abstract:
-            new_class.merge_parent_settings()
+        new_class.merge_parent_settings()
+        try:
+            Behavior
             new_class.modify_schema()
+        except NameError: # creating Behavior
+            pass
         return new_class
 
 class Behavior(models.Model):
@@ -61,15 +64,10 @@ class Behavior(models.Model):
         behaviors = [behavior.__name__ for behavior in cls.base_behaviors()]
         for parent in reversed(cls.mro()):
             for behavior in behaviors:
-                parent_settings = getattr(parent, behavior, None)
-                if not parent_settings == None:
-                    child_settings = getattr(cls, behavior)
-                    for name in dir(parent_settings):
-                        if name.startswith('__'):
-                            continue
-                        if not hasattr(child_settings, name):
-                            value = getattr(parent_settings, name)
-                            setattr(child_settings, name, value)
+                parent_settings = dict(getattr(parent, behavior, object).__dict__)
+                child_settings = getattr(cls, behavior, object).__dict__
+                parent_settings.update(child_settings)
+                getattr(cls, behavior).__dict__ = parent_settings
 
     @classmethod
     def base_behaviors(cls):
