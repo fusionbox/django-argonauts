@@ -32,6 +32,33 @@ class TestBehaviorBase(unittest.TestCase):
         self.assertTrue(ThirdBehavior.BaseBehavior.child_base_setting == 'b')
 
 
+    def test_declared_fields_doesnt_break_modelbase(self):
+        # I'm not sure if this actually tests anything
+        from django.core.management.validation import get_validation_errors
+        from StringIO import StringIO
+
+        class AppMod(object):
+            __name__ = 'fusionbox.behaviors'
+            class Sluggable(Behavior):
+                slug = models.CharField(max_length=255)
+                class Meta:
+                    abstract = True
+                    unique_together = (('slug',),)
+            class AbstractSluggableModel(Sluggable, models.Model):
+                class Meta:
+                    unique_together = (('slug',),)
+                    abstract = True
+            class TheActualModel(AbstractSluggableModel):
+                pass
+
+        app_mod = AppMod()
+        errors = StringIO()
+        get_validation_errors(errors, app_mod)
+        errors = errors.getvalue()
+        print errors
+        self.assertTrue(errors == '')
+
+
 def get_field_dict(model):
     """
     Make a dictionary of field name -> field class

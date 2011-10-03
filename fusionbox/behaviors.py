@@ -34,20 +34,18 @@ class MetaBehavior(ModelBase):
 
         declared_fields = {}
 
-        for property_name in attrs:
-            if isinstance(attrs[property_name], models.Field):
-                declared_fields[property_name] = attrs[property_name]
-        for field in declared_fields:
-            del attrs[field]
+        if getattr(attrs.get('Meta', EmptyObject()), 'abstract', False):
+            for property_name in attrs:
+                if isinstance(attrs[property_name], models.Field):
+                    declared_fields[property_name] = attrs[property_name]
+            for field in declared_fields:
+                del attrs[field]
 
         attrs['declared_fields'] = declared_fields
 
         new_class = super(MetaBehavior, cls).__new__(cls, name, bases, attrs)
         new_class.merge_parent_settings()
         if not new_class._meta.abstract:
-            # non-abstract classes can't have their field overridden
-            for field_name in declared_fields:
-                new_class.add_to_class(field_name, declared_fields[field_name])
             new_class.modify_schema()
         else:
             # make sure abstract classes have an inner settings class
