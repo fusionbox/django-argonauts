@@ -15,3 +15,24 @@ Add `fusionbox.middleware.GenericTemplateFinderMiddleware` to your
 - `/` renders `index.html`
 - `/foo/` renders `/foo.html` OR `/foo/index.html` OR `/foo`
 - This works for an directory depth
+
+## Behaviors
+Behaviors are a [DRY](http://c2.com/cgi/wiki?DontRepeatYourself) way of re-using common fields and methods on models. Behaviors function seamlessly through python inheritance and are fully configurable. Behaviors also support multi-inheritance so adding multiple behaviors to a single model is as easy as inheriting from each behavior you wish to add.
+
+### Standard Usage
+    from fusionbox.behaviors import TimeStampable
+
+    class Foo(TimeStampable):
+        pass
+
+This will add the fields `created_at` and `updated_at` to your `Foo` model.  Just as their names suggest, `created_at` is a `DateTimeField(auto_now_add=True)` and `updated_at` is a `DateTimeField(auto_now=True)`.
+
+### Custom Configuration Usage
+    from fusionbox.behaviors import TimeStampable
+
+    class Foo(TimeStampable):
+        class TimeStampable:
+            created_at_field_name = "creation_date"
+            updated_at_field_naem = "date_updated"
+
+This will add the same fields as in the standard usage, but the fields will instead be named `creation_date` and `date_updated` respectively
