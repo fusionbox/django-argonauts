@@ -16,8 +16,12 @@ Add `fusionbox.middleware.GenericTemplateFinderMiddleware` to your
 - `/foo/` renders `/foo.html` OR `/foo/index.html` OR `/foo`
 - This works for an directory depth
 
-## Behaviors
-Behaviors are a [DRY](http://c2.com/cgi/wiki?DontRepeatYourself) way of re-using common fields and methods on models. Behaviors function seamlessly through python inheritance and are fully configurable. Behaviors also support multi-inheritance so adding multiple behaviors to a single model is as easy as inheriting from each behavior you wish to add.
+## Behavior
+Behaviors are a [DRY](http://c2.com/cgi/wiki?DontRepeatYourself) way of
+re-using common fields and methods on models. Behaviors function seamlessly
+through python inheritance and are fully configurable. Behaviors also support
+multi-inheritance so adding multiple behaviors to a single model is as easy as
+inheriting from each behavior you wish to add.
 
 ### Standard Usage
     from fusionbox.behaviors import TimeStampable
@@ -25,7 +29,12 @@ Behaviors are a [DRY](http://c2.com/cgi/wiki?DontRepeatYourself) way of re-using
     class Foo(TimeStampable):
         pass
 
-This will add the fields `created_at` and `updated_at` to your `Foo` model.  Just as their names suggest, `created_at` is a `DateTimeField(auto_now_add=True)` and `updated_at` is a `DateTimeField(auto_now=True)`.
+This will add the fields `created_at` and `updated_at` to your `Foo` model.
+
+Just as their names suggest, the model will have the following fields.
+
+* `created_at` => `DateTimeField(auto_now_add=True)` 
+* `updated_at` => `DateTimeField(auto_now=True)`
 
 ### Custom Configuration Usage
     from fusionbox.behaviors import TimeStampable
@@ -35,7 +44,8 @@ This will add the fields `created_at` and `updated_at` to your `Foo` model.  Jus
             created_at_field_name = "creation_date"
             updated_at_field_naem = "date_updated"
 
-This will add the same fields as in the standard usage, but the fields will instead be named `creation_date` and `date_updated` respectively
+This will add the same fields as in the standard usage, but the fields will
+instead be named `creation_date` and `date_updated` respectively
 
 ## fusionbox\_tags
 Put `{% load fusionbox_tags %}` in your template to use these.
