@@ -51,19 +51,20 @@ class TestTimestampable(unittest.TestCase):
         self.assertTrue(isinstance(fields['created_at'], models.DateTimeField))
         self.assertTrue(isinstance(fields['updated_at'], models.DateTimeField))
 
-    @unittest.expectedFailure
-    def test_same_name(self):
-        # I'm not sure if this is a problem with django or the behaviors
-        class TestModel(TimeStampable):
-            class TimeStampable:
-                created_at_field_name = 'asdf'
-
-        x = TestModel()
-
-        fields = get_field_dict(x)
-
-        self.assertTrue(isinstance(fields['asdf'], models.DateTimeField))
-        self.assertTrue(isinstance(fields['updated_at'], models.DateTimeField))
+    #@unittest.expectedFailure
+    #def test_same_name(self):
+    #    # This is actually a problem with django, it won't let you have two
+    #    # model classes with the same name in the same app
+    #    class TestModel(TimeStampable):
+    #        class TimeStampable:
+    #            created_at_field_name = 'asdf'
+    #
+    #    x = TestModel()
+    #
+    #    fields = get_field_dict(x)
+    #
+    #    self.assertTrue(isinstance(fields['asdf'], models.DateTimeField))
+    #    self.assertTrue(isinstance(fields['updated_at'], models.DateTimeField))
 
     def test_custom(self):
         # This tests fails if the models share a name. see test_same_name
