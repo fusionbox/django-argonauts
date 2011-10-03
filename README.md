@@ -36,3 +36,26 @@ This will add the fields `created_at` and `updated_at` to your `Foo` model.  Jus
             updated_at_field_naem = "date_updated"
 
 This will add the same fields as in the standard usage, but the fields will instead be named `creation_date` and `date_updated` respectively
+
+## fusionbox\_tags
+Put `{% load fusionbox_tags %}` in your template to use these.
+
+### `{% higlight_here %}`
+This template tag will parse all anchor tags between `higlight_here` and
+`endhighlight` and add a class to the ones that are considered 'parents' of the
+current page's url. It takes an optional class name as an argument, defaulting
+to `here`.
+
+
+#### Usage examples
+
+        {% highlight_here %}
+            <a href="/" class="home">/</a>
+            <a href="/blog/">blog</a>
+        {% endhighlight %}
+
+
+        {% highlight_here big red %}
+            <a href="/">/</a>
+            <a href="/blog/">blog</a>
+        {% endhighlight %}
