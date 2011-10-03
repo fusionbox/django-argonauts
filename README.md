@@ -41,8 +41,8 @@ Just as their names suggest, the model will have the following fields.
 
     class Foo(TimeStampable):
         class TimeStampable:
-            created_at_field_name = "creation_date"
-            updated_at_field_naem = "date_updated"
+            created_at = "creation_date"
+            updated_at = "date_updated"
 
 This will add the same fields as in the standard usage, but the fields will
 instead be named `creation_date` and `date_updated` respectively

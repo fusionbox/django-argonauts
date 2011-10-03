@@ -57,7 +57,7 @@ class TestTimestampable(unittest.TestCase):
     #    # model classes with the same name in the same app
     #    class TestModel(TimeStampable):
     #        class TimeStampable:
-    #            created_at_field_name = 'asdf'
+    #            created_at = 'asdf'
     #
     #    x = TestModel()
     #
@@ -70,7 +70,7 @@ class TestTimestampable(unittest.TestCase):
         # This tests fails if the models share a name. see test_same_name
         class Test2Model(TimeStampable):
             class TimeStampable:
-                created_at_field_name = 'asdf'
+                created_at = 'asdf'
 
         x = Test2Model()
 
@@ -94,10 +94,36 @@ class TestSEO(unittest.TestCase):
         self.assertTrue(isinstance(fields['seo_description'], models.TextField))
         self.assertTrue(isinstance(fields['seo_keywords'], models.TextField))
 
+    def test_overridden_field(self):
+        class Test14Model(SEO):
+            seo_title = models.IntegerField()
+
+        x = Test14Model()
+
+        fields = get_field_dict(x)
+
+        self.assertTrue(isinstance(fields['seo_title'], models.IntegerField))
+        self.assertTrue(isinstance(fields['seo_description'], models.TextField))
+        self.assertTrue(isinstance(fields['seo_keywords'], models.TextField))
+
+    def test_nonsense_config(self):
+        class Test13Model(SEO):
+            blahblah = 'foo'
+            asdf = models.CharField()
+
+        x = Test13Model()
+
+        fields = get_field_dict(x)
+
+        self.assertTrue(isinstance(fields['seo_title'], models.CharField))
+        self.assertTrue(isinstance(fields['seo_description'], models.TextField))
+        self.assertTrue(isinstance(fields['seo_keywords'], models.TextField))
+
+
     def test_override(self):
         class Test4Model(SEO):
             class SEO:
-                seo_title_field_name = 'foo'
+                seo_title = 'foo'
 
         x = Test4Model()
 
@@ -110,10 +136,10 @@ class TestSEO(unittest.TestCase):
     def test_deep_inheritance(self):
         class ParentModel(SEO):
             class SEO:
-                seo_title_field_name = 'foo'
+                seo_title = 'foo'
         class Test7Model(ParentModel):
             class SEO:
-                seo_keywords_field_name = 'asdfasdf'
+                seo_keywords = 'asdfasdf'
 
         x = Test7Model()
 
@@ -126,12 +152,12 @@ class TestSEO(unittest.TestCase):
     def test_deep_inheritance_abstract(self):
         class ParentModelAbstract(SEO):
             class SEO:
-                seo_title_field_name = 'foo'
+                seo_title = 'foo'
             class Meta:
                 abstract = True
         class Test8Model(ParentModelAbstract):
             class SEO:
-                seo_keywords_field_name = 'asdfasdf'
+                seo_keywords = 'asdfasdf'
 
         x = Test8Model()
 
@@ -147,7 +173,7 @@ class TestSEO(unittest.TestCase):
                 abstract = True
         class Test9Model(ParentModelNoSettings):
             class SEO:
-                seo_keywords_field_name = 'asdfasdf'
+                seo_keywords = 'asdfasdf'
 
         x = Test9Model()
 
@@ -180,9 +206,9 @@ class TestTwoBehaviors(unittest.TestCase):
     def test_override(self):
         class Test6Model(SEO, TimeStampable):
             class SEO:
-                seo_title_field_name = 'asdf'
+                seo_title = 'asdf'
             class TimeStampable:
-                updated_at_field_name = 'foo'
+                updated_at = 'foo'
             pass
 
         x = Test6Model()
@@ -196,4 +222,46 @@ class TestTwoBehaviors(unittest.TestCase):
         self.assertTrue(isinstance(fields['created_at'], models.DateTimeField))
         self.assertTrue(isinstance(fields['foo'], models.DateTimeField))
 
+    def test_new_behavior(self):
+        class SeoAndTime(SEO, TimeStampable):
+            class SEO:
+                seo_title = 'seo_and_time_title'
+            pass
 
+        class Test10Model(SeoAndTime):
+            class TimeStampable:
+                updated_at = 'asdf'
+            class SEO:
+                seo_description = 'foo'
+
+        x = Test10Model()
+
+        fields = get_field_dict(x)
+
+        self.assertTrue(isinstance(fields['seo_and_time_title'], models.CharField))
+        self.assertTrue(isinstance(fields['foo'], models.TextField))
+        self.assertTrue(isinstance(fields['seo_keywords'], models.TextField))
+
+        self.assertTrue(isinstance(fields['created_at'], models.DateTimeField))
+        self.assertTrue(isinstance(fields['asdf'], models.DateTimeField))
+
+    def test_namespacings(self):
+        class SeoAndTime2(SEO, TimeStampable):
+            class SEO:
+                seo_title = 'seo_and_time_title'
+            pass
+
+        class Test11Model(SeoAndTime2):
+            class TimeStampable:
+                seo_description = 'asdf'
+
+        x = Test11Model()
+
+        fields = get_field_dict(x)
+
+        self.assertTrue(isinstance(fields['seo_and_time_title'], models.CharField))
+        self.assertTrue(isinstance(fields['seo_description'], models.TextField))
+        self.assertTrue(isinstance(fields['seo_keywords'], models.TextField))
+
+        self.assertTrue(isinstance(fields['created_at'], models.DateTimeField))
+        self.assertTrue(isinstance(fields['updated_at'], models.DateTimeField))
