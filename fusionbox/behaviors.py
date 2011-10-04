@@ -107,7 +107,14 @@ class Behavior(models.Model):
                 continue
 
             for name, field in declared_fields.iteritems():
-                new_name = getattr(getattr(cls, parent.__name__, EmptyObject()), name, name)
+                if not hasattr(cls, parent.__name__):
+                    setattr(cls, parent.__name__, EmptyObject())
+                try:
+                    new_name = getattr(getattr(cls, parent.__name__), name)
+                except AttributeError:
+                    new_name = name
+                    # put the column name in the behavior's config, so it's always there
+                    setattr(getattr(parent, parent.__name__), name, name)
                 if not hasattr(cls, new_name):
                     cls.add_to_class(new_name, field)
 
