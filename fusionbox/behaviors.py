@@ -192,3 +192,17 @@ class SEO(Behavior):
     seo_title = models.CharField(max_length = 255)
     seo_description = models.TextField()
     seo_keywords = models.TextField()
+
+    def formatted_seo_data(self, title='', description = '', keywords = ''):
+        """
+        A string containing the model's SEO data marked up and ready for output
+        in HTML.
+        """
+        from django.utils.safestring import mark_safe
+        from django.utils.html import escape
+
+        escaped_data = tuple(map(escape,
+            (getattr(self, self.SEO.seo_title, title),
+             getattr(self, self.SEO.seo_description, description),
+             getattr(self, self.SEO.seo_keywords, keywords))))
+        return mark_safe('<title>%s</title>\n<meta name="description" value="%s"/>\n<meta name="keywords" value="%s"/>' % escaped_data)
