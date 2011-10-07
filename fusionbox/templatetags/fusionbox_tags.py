@@ -6,18 +6,6 @@ register = template.Library()
 
 class Highlighter(template.Node):
 
-    @staticmethod
-    def is_here(current, url):
-        """
-        Determine if current is 'underneath' url.
-        """
-        if url == '/':
-            return current == '/'
-        if current.startswith(url):
-            return True
-        else:
-            return False
-
     def __init__(self, parser, token):
         self.highlight_class = ' '.join(token.split_contents()[1:])
         self.nodelist = parser.parse(('endhighlight',))
@@ -54,13 +42,11 @@ class HighlightHereNode(Highlighter):
         if not self.highlight_class:
             self.highlight_class = "here"
 
-        for anchor in soup.findAll('a', {'href': True}):
-            if self.is_here(context['request'].path, anchor['href']):
-                try:
-                    anchor['class'] += ' ' + self.highlight_class
-                except KeyError:
-                    anchor['class'] = self.highlight_class
-
+        for anchor in soup.findAll('a', {'href': context['request'].path}):
+            try:
+                anchor['class'] += ' ' + self.highlight_class
+            except KeyError:
+                anchor['class'] = self.highlight_class
         return str(soup)
 
 register.tag("highlight_here", HighlightHereNode)
@@ -102,12 +88,11 @@ class HighlightHereParentNode(Highlighter):
 
         if not self.highlight_class:
             self.highlight_class = "here"
-        for anchor in soup.findAll('a', {'href': True}):
-            if self.is_here(context['request'].path, anchor['href']):
-                try:
-                    anchor.parent['class'] += ' ' + self.highlight_class
-                except KeyError:
-                    anchor.parent['class'] = self.highlight_class
+        for anchor in soup.findAll('a', {'href': context['request'].path}):
+            try:
+                anchor.parent['class'] += ' ' + self.highlight_class
+            except KeyError:
+                anchor.parent['class'] = self.highlight_class
         return str(soup)
 
 register.tag("highlight_here_parent", HighlightHereParentNode)
