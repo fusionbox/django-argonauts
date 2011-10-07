@@ -4,15 +4,67 @@ from BeautifulSoup import BeautifulSoup
 
 register = template.Library()
 
-class Highlighter(template.Node):
+def addclass(elem, cls):
+    try:
+        elem['class'] += ' ' + cls
+    except KeyError:
+        elem['class'] = cls
 
+
+class HighlighterBase(template.Node):
+    """
+    Base class for templatetags that highlight specific DOM elements.
+
+    Child classes must implement a ``elems_to_highlight`` method, which should
+    return a iterable of elements to modify.  Optionally, they can override the
+    ``highlight`` method, which by default simply adds a class to the DOM
+    elements.
+
+    Each templatetag accepts an optional ``self.highlight_class`` parameter and
+    all other options are stored in ``self.options``.  This behavior can be
+    overriden by implementing the ``parse_options`` method.
+    """
     def __init__(self, parser, token):
-        self.highlight_class = ' '.join(token.split_contents()[1:])
+        self.parse_options(tokens.split_contents())
+
         self.nodelist = parser.parse(('endhighlight',))
         parser.delete_first_token()
 
+    def parse_options(self, tokens):
+        self.options = tokens[1:]
 
-class HighlightHereNode(Highlighter):
+        try:
+            self.highlight_class = self.options.pop(0)
+        except IndexError:
+            pass
+
+    def elems_to_highlight(self, soup, context):
+        """
+        Returns an iterable of all DOM elements to be highlighted.
+
+        Accepts a BeautifulSoup object of the HTML
+        """
+        raise NotImplemented
+
+    def build_soup(self, context):
+        content = self.nodelist.render(context)
+        soup = BeautifulSoup(content)
+
+        return soup
+
+    def highlight(self, elem):
+        addclass(elem, self.highlight_class)
+
+    def render(self, context):
+        soup = self.build_soup(context)
+
+        for elem in self.elems_to_highlight(soup, context):
+            self.highlight(elem)
+        
+        return str(soup)
+
+
+class HighlightHereNode(HighlighterBase):
     """
     Filter the subnode's output to add a 'here' class to every anchor where
     appropriate, based on startswith matching.
@@ -35,31 +87,35 @@ class HighlightHereNode(Highlighter):
         <a href="/blog/" class="here">blog</a>
 
     """
-    def render(self, context):
-        content = self.nodelist.render(context)
-        soup = BeautifulSoup(content)
-        
-        if not self.highlight_class:
-            self.highlight_class = "here"
+    def __init__(self, parser, token):
+        super(HereHighlighter, self).__init__(parser, token)
 
-        for anchor in soup.findAll('a', {'href': context['request'].path}):
+        self.highlight_class = self.highlight_class or 'here'
+
+    def elems_to_highlight(self, soup, context):
+        try:
+            path = self.options[0]
+        except IndexError:
             try:
-                anchor['class'] += ' ' + self.highlight_class
+                path = context['request'].path
             except KeyError:
-                anchor['class'] = self.highlight_class
-        return str(soup)
+                raise KeyError("The request was not available in the context, please ensure that the request is made available in the context.")
+
+        for anchor in soup.findAll('a', {'href': path}):
+            yield anchor
+
 
 register.tag("highlight_here", HighlightHereNode)
 
 
-class HighlightHereParentNode(Highlighter):
+class HighlightHereParentNode(HighlightHereNode):
     """
-    Adds a here class to the parent of the anchor link.  Useful for nested navs where highlight
-    style might bubble upwards
+    Adds a here class to the parent of the anchor link.  Useful for nested navs
+    where highlight style might bubble upwards.
 
     Given::
 
-    {% highlight_here %}
+    {% highlight_here_parent %}
      <ul>
         <li id="navHome" class="parent_home">
             <a href="/" class="home">/</a>
@@ -82,17 +138,8 @@ class HighlightHereParentNode(Highlighter):
     <ul>
 
     """
-    def render(self, context):
-        content = self.nodelist.render(context)
-        soup = BeautifulSoup(content)
-
-        if not self.highlight_class:
-            self.highlight_class = "here"
-        for anchor in soup.findAll('a', {'href': context['request'].path}):
-            try:
-                anchor.parent['class'] += ' ' + self.highlight_class
-            except KeyError:
-                anchor.parent['class'] = self.highlight_class
-        return str(soup)
+    def elems_to_highlight(self, soup, href):
+        for anchor in super(HighlightHereParentNode, self).elems_to_highlight(soup, href):
+            yield anchor.parent
 
 register.tag("highlight_here_parent", HighlightHereParentNode)
