@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models.base import ModelBase
 
+import copy
 
 class EmptyObject(object):
     pass
@@ -116,7 +117,7 @@ class Behavior(models.Model):
                     # put the column name in the behavior's config, so it's always there
                     setattr(getattr(parent, parent.__name__), name, name)
                 if not hasattr(cls, new_name):
-                    cls.add_to_class(new_name, field)
+                    cls.add_to_class(new_name, copy.copy(field))
 
 
     @classmethod

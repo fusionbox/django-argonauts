@@ -58,6 +58,19 @@ class TestBehaviorBase(unittest.TestCase):
         print errors
         self.assertTrue(errors == '')
 
+    def test_sharing(self):
+        class SharedModel1(SEO):
+            class SEO:
+                seo_title = 'name'
+        class SharedModel2(SEO):
+            class SEO:
+                seo_title = 'asdf'
+
+        print vars(SharedModel1.SEO)
+        print vars(SharedModel2.SEO)
+        get_field_dict(SharedModel1)['name']
+        get_field_dict(SharedModel2)['asdf']
+
 
 def get_field_dict(model):
     """
