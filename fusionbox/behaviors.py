@@ -166,6 +166,51 @@ class TimeStampable(Behavior):
     updated_at = models.DateTimeField()
 
 
+class PublishableManager(models.Manager):
+    """
+    Manager for publishable behavior
+
+    """
+    def get_query_set(self):
+        queryset = super(PublishableManager, self).get_query_set()
+        return queryset.filter(is_published=True, pub_date__lte=datetime.now)
+
+class Publishable(models.Model):
+    """
+    Base class for adding publishable behavior to a model.
+
+    Added Fields:
+        Field 1:
+            field: DateTimeField(default=datetime.now, help_text='Selecting a future date will automatically publish to the live site on that date.')
+            description: The date that the model instance will be made available to the PublishableManager's query set
+            default_name: pub_date
+        Field 2:
+            field: DateTimeField(default=datetime.now, help_text='Selecting a future date will automatically publish to the live site on that date.')
+            description: setting to False will automatically draft the instance, making it unavailable to the PublishableManager's query set
+            default_name: is_published
+
+    Added Managers:
+        PublishableManager:
+            description: overwritten get_query_set() function to only fetch published instances.
+            name: published
+            usage: 
+                class Blog(Publishable):
+                ...
+
+                all_blogs = Blog.objects.all()
+                published_blogs = Blog.published.all()
+
+    """
+    class Meta:
+        abstract = True
+
+    pub_date = models.DateTimeField(default=datetime.now, help_text='Selecting a future date will automatically publish to the live site on that date.')
+    is_published = models.BooleanField(default=True, help_text='Unchecking this will take the entry off the live site regardless of publishing date')
+
+    objects = models.Manager()
+    published = PublishableManager()
+
+
 class SEO(Behavior):
     """
     Base class for adding seo behavior to a model.
