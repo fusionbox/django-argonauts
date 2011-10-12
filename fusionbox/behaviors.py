@@ -163,8 +163,8 @@ class Timestampable(Behavior):
     class Meta:
         abstract = True
 
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class PublishableManager(models.Manager):
