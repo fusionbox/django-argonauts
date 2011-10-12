@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models.base import ModelBase
 
 import copy
+import datetime
 
 class EmptyObject(object):
     pass
@@ -173,20 +174,19 @@ class PublishableManager(models.Manager):
     """
     def get_query_set(self):
         queryset = super(PublishableManager, self).get_query_set()
-        return queryset.filter(is_published=True, publish_at__lte=datetime.now)
+        return queryset.filter(is_published=True, publish_at__lte=datetime.datetime.now())
 
-import datetime
 class Publishable(models.Model):
     """
     Base class for adding publishable behavior to a model.
 
     Added Fields:
         Field 1:
-            field: DateTimeField(default=datetime.now, help_text='Selecting a future date will automatically publish to the live site on that date.')
+            field: DateTimeField(default=datetime.datetime.now(), help_text='Selecting a future date will automatically publish to the live site on that date.')
             description: The date that the model instance will be made available to the PublishableManager's query set
             default_name: publish_at
         Field 2:
-            field: DateTimeField(default=datetime.now, help_text='Selecting a future date will automatically publish to the live site on that date.')
+            field: DateTimeField(default=datetime.datetime.now(), help_text='Selecting a future date will automatically publish to the live site on that date.')
             description: setting to False will automatically draft the instance, making it unavailable to the PublishableManager's query set
             default_name: is_published
 
@@ -205,7 +205,7 @@ class Publishable(models.Model):
     class Meta:
         abstract = True
 
-    publish_at = models.DateTimeField(default=datetime.datetime.now, help_text='Selecting a future date will automatically publish to the live site on that date.')
+    publish_at = models.DateTimeField(default=datetime.datetime.now(), help_text='Selecting a future date will automatically publish to the live site on that date.')
     is_published = models.BooleanField(default=True, help_text='Unchecking this will take the entry off the live site regardless of publishing date')
 
     objects = models.Manager()
