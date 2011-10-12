@@ -205,7 +205,7 @@ class Publishable(models.Model):
     class Meta:
         abstract = True
 
-    pub_date = models.DateTimeField(default=datetime.now, help_text='Selecting a future date will automatically publish to the live site on that date.')
+    pub_date = models.DateTimeField(default=datetime.datetime.now, help_text='Selecting a future date will automatically publish to the live site on that date.')
     is_published = models.BooleanField(default=True, help_text='Unchecking this will take the entry off the live site regardless of publishing date')
 
     objects = models.Manager()
