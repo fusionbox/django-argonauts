@@ -144,7 +144,7 @@ class Behavior(models.Model):
         return behaviors
 
 
-class TimeStampable(Behavior):
+class Timestampable(Behavior):
     """
     Base class for adding timestamping behavior to a model.
 
