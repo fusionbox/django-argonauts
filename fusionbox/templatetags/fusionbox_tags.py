@@ -25,7 +25,7 @@ class HighlighterBase(template.Node):
     overriden by implementing the ``parse_options`` method.
     """
     def __init__(self, parser, token):
-        self.parse_options(tokens.split_contents())
+        self.parse_options(token.split_contents())
 
         self.nodelist = parser.parse(('endhighlight',))
         parser.delete_first_token()
