@@ -88,7 +88,7 @@ class HighlightHereNode(HighlighterBase):
 
     """
     def __init__(self, parser, token):
-        super(HereHighlighter, self).__init__(parser, token)
+        super(HighlightHereNode, self).__init__(parser, token)
 
         self.highlight_class = self.highlight_class or 'here'
 
