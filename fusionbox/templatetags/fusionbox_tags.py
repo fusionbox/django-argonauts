@@ -32,11 +32,10 @@ class HighlighterBase(template.Node):
 
     def parse_options(self, tokens):
         self.options = tokens[1:]
-
         try:
             self.highlight_class = self.options.pop(0)
         except IndexError:
-            pass
+            self.highlight_class = None
 
     def elems_to_highlight(self, soup, context):
         """
