@@ -300,73 +300,154 @@ class TestTwoBehaviors(unittest.TestCase):
 
 class TestHighlightHereTags(unittest.TestCase):
     def test_simple_highlight_here(self):
-        t = Template('{% load fusionbox_tags %}{% highlight_here %}<a class="" href="/">Index</a>{% endhighlight %}')
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here %}'
+                     '<a href="/">Index</a>'
+                     '{% endhighlight %}'
+                     )
         request = Request
         request.path = '/'
         c = Context({'request':request})
-        self.assertEqual('<a class=" here" href="/">Index</a>', t.render(c))
+        self.assertEqual('<a href="/" class="here">Index</a>', t.render(c))
 
     def test_multiple_simple_highlight_here(self):
-        t = Template('{% load fusionbox_tags %}{% highlight_here %}<a class="" href="/">Index</a><a class="blog" href="/blog/">Blog</a>{% endhighlight %}')
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here %}'
+                     '<a class="" href="/">Index</a>'
+                     '<a class="blog" href="/blog/">Blog</a>'
+                     '{% endhighlight %}'
+                    )
         request = Request
         request.path = '/blog/'
         c = Context({'request':request})
-        self.assertEqual('<a class="" href="/">Index</a><a class="blog here" href="/blog/">Blog</a>', t.render(c))
+        self.assertEqual('<a class="" href="/">Index</a>'
+                         '<a class="blog here" href="/blog/">Blog</a>',t.render(c))
 
     def test_simple_highlight_here_with_class(self):
-        t = Template('{% load fusionbox_tags %}{% highlight_here yellow %}<a class="" href="/">Index</a>{% endhighlight %}')
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here yellow %}'
+                     '<a href="/">Index</a>'
+                     '{% endhighlight %}'
+                    )
         request = Request
         request.path = '/'
         c = Context({'request':request})
-        self.assertEqual('<a class=" yellow" href="/">Index</a>', t.render(c))
+        self.assertEqual('<a href="/" class="yellow">Index</a>', t.render(c))
 
     def test_multiple_highlight_here_with_class(self):
-        t = Template('{% load fusionbox_tags %}{% highlight_here yellow %}<a class="" href="/">Index</a><a class="blog" href="/blog/">Blog</a>{% endhighlight %}')
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here yellow %}'
+                     '<a class="" href="/">Index</a>'
+                     '<a class="blog" href="/blog/">Blog</a>'
+                     '{% endhighlight %}'
+                     )
         request = Request
         request.path = '/blog/'
         c = Context({'request':request})
-        self.assertEqual('<a class="" href="/">Index</a><a class="blog yellow" href="/blog/">Blog</a>', t.render(c))
+        self.assertEqual('<a class="" href="/">Index</a>'
+                         '<a class="blog yellow" href="/blog/">Blog</a>', t.render(c))
     
     def test_highlight_here_with_variable_path(self):
-        t = Template('{% load fusionbox_tags %}{% highlight_here yellow path_to_highlight %}<a class="" href="/">Index</a><a class="blog" href="/blog/">Blog</a>{% endhighlight %}')
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here yellow path_to_highlight %}'
+                     '<a class="" href="/">Index</a>'
+                     '<a class="blog" href="/blog/">Blog</a>'
+                     '{% endhighlight %}'
+                    )
         request = Request
         request.path = '/'
         c = Context({'request':request, 'path_to_highlight' : '/blog/'})
-        self.assertEqual('<a class="" href="/">Index</a><a class="blog yellow" href="/blog/">Blog</a>', t.render(c))
+        self.assertEqual('<a class="" href="/">Index</a>'
+                         '<a class="blog yellow" href="/blog/">Blog</a>', t.render(c))
 
 class TestHighlightParentTags(unittest.TestCase):
     def test_simple_highlight_here_parent(self):
-        t = Template('{% load fusionbox_tags %}{% highlight_here_parent %}<li class=""><a class="" href="/">Index</a></li>{% endhighlight %}')
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here_parent %}'
+                     '<li>'
+                     '<a class="" href="/">Index</a>'
+                     '</li>'
+                     '{% endhighlight %}'
+                    )
         request = Request
         request.path = '/'
         c = Context({'request':request})
-        self.assertEqual('<li class=" here"><a class="" href="/">Index</a></li>', t.render(c))
+        self.assertEqual('<li class="here">'
+                         '<a class="" href="/">Index</a>'
+                         '</li>', t.render(c))
 
     def test_multiple_simple_highlight_here_parent(self):
-        t = Template('{% load fusionbox_tags %}{% highlight_here_parent %}<li class=""><a class="" href="/">Index</a></li><li class="here"><a class="blog" href="/blog/">Blog</a></li>{% endhighlight %}')
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here_parent %}'
+                     '<li>'
+                     '<a class="" href="/">Index</a>'
+                     '</li>'
+                     '<li><a class="blog" href="/blog/">Blog</a>'
+                     '</li>'
+                     '{% endhighlight %}'
+                    )
         request = Request
         request.path = '/blog/'
         c = Context({'request':request})
-        self.assertEqual('<li><a class="" href="/">Index</a></li><li><a class="blog here" href="/blog/">Blog</a></li>', t.render(c))
+        self.assertEqual('<li>'
+                         '<a class="" href="/">Index</a>'
+                         '</li>'
+                         '<li class="here">'
+                         '<a class="blog" href="/blog/">Blog</a>'
+                         '</li>', t.render(c))
 
     def test_simple_highlight_here_parent_with_class(self):
-        t = Template('{% load fusionbox_tags %}{% highlight_here_parent yellow %}<a class="" href="/">Index</a>{% endhighlight %}')
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here_parent yellow %}'
+                     '<li>'
+                     '<a class="" href="/">Index</a>'
+                     '</li>'
+                     '{% endhighlight %}'
+                    )
         request = Request
         request.path = '/'
         c = Context({'request':request})
-        self.assertEqual('<a class=" yellow" href="/">Index</a>', t.render(c))
+        self.assertEqual('<li class="yellow">'
+                         '<a class="" href="/">Index</a>'
+                         '</li>', t.render(c))
 
     def test_multiple_highlight_here_parent_with_class(self):
-        t = Template('{% load fusionbox_tags %}{% highlight_here_parent yellow %}<a class="" href="/">Index</a><a class="blog" href="/blog/">Blog</a>{% endhighlight %}')
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here_parent yellow %}'
+                     '<li>'
+                     '<a class="" href="/">Index</a>'
+                     '</li>'
+                     '<li class="blog">'
+                     '<a class="blog" href="/blog/">Blog</a></li>'
+                     '{% endhighlight %}'
+                    )
         request = Request
         request.path = '/blog/'
         c = Context({'request':request})
-        self.assertEqual('<a class="" href="/">Index</a><a class="blog yellow" href="/blog/">Blog</a>', t.render(c))
+        self.assertEqual('<li>'
+                         '<a class="" href="/">Index</a>'
+                         '</li>'
+                         '<li class="blog yellow">'
+                         '<a class="blog" href="/blog/">Blog</a>'
+                         '</li>', t.render(c))
     
     def test_highlight_here_parent_with_variable_path(self):
-        t = Template('{% load fusionbox_tags %}{% highlight_here_parent yellow path_to_highlight %}<a class="" href="/">Index</a><a class="blog" href="/blog/">Blog</a>{% endhighlight %}')
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here_parent yellow path_to_highlight %}'
+                     '<li>'
+                     '<a class="" href="/">Index</a>'
+                     '</li>'
+                     '<li class="blog">'
+                     '<a class="blog" href="/blog/">Blog</a></li>'
+                     '{% endhighlight %}'
+                    )
         request = Request
         request.path = '/'
         c = Context({'request':request, 'path_to_highlight' : '/blog/'})
-        self.assertEqual('<a class="" href="/">Index</a><a class="blog yellow" href="/blog/">Blog</a>', t.render(c))
+        self.assertEqual('<li>'
+                         '<a class="" href="/">Index</a>'
+                         '</li>'
+                         '<li class="blog yellow">'
+                         '<a class="blog" href="/blog/">Blog</a>'
+                         '</li>', t.render(c))
 
