@@ -104,7 +104,7 @@ class HighlightHereNode(HighlighterBase):
 
     def elems_to_highlight(self, soup, context):
         try:
-            path = context[self.options[0]]
+            path = template.Variable(self.options[0]).resolve(context)
         except template.VariableDoesNotExist:
             path = self.options[0]
         except IndexError:
