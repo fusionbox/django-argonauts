@@ -10,6 +10,17 @@ def addclass(elem, cls):
     except KeyError:
         elem['class'] = cls
 
+def is_here(current, url):
+    """
+    Determine if current is 'underneath' url.
+    """
+    if url == '/':
+        return current == '/'
+    if current.startswith(url):
+        return True
+    else:
+        return False
+
 
 class HighlighterBase(template.Node):
     """
@@ -59,7 +70,7 @@ class HighlighterBase(template.Node):
 
         for elem in self.elems_to_highlight(soup, context):
             self.highlight(elem)
-        
+
         return str(soup)
 
 
@@ -93,7 +104,7 @@ class HighlightHereNode(HighlighterBase):
 
     def elems_to_highlight(self, soup, context):
         try:
-            path = template.Variable(self.options[0]).resolve(context)
+            path = context[self.options[0]]
         except template.VariableDoesNotExist:
             path = self.options[0]
         except IndexError:
@@ -102,8 +113,7 @@ class HighlightHereNode(HighlighterBase):
             except KeyError:
                 raise KeyError("The request was not available in the context, please ensure that the request is made available in the context.")
 
-        for anchor in soup.findAll('a', {'href': path}):
-            yield anchor
+        return (anchor for anchor in soup.findAll('a', {'href': True}) if is_here(path, anchor['href']))
 
 
 register.tag("highlight_here", HighlightHereNode)

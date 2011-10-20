@@ -359,7 +359,7 @@ class TestHighlightHereTags(unittest.TestCase):
         c = Context({'request':request})
         self.assertEqual('<a class="" href="/">Index</a>'
                          '<a class="blog yellow" href="/blog/">Blog</a>', t.render(c))
-    
+
     def test_highlight_here_with_variable_path(self):
         t = Template('{% load fusionbox_tags %}'
                      '{% highlight_here yellow path_to_highlight %}'
@@ -372,6 +372,21 @@ class TestHighlightHereTags(unittest.TestCase):
         c = Context({'request':request, 'path_to_highlight' : '/blog/'})
         self.assertEqual('<a class="" href="/">Index</a>'
                          '<a class="blog yellow" href="/blog/">Blog</a>', t.render(c))
+
+    def test_deep_links(self):
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here %}'
+                     '<a class="" href="/">Index</a>'
+                     '<a class="blog" href="/blog/">Blog</a>'
+                     '<a class="blog" href="/blog/detail/foo/">Blog detail</a>'
+                     '{% endhighlight %}'
+                    )
+        request = Request
+        request.path = '/blog/detail/foo/'
+        c = Context({'request':request})
+        self.assertEqual('<a class="" href="/">Index</a>'
+                         '<a class="blog here" href="/blog/">Blog</a>'
+                         '<a class="blog here" href="/blog/detail/foo/">Blog detail</a>', t.render(c))
 
 class TestHighlightParentTags(unittest.TestCase):
     def test_simple_highlight_here_parent(self):
@@ -443,7 +458,7 @@ class TestHighlightParentTags(unittest.TestCase):
                          '<li class="blog yellow">'
                          '<a class="blog" href="/blog/">Blog</a>'
                          '</li>', t.render(c))
-    
+
     def test_highlight_here_parent_with_variable_path(self):
         t = Template('{% load fusionbox_tags %}'
                      '{% highlight_here_parent yellow path_to_highlight %}'
