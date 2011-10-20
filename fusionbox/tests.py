@@ -9,6 +9,14 @@ from django.http import HttpRequest as Request
 from fusionbox.behaviors import *
 from fusionbox.templatetags import fusionbox_tags
 
+
+class TestObject(object):
+    """
+    dummy class for testing objects
+    """
+    pass
+
+
 class TestBehaviorBase(unittest.TestCase):
     def test_meta_inheritance(self):
         class BaseBehavior(Behavior):
@@ -347,6 +355,17 @@ class TestHighlightHereTags(unittest.TestCase):
         c = Context({'request':request})
         self.assertEqual('<a href="/" class="yellow">Index</a>', t.render(c))
 
+    def test_simple_highlight_here_with_multiple_classes(self):
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here "yellow red" %}'
+                     '<a href="/">Index</a>'
+                     '{% endhighlight %}'
+                    )
+        request = Request
+        request.path = '/'
+        c = Context({'request':request})
+        self.assertEqual('<a href="/" class="yellow red">Index</a>', t.render(c))
+
     def test_multiple_highlight_here_with_class(self):
         t = Template('{% load fusionbox_tags %}'
                      '{% highlight_here yellow %}'
@@ -362,14 +381,16 @@ class TestHighlightHereTags(unittest.TestCase):
 
     def test_highlight_here_with_variable_path(self):
         t = Template('{% load fusionbox_tags %}'
-                     '{% highlight_here yellow path_to_highlight %}'
+                     '{% highlight_here yellow test_object.path %}'
                      '<a class="" href="/">Index</a>'
                      '<a class="blog" href="/blog/">Blog</a>'
                      '{% endhighlight %}'
                     )
         request = Request
         request.path = '/'
-        c = Context({'request':request, 'path_to_highlight' : '/blog/'})
+        test_object = TestObject()
+        test_object.path = '/blog/'
+        c = Context({'request':request, 'test_object' : test_object})
         self.assertEqual('<a class="" href="/">Index</a>'
                          '<a class="blog yellow" href="/blog/">Blog</a>', t.render(c))
 
@@ -461,7 +482,7 @@ class TestHighlightParentTags(unittest.TestCase):
 
     def test_highlight_here_parent_with_variable_path(self):
         t = Template('{% load fusionbox_tags %}'
-                     '{% highlight_here_parent yellow path_to_highlight %}'
+                     '{% highlight_here_parent yellow test_object.path %}'
                      '<li>'
                      '<a class="" href="/">Index</a>'
                      '</li>'
@@ -471,7 +492,9 @@ class TestHighlightParentTags(unittest.TestCase):
                     )
         request = Request
         request.path = '/'
-        c = Context({'request':request, 'path_to_highlight' : '/blog/'})
+        test_object = TestObject()
+        test_object.path = '/blog/'
+        c = Context({'request':request, 'test_object' : test_object})
         self.assertEqual('<li>'
                          '<a class="" href="/">Index</a>'
                          '</li>'

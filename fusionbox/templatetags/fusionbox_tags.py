@@ -44,7 +44,7 @@ class HighlighterBase(template.Node):
     def parse_options(self, tokens):
         self.options = tokens[1:]
         try:
-            self.highlight_class = self.options.pop(0)
+            self.highlight_class = self.options.pop(0).replace('"','')
         except IndexError:
             self.highlight_class = None
 
