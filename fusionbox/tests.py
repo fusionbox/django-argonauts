@@ -62,6 +62,19 @@ class TestBehaviorBase(unittest.TestCase):
         print errors
         self.assertTrue(errors == '')
 
+    def test_sharing(self):
+        class SharedModel1(SEO):
+            class SEO:
+                seo_title = 'name'
+        class SharedModel2(SEO):
+            class SEO:
+                seo_title = 'asdf'
+
+        print vars(SharedModel1.SEO)
+        print vars(SharedModel2.SEO)
+        get_field_dict(SharedModel1)['name']
+        get_field_dict(SharedModel2)['asdf']
+
 
 def get_field_dict(model):
     """
@@ -72,7 +85,7 @@ def get_field_dict(model):
 
 class TestTimestampable(unittest.TestCase):
     def test_bare(self):
-        class TestModel(TimeStampable):
+        class TestModel(Timestampable):
             pass
 
         x = TestModel()
@@ -86,8 +99,8 @@ class TestTimestampable(unittest.TestCase):
     #def test_same_name(self):
     #    # This is actually a problem with django, it won't let you have two
     #    # model classes with the same name in the same app
-    #    class TestModel(TimeStampable):
-    #        class TimeStampable:
+    #    class TestModel(Timestampable):
+    #        class Timestampable:
     #            created_at = 'asdf'
     #
     #    x = TestModel()
@@ -99,8 +112,8 @@ class TestTimestampable(unittest.TestCase):
 
     def test_custom(self):
         # This tests fails if the models share a name. see test_same_name
-        class Test2Model(TimeStampable):
-            class TimeStampable:
+        class Test2Model(Timestampable):
+            class Timestampable:
                 created_at = 'asdf'
 
         x = Test2Model()
@@ -220,7 +233,7 @@ class TestSEO(unittest.TestCase):
 
 class TestTwoBehaviors(unittest.TestCase):
     def test_bare(self):
-        class Test5Model(SEO, TimeStampable):
+        class Test5Model(SEO, Timestampable):
             pass
 
         x = Test5Model()
@@ -235,10 +248,10 @@ class TestTwoBehaviors(unittest.TestCase):
         self.assertTrue(isinstance(fields['updated_at'], models.DateTimeField))
 
     def test_override(self):
-        class Test6Model(SEO, TimeStampable):
+        class Test6Model(SEO, Timestampable):
             class SEO:
                 seo_title = 'asdf'
-            class TimeStampable:
+            class Timestampable:
                 updated_at = 'foo'
             pass
 
@@ -254,13 +267,13 @@ class TestTwoBehaviors(unittest.TestCase):
         self.assertTrue(isinstance(fields['foo'], models.DateTimeField))
 
     def test_new_behavior(self):
-        class SeoAndTime(SEO, TimeStampable):
+        class SeoAndTime(SEO, Timestampable):
             class SEO:
                 seo_title = 'seo_and_time_title'
             pass
 
         class Test10Model(SeoAndTime):
-            class TimeStampable:
+            class Timestampable:
                 updated_at = 'asdf'
             class SEO:
                 seo_description = 'foo'
@@ -277,13 +290,13 @@ class TestTwoBehaviors(unittest.TestCase):
         self.assertTrue(isinstance(fields['asdf'], models.DateTimeField))
 
     def test_namespacings(self):
-        class SeoAndTime2(SEO, TimeStampable):
+        class SeoAndTime2(SEO, Timestampable):
             class SEO:
                 seo_title = 'seo_and_time_title'
             pass
 
         class Test11Model(SeoAndTime2):
-            class TimeStampable:
+            class Timestampable:
                 seo_description = 'asdf'
 
         x = Test11Model()

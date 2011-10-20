@@ -1,6 +1,8 @@
 from django.db import models
 from django.db.models.base import ModelBase
 
+import copy
+import datetime
 
 class EmptyObject(object):
     pass
@@ -116,7 +118,7 @@ class Behavior(models.Model):
                     # put the column name in the behavior's config, so it's always there
                     setattr(getattr(parent, parent.__name__), name, name)
                 if not hasattr(cls, new_name):
-                    cls.add_to_class(new_name, field)
+                    cls.add_to_class(new_name, copy.copy(field))
 
 
     @classmethod
@@ -143,7 +145,7 @@ class Behavior(models.Model):
         return behaviors
 
 
-class TimeStampable(Behavior):
+class Timestampable(Behavior):
     """
     Base class for adding timestamping behavior to a model.
 
@@ -161,8 +163,53 @@ class TimeStampable(Behavior):
     class Meta:
         abstract = True
 
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class PublishableManager(models.Manager):
+    """
+    Manager for publishable behavior
+
+    """
+    def get_query_set(self):
+        queryset = super(PublishableManager, self).get_query_set()
+        return queryset.filter(is_published=True, publish_at__lte=datetime.datetime.now())
+
+class Publishable(models.Model):
+    """
+    Base class for adding publishable behavior to a model.
+
+    Added Fields:
+        Field 1:
+            field: DateTimeField(default=datetime.datetime.now, help_text='Selecting a future date will automatically publish to the live site on that date.')
+            description: The date that the model instance will be made available to the PublishableManager's query set
+            default_name: publish_at
+        Field 2:
+            field: DateTimeField(default=datetime.datetime.now, help_text='Selecting a future date will automatically publish to the live site on that date.')
+            description: setting to False will automatically draft the instance, making it unavailable to the PublishableManager's query set
+            default_name: is_published
+
+    Added Managers:
+        PublishableManager:
+            description: overwritten get_query_set() function to only fetch published instances.
+            name: published
+            usage: 
+                class Blog(Publishable):
+                ...
+
+                all_blogs = Blog.objects.all()
+                published_blogs = Blog.published.all()
+
+    """
+    class Meta:
+        abstract = True
+
+    publish_at = models.DateTimeField(default=datetime.datetime.now, help_text='Selecting a future date will automatically publish to the live site on that date.')
+    is_published = models.BooleanField(default=True, help_text='Unchecking this will take the entry off the live site regardless of publishing date')
+
+    objects = models.Manager()
+    published = PublishableManager()
 
 
 class SEO(Behavior):
