@@ -4,6 +4,7 @@ fusionbox/middleware.py
 fusionbox/behaviors.py
 fusionbox/tests.py
 fusionbox/models.py
+fusionbox/mail.py
 fusionbox/templatetags
 fusionbox/templatetags/__init__.py
 fusionbox/templatetags/fusionbox_tags.py
