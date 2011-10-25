@@ -2,8 +2,20 @@ from pprint import pprint
 
 from django.db import models
 from django.utils import unittest
+from django.template import Template, Context
+from django.http import HttpRequest as Request
+
 
 from fusionbox.behaviors import *
+from fusionbox.templatetags import fusionbox_tags
+
+
+class TestObject(object):
+    """
+    dummy class for testing objects
+    """
+    pass
+
 
 class TestBehaviorBase(unittest.TestCase):
     def test_meta_inheritance(self):
@@ -58,6 +70,19 @@ class TestBehaviorBase(unittest.TestCase):
         print errors
         self.assertTrue(errors == '')
 
+    def test_sharing(self):
+        class SharedModel1(SEO):
+            class SEO:
+                seo_title = 'name'
+        class SharedModel2(SEO):
+            class SEO:
+                seo_title = 'asdf'
+
+        print vars(SharedModel1.SEO)
+        print vars(SharedModel2.SEO)
+        get_field_dict(SharedModel1)['name']
+        get_field_dict(SharedModel2)['asdf']
+
 
 def get_field_dict(model):
     """
@@ -68,7 +93,7 @@ def get_field_dict(model):
 
 class TestTimestampable(unittest.TestCase):
     def test_bare(self):
-        class TestModel(TimeStampable):
+        class TestModel(Timestampable):
             pass
 
         x = TestModel()
@@ -82,8 +107,8 @@ class TestTimestampable(unittest.TestCase):
     #def test_same_name(self):
     #    # This is actually a problem with django, it won't let you have two
     #    # model classes with the same name in the same app
-    #    class TestModel(TimeStampable):
-    #        class TimeStampable:
+    #    class TestModel(Timestampable):
+    #        class Timestampable:
     #            created_at = 'asdf'
     #
     #    x = TestModel()
@@ -95,8 +120,8 @@ class TestTimestampable(unittest.TestCase):
 
     def test_custom(self):
         # This tests fails if the models share a name. see test_same_name
-        class Test2Model(TimeStampable):
-            class TimeStampable:
+        class Test2Model(Timestampable):
+            class Timestampable:
                 created_at = 'asdf'
 
         x = Test2Model()
@@ -216,7 +241,7 @@ class TestSEO(unittest.TestCase):
 
 class TestTwoBehaviors(unittest.TestCase):
     def test_bare(self):
-        class Test5Model(SEO, TimeStampable):
+        class Test5Model(SEO, Timestampable):
             pass
 
         x = Test5Model()
@@ -231,10 +256,10 @@ class TestTwoBehaviors(unittest.TestCase):
         self.assertTrue(isinstance(fields['updated_at'], models.DateTimeField))
 
     def test_override(self):
-        class Test6Model(SEO, TimeStampable):
+        class Test6Model(SEO, Timestampable):
             class SEO:
                 seo_title = 'asdf'
-            class TimeStampable:
+            class Timestampable:
                 updated_at = 'foo'
             pass
 
@@ -250,13 +275,13 @@ class TestTwoBehaviors(unittest.TestCase):
         self.assertTrue(isinstance(fields['foo'], models.DateTimeField))
 
     def test_new_behavior(self):
-        class SeoAndTime(SEO, TimeStampable):
+        class SeoAndTime(SEO, Timestampable):
             class SEO:
                 seo_title = 'seo_and_time_title'
             pass
 
         class Test10Model(SeoAndTime):
-            class TimeStampable:
+            class Timestampable:
                 updated_at = 'asdf'
             class SEO:
                 seo_description = 'foo'
@@ -273,13 +298,13 @@ class TestTwoBehaviors(unittest.TestCase):
         self.assertTrue(isinstance(fields['asdf'], models.DateTimeField))
 
     def test_namespacings(self):
-        class SeoAndTime2(SEO, TimeStampable):
+        class SeoAndTime2(SEO, Timestampable):
             class SEO:
                 seo_title = 'seo_and_time_title'
             pass
 
         class Test11Model(SeoAndTime2):
-            class TimeStampable:
+            class Timestampable:
                 seo_description = 'asdf'
 
         x = Test11Model()
@@ -292,3 +317,188 @@ class TestTwoBehaviors(unittest.TestCase):
 
         self.assertTrue(isinstance(fields['created_at'], models.DateTimeField))
         self.assertTrue(isinstance(fields['updated_at'], models.DateTimeField))
+
+
+class TestHighlightHereTags(unittest.TestCase):
+    def test_simple_highlight_here(self):
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here %}'
+                     '<a href="/">Index</a>'
+                     '{% endhighlight %}'
+                     )
+        request = Request
+        request.path = '/'
+        c = Context({'request':request})
+        self.assertEqual('<a href="/" class="here">Index</a>', t.render(c))
+
+    def test_multiple_simple_highlight_here(self):
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here %}'
+                     '<a class="" href="/">Index</a>'
+                     '<a class="blog" href="/blog/">Blog</a>'
+                     '{% endhighlight %}'
+                    )
+        request = Request
+        request.path = '/blog/'
+        c = Context({'request':request})
+        self.assertEqual('<a class="" href="/">Index</a>'
+                         '<a class="blog here" href="/blog/">Blog</a>',t.render(c))
+
+    def test_simple_highlight_here_with_class(self):
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here yellow %}'
+                     '<a href="/">Index</a>'
+                     '{% endhighlight %}'
+                    )
+        request = Request
+        request.path = '/'
+        c = Context({'request':request})
+        self.assertEqual('<a href="/" class="yellow">Index</a>', t.render(c))
+
+    def test_simple_highlight_here_with_multiple_classes(self):
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here "yellow red" %}'
+                     '<a href="/">Index</a>'
+                     '{% endhighlight %}'
+                    )
+        request = Request
+        request.path = '/'
+        c = Context({'request':request})
+        self.assertEqual('<a href="/" class="yellow red">Index</a>', t.render(c))
+
+    def test_multiple_highlight_here_with_class(self):
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here yellow %}'
+                     '<a class="" href="/">Index</a>'
+                     '<a class="blog" href="/blog/">Blog</a>'
+                     '{% endhighlight %}'
+                     )
+        request = Request
+        request.path = '/blog/'
+        c = Context({'request':request})
+        self.assertEqual('<a class="" href="/">Index</a>'
+                         '<a class="blog yellow" href="/blog/">Blog</a>', t.render(c))
+
+    def test_highlight_here_with_variable_path(self):
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here yellow test_object.path %}'
+                     '<a class="" href="/">Index</a>'
+                     '<a class="blog" href="/blog/">Blog</a>'
+                     '{% endhighlight %}'
+                    )
+        request = Request
+        request.path = '/'
+        test_object = TestObject()
+        test_object.path = '/blog/'
+        c = Context({'request':request, 'test_object' : test_object})
+        self.assertEqual('<a class="" href="/">Index</a>'
+                         '<a class="blog yellow" href="/blog/">Blog</a>', t.render(c))
+
+    def test_deep_links(self):
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here %}'
+                     '<a class="" href="/">Index</a>'
+                     '<a class="blog" href="/blog/">Blog</a>'
+                     '<a class="blog" href="/blog/detail/foo/">Blog detail</a>'
+                     '{% endhighlight %}'
+                    )
+        request = Request
+        request.path = '/blog/detail/foo/'
+        c = Context({'request':request})
+        self.assertEqual('<a class="" href="/">Index</a>'
+                         '<a class="blog here" href="/blog/">Blog</a>'
+                         '<a class="blog here" href="/blog/detail/foo/">Blog detail</a>', t.render(c))
+
+class TestHighlightParentTags(unittest.TestCase):
+    def test_simple_highlight_here_parent(self):
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here_parent %}'
+                     '<li>'
+                     '<a class="" href="/">Index</a>'
+                     '</li>'
+                     '{% endhighlight %}'
+                    )
+        request = Request
+        request.path = '/'
+        c = Context({'request':request})
+        self.assertEqual('<li class="here">'
+                         '<a class="" href="/">Index</a>'
+                         '</li>', t.render(c))
+
+    def test_multiple_simple_highlight_here_parent(self):
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here_parent %}'
+                     '<li>'
+                     '<a class="" href="/">Index</a>'
+                     '</li>'
+                     '<li><a class="blog" href="/blog/">Blog</a>'
+                     '</li>'
+                     '{% endhighlight %}'
+                    )
+        request = Request
+        request.path = '/blog/'
+        c = Context({'request':request})
+        self.assertEqual('<li>'
+                         '<a class="" href="/">Index</a>'
+                         '</li>'
+                         '<li class="here">'
+                         '<a class="blog" href="/blog/">Blog</a>'
+                         '</li>', t.render(c))
+
+    def test_simple_highlight_here_parent_with_class(self):
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here_parent yellow %}'
+                     '<li>'
+                     '<a class="" href="/">Index</a>'
+                     '</li>'
+                     '{% endhighlight %}'
+                    )
+        request = Request
+        request.path = '/'
+        c = Context({'request':request})
+        self.assertEqual('<li class="yellow">'
+                         '<a class="" href="/">Index</a>'
+                         '</li>', t.render(c))
+
+    def test_multiple_highlight_here_parent_with_class(self):
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here_parent yellow %}'
+                     '<li>'
+                     '<a class="" href="/">Index</a>'
+                     '</li>'
+                     '<li class="blog">'
+                     '<a class="blog" href="/blog/">Blog</a></li>'
+                     '{% endhighlight %}'
+                    )
+        request = Request
+        request.path = '/blog/'
+        c = Context({'request':request})
+        self.assertEqual('<li>'
+                         '<a class="" href="/">Index</a>'
+                         '</li>'
+                         '<li class="blog yellow">'
+                         '<a class="blog" href="/blog/">Blog</a>'
+                         '</li>', t.render(c))
+
+    def test_highlight_here_parent_with_variable_path(self):
+        t = Template('{% load fusionbox_tags %}'
+                     '{% highlight_here_parent yellow test_object.path %}'
+                     '<li>'
+                     '<a class="" href="/">Index</a>'
+                     '</li>'
+                     '<li class="blog">'
+                     '<a class="blog" href="/blog/">Blog</a></li>'
+                     '{% endhighlight %}'
+                    )
+        request = Request
+        request.path = '/'
+        test_object = TestObject()
+        test_object.path = '/blog/'
+        c = Context({'request':request, 'test_object' : test_object})
+        self.assertEqual('<li>'
+                         '<a class="" href="/">Index</a>'
+                         '</li>'
+                         '<li class="blog yellow">'
+                         '<a class="blog" href="/blog/">Blog</a>'
+                         '</li>', t.render(c))
+
