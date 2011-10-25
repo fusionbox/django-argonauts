@@ -126,27 +126,27 @@ class HighlightHereParentNode(HighlightHereNode):
 
     Given::
 
-    {% highlight_here_parent %}
-     <ul>
-        <li id="navHome" class="parent_home">
-            <a href="/" class="home">/</a>
-        </li>
-        <li id="navblog" class="">
-            <a href="/blog/">blog</a>
-        </li>
-     </ul>
-    {% endhighlight %}
+        {% highlight_here_parent %}
+         <ul>
+            <li id="navHome" class="parent_home">
+                <a href="/" class="home">/</a>
+            </li>
+            <li id="navblog" class="">
+                <a href="/blog/">blog</a>
+            </li>
+         </ul>
+        {% endhighlight %}
 
     If request.url is ``/``, the output is::
 
-    <ul>
-        <li id="navHome" class="parent_home here">
-            <a href="/" class="home">/</a>
-        </li>
-        <li>
-            <a href="/blog/">blog</a>
-        </li>
-    <ul>
+        <ul>
+            <li id="navHome" class="parent_home here">
+                <a href="/" class="home">/</a>
+            </li>
+            <li>
+                <a href="/blog/">blog</a>
+            </li>
+        <ul>
 
     """
     def elems_to_highlight(self, soup, href):

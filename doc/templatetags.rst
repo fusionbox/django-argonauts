@@ -6,7 +6,7 @@ The :mod:`fusionbox_tags` library contains several useful template tags. Use
 
 
 ``highlight_here``
-=============
+==================
 
 Filter the subnode's output to add a class to every anchor where
 appropriate, based on startswith matching. By default the class is ``here``,
@@ -18,6 +18,7 @@ but you can override by passing an argument to the tag.
 Examples
 --------
 .. highlight:: html
+
 Given::
 
     {% highlight_here %}
