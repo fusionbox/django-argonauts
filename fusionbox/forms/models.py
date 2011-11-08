@@ -3,8 +3,6 @@ from django import forms
 import hashlib
 
 class UncaptchaBase(object):
-    uncaptcha = forms.CharField(required = False)
-
     def __init__(self, request, *args, **kwargs):
         super(UncaptchaBase, self).__init__(*args, **kwargs)
         hasher = hashlib.sha256()
@@ -13,12 +11,12 @@ class UncaptchaBase(object):
 
     def clean_uncaptcha(self):
         value = self.cleaned_data['uncaptcha']
-        if not value = self.uncaptcha_value:
+        if not value == self.uncaptcha_value:
             raise forms.ValidationError("Incorrect uncaptcha value")
         return value
 
 class UncaptchaForm(UncaptchaBase, forms.Form):
-    pass
+    uncaptcha = forms.CharField(required = False)
 
 class UncaptchaModelForm(UncaptchaBase, forms.ModelForm):
-    pass
+    uncaptcha = forms.CharField(required = False)
