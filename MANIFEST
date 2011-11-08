@@ -1,10 +1,11 @@
 setup.py
 fusionbox/__init__.py
-fusionbox/middleware.py
 fusionbox/behaviors.py
-fusionbox/tests.py
-fusionbox/models.py
+fusionbox/http.py
 fusionbox/mail.py
+fusionbox/middleware.py
+fusionbox/models.py
+fusionbox/tests.py
 fusionbox/templatetags
 fusionbox/templatetags/__init__.py
 fusionbox/templatetags/fusionbox_tags.py
