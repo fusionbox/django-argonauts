@@ -37,7 +37,7 @@ from django.utils.safestring import mark_safe
 from django.conf import settings
 
 try:
-    EMAIL_LAYOUT = settings.EMAIL_LAYOUT):
+    EMAIL_LAYOUT = settings.EMAIL_LAYOUT
 except AttributeError:
     EMAIL_LAYOUT = None
 
