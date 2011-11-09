@@ -34,19 +34,26 @@ from django.contrib.sites.models import Site
 from django.core.mail import EmailMultiAlternatives
 from django.utils.safestring import mark_safe
 
-import settings
+from django.conf import settings
 
+try:
+    EMAIL_LAYOUT = settings.EMAIL_LAYOUT):
+except AttributeError:
+    EMAIL_LAYOUT = None
 
 def send_markdown_mail(template,
                        context,
                        to=None,
                        subject=None,
                        from_address=settings.SERVER_EMAIL,
-                       layout=settings.EMAIL_LAYOUT):
+                       layout=EMAIL_LAYOUT):
 
     """
     The top-level email-sending function.
     """
+
+    if layout is None:
+        raise ValueError('layout was not defined by settings.EMAIL_LAYOUT and none was provided')
 
     meta, raw, html = render_template(template, context, layout)
 
