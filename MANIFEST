@@ -14,6 +14,7 @@ fusionbox/management/commands/__init__.py
 fusionbox/management/commands/backupdb.py
 fusionbox/middleware.py
 fusionbox/models.py
+fusionbox/shortcuts.py
 fusionbox/templatetags
 fusionbox/templatetags/__init__.py
 fusionbox/templatetags/fusionbox_tags.py
