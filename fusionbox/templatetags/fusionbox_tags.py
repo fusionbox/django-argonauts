@@ -1,6 +1,8 @@
 from django import template
 
 from BeautifulSoup import BeautifulSoup
+from django.utils import simplejson
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -154,3 +156,8 @@ class HighlightHereParentNode(HighlightHereNode):
             yield anchor.parent
 
 register.tag("highlight_here_parent", HighlightHereParentNode)
+
+@register.filter
+def json(a):
+    return mark_safe(simplejson.dumps(a))
+json.is_safe = True
