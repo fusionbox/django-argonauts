@@ -41,7 +41,7 @@ class Command(BaseCommand):
         if user:
             args += ["--user=%s" % pipes.quote(user)]
         if password:
-            args += ["--password=%s" % pipes.quote(passwd)]
+            args += ["--password=%s" % pipes.quote(password)]
         if host:
             args += ["--host=%s" % pipes.quote(host)]
         if port:
