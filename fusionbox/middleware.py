@@ -7,10 +7,8 @@ def generic_template_finder_view(request):
     """
     Find a template based on the request url and render it.
 
-    / -> index.html
-    /foo/ -> foo.html OR foo/index.html
-
-
+    * ``/`` -> ``index.html``
+    * ``/foo/`` -> ``foo.html`` OR ``foo/index.html``
     """
     path = request.path
     if not path.endswith('/'):
@@ -30,7 +28,7 @@ def generic_template_finder_view(request):
 
 class GenericTemplateFinderMiddleware(object):
     """
-    Response middleware that uses generic_template_finder_view to attempt to
+    Response middleware that uses :func:`generic_template_finder_view` to attempt to
     autolocate a template for otherwise 404 responses.
     """
     def process_response(self, request, response):
