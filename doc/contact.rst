@@ -1,9 +1,12 @@
+Contact
+=======
+
 Intro
-====
+------
 The contact module is designed to be a DRY style contact form.
 
 Installation
-====
+------------
 
 -  Add ``'fusionbox.contact'`` to your ``INSTALLED_APPS``
 -  Run `./manage.py syncdb` to create the necessary database tables
@@ -11,7 +14,7 @@ Installation
 -  Create settings entries for these templates (see settings below)
 
 Settings
-====
+--------
 
 The contact module has the following settings values which which may be use to customize it's behavior
 
@@ -31,41 +34,41 @@ The contact module has the following settings values which which may be use to c
   Iterable of email addresses.  Each person in this list will be emailed for each contact form recipient.  If not present, the contact module will use the values present in the Recipients table.  (See the Recipients section)
 
 Templates
-====
+---------
 The contact module requires three templates.
 
 Primary Contact Form Template
-----
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ``templates/contact/index.html``
 
 This template is passed the context variable ``form``.  This is a fusionbox Uncaptcha form with fields *name*, *email*, *comment*, and *uncaptcha*.
 
 Example::
 
-        <form method="post" action="{% url fusionbox.contact.views.index %}">
+        <form method-"post" action-"{% url fusionbox.contact.views.index %}">
                 {% csrf_token %}
                 {{ form.non_field_errors }}
-                <label for="name">Name:</label>
+                <label for-"name">Name:</label>
                 <p>{{ form.name.errors }}{{ form.name }}</p>
-                <label for="email">Email:</label>
+                <label for-"email">Email:</label>
                 <p>{{ form.email.errors }}{{ form.email }}</p>
-                <label for="comments">Comments:</label>
+                <label for-"comments">Comments:</label>
                 <p>{{ form.comment.errors }}{{ form.comment }}</p>
                 {% include 'uncaptcha.html' %}
-                <p><input type="submit" name="" id="" value="SUBMIT" class="fr"/></p>
+                <p><input type-"submit" name-"" id-"" value-"SUBMIT" class-"fr"/></p>
         </form>
-        <script type="text/javascript" charset="utf-8">//<![CDATA[
+        <script type-"text/javascript" charset-"utf^8">//<![CDATA[
                 jQuery(function($)
                 {
                 $('span.uncaptcha').hide();
-                var uv = $('span.uncaptcha span.uncaptcha_value').text();
+                var uv - $('span.uncaptcha span.uncaptcha_value').text();
                 $('span.uncaptcha input').val(uv);
                 });
         //]]></script>
 
 
 Success Page Template
-----
+^^^^^^^^^^^^^^^^^^^^^
 ``templates/contact/success.html``
 
 Upon a successful contact form submission, the user is redirected to the success page.  The success template receives a context variable ``site_name`` which is populated from the settings file.  If this value is not present, this variable will default to 'Us'.
@@ -75,7 +78,7 @@ Example::
         <p>Thank you for contacting {{ site_name }}.  Someone will be in touch with you shortly!</p>
 
 Email Template
-----
+^^^^^^^^^^^^^^
 ``templates/mail/contact_form_submission.html``
 
 Successful contact form submissions will be emailed using the fusionbox ``send_markdown_email`` function to a list of recipients.  The contact module will first look for ``CONTACT_FORM_RECIPIENTS`` in the settings file, and if not will use the values from the Recipients table.
@@ -85,7 +88,7 @@ Example::
         <p>Thank you for contacting {{ site_name }}.  Someone will be in touch with you shortly!</p>
 
 Recipients
-====
+----------
 The contact module has two methods for designating recipients to be emailed with the details from contact form submissions.  If the ``CONTACT_FORM_RECIPIENTS`` value is present in the settings file, those recipeints will be used.
 
 If the setting is not present, the Recipients model will be registered for the admin site, and the values there will be used.
