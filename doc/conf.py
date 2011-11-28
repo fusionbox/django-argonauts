@@ -41,7 +41,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'django-fusionbox'
-copyright = u'2011, Gavin Wahl, Aaron Merriam, Fusionbox'
+copyright = u'2011, Fusionbox'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

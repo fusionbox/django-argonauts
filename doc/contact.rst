@@ -16,7 +16,7 @@ Installation
 Settings
 --------
 
-The contact module has the following settings values which which may be use to customize it's behavior
+The contact module has the following settings values which which may be used to customize its behavior
 
 ``CONTACT_INDEX_TEMPLATE``
   Template location for the main contact form page.  Defaults to ``contact/index.html``
