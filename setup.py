@@ -8,7 +8,7 @@ Useful stuff for django
 
 """
 
-version = '0.0.1'
+version = '0.0.2'
 
 setup(name='django-fusionbox',
     version=version,
@@ -18,7 +18,7 @@ setup(name='django-fusionbox',
     keywords='django boilerplate',
     long_description=__doc__,
     url='https://github.com/fusionbox/django-fusionbox',
-    packages=['fusionbox', 'fusionbox.templatetags', 'fusionbox.management', 'fusionbox.management.commands'],
+    packages=['fusionbox', 'fusionbox.contact', 'fusionbox.forms', 'fusionbox.templatetags', 'fusionbox.management', 'fusionbox.management.commands'],
     platforms = "any",
     license='BSD',
     classifiers=[

@@ -1,0 +1,4 @@
+/* Make linebreaks on readonly fields in admin center work
+ * ------------------------------------------------------*/
+
+form#submission_form div.field-comment div p { white-space: pre-wrap; }
