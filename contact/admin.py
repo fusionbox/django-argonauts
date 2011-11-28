@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.conf import settings
 
 from fusionbox.contact.models import Submission, Recipient
 
@@ -33,4 +34,8 @@ class RecipientAdmin(admin.ModelAdmin):
         model = Recipient
 
 admin.site.register(Submission, SubmissionAdmin)
-admin.site.register(Recipient, RecipientAdmin)
+
+if hasattr(settings, 'CONTACT_FORM_RECIPIENTS'):
+    pass
+else:
+    admin.site.register(Recipient, RecipientAdmin)

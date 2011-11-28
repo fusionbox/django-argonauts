@@ -15,7 +15,7 @@ def index(request):
     View that displays the contact form and handles contact form submissions
     """
     env = {}
-    template = 'contact/index.html'
+    template = getattr(settings, 'CONTACT_INDEX_TEMPLATE', 'contact/index.html')
 
     if request.method == 'POST':
         form = ContactForm(request, request.POST)
@@ -29,7 +29,7 @@ def index(request):
             env['submission'] = submission
             env['host'] = request.get_host()
             send_markdown_mail(
-                    settings.CONTACT_FORM_EMAIL_TEMPLATE,
+                    getattr(settings, 'CONTACT_FORM_EMAIL_TEMPLATE', 'mail/contact_form_submission.md'),
                     env,
                     to = recipients,)
             return HttpResponseSeeOther(reverse('contact_success'))
@@ -45,7 +45,7 @@ def success(request):
     Success page for contact form submissions
     """
     env = {}
-    template = 'contact/success.html'
+    template = getattr(settings, 'CONTACT_SUCCESS_TEMPLATE', 'contact/success.html')
 
     env['site_name'] = getattr(settings, 'SITE_NAME', 'Us')
 
