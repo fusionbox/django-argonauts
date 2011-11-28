@@ -15,6 +15,7 @@ Contents:
    middleware
    templatetags
    behaviors
+   contact
    mail
 
 Indices and tables
