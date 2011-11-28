@@ -1,3 +1,4 @@
+from django.forms.forms import BaseForm
 from django.template import TemplateDoesNotExist, RequestContext
 from django.http import Http404
 from django.shortcuts import render_to_response
@@ -36,3 +37,30 @@ class GenericTemplateFinderMiddleware(object):
             return generic_template_finder_view(request)
         else:
             return response
+
+class AutoErrorClassOnFormsMiddleware(object):
+    """
+    Middleware which adds an error class to all form widgets that have a field
+    error. 
+    
+    Requires that views return a TemplateResponse object.
+
+    Iterates through all values in the response context looking for anything
+    which inherits from django's BaseForm.  Any fields with field specific
+    errors have the class 'error' appended to their widget dictionary of
+    attributes.
+    """
+    def process_template_response(self, request, response):
+        for val in response.context_data.values():
+            if issubclass(type(val), BaseForm):
+                if val._errors:
+                    for name in val._errors.keys():
+                        field = val.fields[name]
+                        cls = field.widget.attrs.get('class', '')
+                        if 'error' in cls:
+                            continue
+                        else:
+                            cls += ' error'
+                            cls = cls.strip()
+                        field.widget.attrs['class'] = cls
+        return response
