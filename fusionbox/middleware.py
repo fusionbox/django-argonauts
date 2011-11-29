@@ -55,7 +55,7 @@ class AutoErrorClassOnFormsMiddleware(object):
             if issubclass(type(val), BaseForm):
                 if val._errors:
                     for name in val._errors.keys():
-                        if name == '__all__':
+                        if not name in val.fields:
                             continue
                         field = val.fields[name]
                         cls = field.widget.attrs.get('class', '')
