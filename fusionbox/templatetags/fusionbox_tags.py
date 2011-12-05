@@ -7,9 +7,9 @@ from django.utils.safestring import mark_safe
 register = template.Library()
 
 def addclass(elem, cls):
-    try:
+    if 'class' in elem:
         elem['class'] += ' ' + cls
-    except KeyError:
+    else:
         elem['class'] = cls
 
 def is_here(current, url):
@@ -110,9 +110,9 @@ class HighlightHereNode(HighlighterBase):
         except template.VariableDoesNotExist:
             path = self.options[0]
         except IndexError:
-            try:
+            if 'request' in context:
                 path = context['request'].path
-            except KeyError:
+            else:
                 raise KeyError("The request was not available in the context, please ensure that the request is made available in the context.")
 
         return (anchor for anchor in soup.findAll('a', {'href': True}) if is_here(path, anchor['href']))
