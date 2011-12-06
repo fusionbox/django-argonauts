@@ -34,7 +34,10 @@ class GenericTemplateFinderMiddleware(object):
     """
     def process_response(self, request, response):
         if response.status_code == 404:
-            return generic_template_finder_view(request)
+            try:
+                return generic_template_finder_view(request)
+            except Http404:
+                return response
         else:
             return response
 
