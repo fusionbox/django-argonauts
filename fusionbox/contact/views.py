@@ -10,15 +10,16 @@ from fusionbox.http import HttpResponseSeeOther
 from fusionbox.contact.forms import ContactForm
 from fusionbox.contact.models import Recipient
 
-def index(request):
+def index(request, template='contact/index.html',
+        email_template='mail/contact_form_submission.md',
+        contact_form=ContactForm, extra_context={}):
     """
     View that displays the contact form and handles contact form submissions
     """
-    env = {}
-    template = getattr(settings, 'CONTACT_INDEX_TEMPLATE', 'contact/index.html')
+    env = extra_context
 
     if request.method == 'POST':
-        form = ContactForm(request, request.POST)
+        form = contact_form(request, request.POST)
         if form.is_valid():
             submission = form.save()
             try:
@@ -28,24 +29,25 @@ def index(request):
             env = {}
             env['submission'] = submission
             env['host'] = request.get_host()
-            send_markdown_mail(
-                    getattr(settings, 'CONTACT_FORM_EMAIL_TEMPLATE', 'mail/contact_form_submission.md'),
-                    env,
-                    to = recipients,)
+            if recipeints:
+                send_markdown_mail(
+                        email_template,
+                        env,
+                        to = recipients,)
             return HttpResponseSeeOther(reverse('contact_success'))
     else:
-        form = ContactForm(request)
+        form = contact_form(request)
 
     env['form'] = form
 
     return render(request, template, env)
 
-def success(request):
+def success(request, template='contact/success.html',
+        extra_context={}):
     """
     Success page for contact form submissions
     """
-    env = {}
-    template = getattr(settings, 'CONTACT_SUCCESS_TEMPLATE', 'contact/success.html')
+    env = extra_context
 
     env['site_name'] = getattr(settings, 'SITE_NAME', 'Us')
 
