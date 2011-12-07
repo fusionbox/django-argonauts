@@ -157,6 +157,12 @@ class HighlightHereParentNode(HighlightHereNode):
 
 register.tag("highlight_here_parent", HighlightHereParentNode)
 
+@register.filter_function
+def attr(obj, arg1):
+    att, value = arg1.split("=")
+    obj.field.widget.attrs[att] = value
+    return obj
+
 @register.filter
 def json(a):
     return mark_safe(simplejson.dumps(a))
