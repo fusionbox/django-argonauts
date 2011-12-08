@@ -33,10 +33,8 @@ class UserPanel(DebugPanel):
         return render_to_string('panel.html', context)
 
     def process_request(self, request):
-        force_secure = not getattr(settings, 'DEBUG_TOOLBAR_USER_PANEL_SECURE', False)
-        enabled = request.user.is_superuser or force_secure
-        if not 'primary_user' in request.session and enabled:
-            request.session['primary_user'] = request.user.id
+        if not 'toolbar_user_panel_enabled' in request.session and request.user.is_superuser:
+            request.session['toolbar_user_panel_enabled'] = True
 
     def process_response(self, request, response):
         self.request = request

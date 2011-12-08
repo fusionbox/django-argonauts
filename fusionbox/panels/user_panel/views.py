@@ -11,7 +11,7 @@ from django.core.exceptions import PermissionDenied
 from fusionbox.panels.user_panel.forms import UserForm
 
 def panel_enabled(request):
-    return True
+    return request.session.get('toolbar_user_panel_enabled', False)
 
 def content(request):
     user_dict = {}
@@ -38,7 +38,8 @@ def content(request):
 @csrf_exempt
 @require_POST
 def login(request, **kwargs):
-    if not panel_enabled(request):
+    enabled = panel_enabled(request)
+    if not enabled:
         raise PermissionDenied
 
     if not kwargs:
@@ -51,5 +52,8 @@ def login(request, **kwargs):
 
     user.backend = settings.AUTHENTICATION_BACKENDS[0]
     auth.login(request, user)
+
+    if enabled:
+        request.session['toolbar_user_panel_enabled'] = True
 
     return HttpResponseRedirect(request.POST.get('next', '/'))

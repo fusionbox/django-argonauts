@@ -3,8 +3,8 @@
 
   {% if request.user.is_authenticated %}
     <table>
-      <tr>{% for x,y in user_dict %}<th>{{ x }}</th>{% endfor %}</tr>
-      <tr>{% for x,y in user_dict %}<td>{{ y }}</td>{% endfor %}</tr>
+      <tr>{% for x,y in user_dict.items %}<th>{{ x }}</th>{% endfor %}</tr>
+      <tr>{% for x,y in user_dict.items %}<td>{{ y }}</td>{% endfor %}</tr>
     </table>
   {% else %}
     <p>Not logged in.</p>
