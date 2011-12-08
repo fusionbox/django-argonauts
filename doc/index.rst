@@ -16,6 +16,7 @@ Contents:
    templatetags
    behaviors
    contact
+   panels
    mail
 
 Indices and tables
