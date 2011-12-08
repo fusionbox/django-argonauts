@@ -16,18 +16,26 @@ Installation
 
         INSTALLED_APPS = (
             ...
+
             'fusionbox.panels.user_panel',
+
             ...
         )
 -  Add ``fusionbox.panels.user_panel.panels.UserPanel`` to the ``DEBUG_TOOLBAR_PANELS`` setting::
+
         DEBUG_TOOLBAR_PANELS = (
             ...
+            
             'fusionbox.panels.user_panel.panels.UserPanel',
+
             ...
         )
 -  Include ``fusionbox.panels.user_panel.urls`` somewhere in your url conf::
+
         urlpatterns = patterns('',
             ...
+
             url(r'', include('fusionbox.panels.user_panel.urls')),
+
             ...
         )
