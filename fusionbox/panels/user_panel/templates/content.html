@@ -1,0 +1,37 @@
+{% if display %}
+  <h4>Current user</h4>
+
+  {% if request.user.is_authenticated %}
+    <table>
+      <tr>{% for x,y in user_dict %}<th>{{ x }}</th>{% endfor %}</tr>
+      <tr>{% for x,y in user_dict %}<td>{{ y }}</td>{% endfor %}</tr>
+    </table>
+  {% else %}
+    <p>Not logged in.</p>
+  {% endif %}
+
+  <h4>Recent users</h4>
+
+  <ul>
+    {% for user in users %}
+    <li>
+      <form method="POST" action="{% url fusionbox.panels.user_panel.views.login user.pk %}">
+        {% csrf_token %}
+        {% if next %}
+        <input type="hidden" name="next" value="{{ next }}">
+        {% endif %}
+        <button class="login" type="submit">{{ user }}</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+
+  <h4>Login as any user</h4>
+
+  <form method="POST" action="{% url fusionbox.panels.user_panel.views.login %}">
+    {{ form.as_p }}
+    <button type="submit">Login</button>
+  </form>
+{% else %}
+  <h4>You must start logged in with a super user to use this feature</h4>
+{% endif %}

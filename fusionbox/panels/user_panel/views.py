@@ -15,7 +15,7 @@ def panel_enabled(request):
 
 def content(request):
     user_dict = {}
-    template = 'fusionbox/panels/user_panel/content.html'
+    template = 'content.html'
     env = {}
 
     if request.user.is_authenticated():

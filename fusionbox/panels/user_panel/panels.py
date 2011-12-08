@@ -30,7 +30,7 @@ class UserPanel(DebugPanel):
             'request': self.request,
         })
 
-        return render_to_string('fusionbox/panels/user_panel/panel.html', context)
+        return render_to_string('panel.html', context)
 
     def process_request(self, request):
         force_secure = not getattr(settings, 'DEBUG_TOOLBAR_USER_PANEL_SECURE', False)
