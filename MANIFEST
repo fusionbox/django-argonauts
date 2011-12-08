@@ -24,6 +24,7 @@ fusionbox/management/commands/backupdb.py
 fusionbox/middleware.py
 fusionbox/models.py
 fusionbox/panels
+fusionbox/panels/__init__.py
 fusionbox/panels/user_panel
 fusionbox/panels/user_panel/COPYING
 fusionbox/panels/user_panel/README
