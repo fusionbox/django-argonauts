@@ -7,10 +7,8 @@ from django.utils.safestring import mark_safe
 register = template.Library()
 
 def addclass(elem, cls):
-    if 'class' in elem:
-        elem['class'] += ' ' + cls
-    else:
-        elem['class'] = cls
+    elem['class'] = elem.get('class', '')
+    elem['class'] += ' ' + cls if elem['class'] else cls
 
 def is_here(current, url):
     """
