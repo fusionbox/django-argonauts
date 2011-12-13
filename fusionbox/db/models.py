@@ -9,7 +9,7 @@ class QuerySetManager(models.Manager):
     
     Example Usage
 
-    from django.db.models import QuerySet
+    from django.db.models.query import QuerySet
     from fusionbox.db.models import QuerySetManager
 
     class Foo(models.Model):
