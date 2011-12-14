@@ -11,6 +11,9 @@ fusionbox/contact/static
 fusionbox/contact/static/contact.css
 fusionbox/contact/urls.py
 fusionbox/contact/views.py
+fusionbox/db
+fusionbox/db/__init__.py
+fusionbox/db/models.py
 fusionbox/forms
 fusionbox/forms/__init__.py
 fusionbox/forms/models.py

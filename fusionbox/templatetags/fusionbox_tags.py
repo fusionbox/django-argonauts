@@ -7,10 +7,8 @@ from django.utils.safestring import mark_safe
 register = template.Library()
 
 def addclass(elem, cls):
-    if 'class' in elem:
-        elem['class'] += ' ' + cls
-    else:
-        elem['class'] = cls
+    elem['class'] = elem.get('class', '')
+    elem['class'] += ' ' + cls if elem['class'] else cls
 
 def is_here(current, url):
     """
@@ -156,6 +154,12 @@ class HighlightHereParentNode(HighlightHereNode):
             yield anchor.parent
 
 register.tag("highlight_here_parent", HighlightHereParentNode)
+
+@register.filter_function
+def attr(obj, arg1):
+    att, value = arg1.split("=")
+    obj.field.widget.attrs[att] = value
+    return obj
 
 @register.filter
 def json(a):

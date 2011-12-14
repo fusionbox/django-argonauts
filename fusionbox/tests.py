@@ -320,15 +320,16 @@ class TestTwoBehaviors(unittest.TestCase):
 
 
 class TestHighlightHereTags(unittest.TestCase):
+    request = Request()
+
     def test_simple_highlight_here(self):
         t = Template('{% load fusionbox_tags %}'
                      '{% highlight_here %}'
                      '<a href="/">Index</a>'
                      '{% endhighlight %}'
                      )
-        request = Request
-        request.path = '/'
-        c = Context({'request':request})
+        self.request.path = '/'
+        c = Context({'request':self.request})
         self.assertEqual('<a href="/" class="here">Index</a>', t.render(c))
 
     def test_multiple_simple_highlight_here(self):
@@ -338,9 +339,8 @@ class TestHighlightHereTags(unittest.TestCase):
                      '<a class="blog" href="/blog/">Blog</a>'
                      '{% endhighlight %}'
                     )
-        request = Request
-        request.path = '/blog/'
-        c = Context({'request':request})
+        self.request.path = '/blog/'
+        c = Context({'request':self.request})
         self.assertEqual('<a class="" href="/">Index</a>'
                          '<a class="blog here" href="/blog/">Blog</a>',t.render(c))
 
@@ -350,9 +350,8 @@ class TestHighlightHereTags(unittest.TestCase):
                      '<a href="/">Index</a>'
                      '{% endhighlight %}'
                     )
-        request = Request
-        request.path = '/'
-        c = Context({'request':request})
+        self.request.path = '/'
+        c = Context({'request':self.request})
         self.assertEqual('<a href="/" class="yellow">Index</a>', t.render(c))
 
     def test_simple_highlight_here_with_multiple_classes(self):
@@ -361,9 +360,8 @@ class TestHighlightHereTags(unittest.TestCase):
                      '<a href="/">Index</a>'
                      '{% endhighlight %}'
                     )
-        request = Request
-        request.path = '/'
-        c = Context({'request':request})
+        self.request.path = '/'
+        c = Context({'request':self.request})
         self.assertEqual('<a href="/" class="yellow red">Index</a>', t.render(c))
 
     def test_multiple_highlight_here_with_class(self):
@@ -373,9 +371,8 @@ class TestHighlightHereTags(unittest.TestCase):
                      '<a class="blog" href="/blog/">Blog</a>'
                      '{% endhighlight %}'
                      )
-        request = Request
-        request.path = '/blog/'
-        c = Context({'request':request})
+        self.request.path = '/blog/'
+        c = Context({'request':self.request})
         self.assertEqual('<a class="" href="/">Index</a>'
                          '<a class="blog yellow" href="/blog/">Blog</a>', t.render(c))
 
@@ -386,11 +383,10 @@ class TestHighlightHereTags(unittest.TestCase):
                      '<a class="blog" href="/blog/">Blog</a>'
                      '{% endhighlight %}'
                     )
-        request = Request
-        request.path = '/'
+        self.request.path = '/'
         test_object = TestObject()
         test_object.path = '/blog/'
-        c = Context({'request':request, 'test_object' : test_object})
+        c = Context({'request':self.request, 'test_object' : test_object})
         self.assertEqual('<a class="" href="/">Index</a>'
                          '<a class="blog yellow" href="/blog/">Blog</a>', t.render(c))
 
@@ -402,14 +398,15 @@ class TestHighlightHereTags(unittest.TestCase):
                      '<a class="blog" href="/blog/detail/foo/">Blog detail</a>'
                      '{% endhighlight %}'
                     )
-        request = Request
-        request.path = '/blog/detail/foo/'
-        c = Context({'request':request})
+        self.request.path = '/blog/detail/foo/'
+        c = Context({'request':self.request})
         self.assertEqual('<a class="" href="/">Index</a>'
                          '<a class="blog here" href="/blog/">Blog</a>'
                          '<a class="blog here" href="/blog/detail/foo/">Blog detail</a>', t.render(c))
 
 class TestHighlightParentTags(unittest.TestCase):
+    request = Request()
+
     def test_simple_highlight_here_parent(self):
         t = Template('{% load fusionbox_tags %}'
                      '{% highlight_here_parent %}'
@@ -418,9 +415,8 @@ class TestHighlightParentTags(unittest.TestCase):
                      '</li>'
                      '{% endhighlight %}'
                     )
-        request = Request
-        request.path = '/'
-        c = Context({'request':request})
+        self.request.path = '/'
+        c = Context({'request':self.request})
         self.assertEqual('<li class="here">'
                          '<a class="" href="/">Index</a>'
                          '</li>', t.render(c))
@@ -435,9 +431,8 @@ class TestHighlightParentTags(unittest.TestCase):
                      '</li>'
                      '{% endhighlight %}'
                     )
-        request = Request
-        request.path = '/blog/'
-        c = Context({'request':request})
+        self.request.path = '/blog/'
+        c = Context({'request':self.request})
         self.assertEqual('<li>'
                          '<a class="" href="/">Index</a>'
                          '</li>'
@@ -453,9 +448,8 @@ class TestHighlightParentTags(unittest.TestCase):
                      '</li>'
                      '{% endhighlight %}'
                     )
-        request = Request
-        request.path = '/'
-        c = Context({'request':request})
+        self.request.path = '/'
+        c = Context({'request':self.request})
         self.assertEqual('<li class="yellow">'
                          '<a class="" href="/">Index</a>'
                          '</li>', t.render(c))
@@ -470,9 +464,8 @@ class TestHighlightParentTags(unittest.TestCase):
                      '<a class="blog" href="/blog/">Blog</a></li>'
                      '{% endhighlight %}'
                     )
-        request = Request
-        request.path = '/blog/'
-        c = Context({'request':request})
+        self.request.path = '/blog/'
+        c = Context({'request':self.request})
         self.assertEqual('<li>'
                          '<a class="" href="/">Index</a>'
                          '</li>'
@@ -490,11 +483,10 @@ class TestHighlightParentTags(unittest.TestCase):
                      '<a class="blog" href="/blog/">Blog</a></li>'
                      '{% endhighlight %}'
                     )
-        request = Request
-        request.path = '/'
+        self.request.path = '/'
         test_object = TestObject()
         test_object.path = '/blog/'
-        c = Context({'request':request, 'test_object' : test_object})
+        c = Context({'request':self.request, 'test_object' : test_object})
         self.assertEqual('<li>'
                          '<a class="" href="/">Index</a>'
                          '</li>'
