@@ -76,8 +76,8 @@ class Behavior(models.Model):
 
         class MyModel(FooBehavior):
             class FooBehavior:
-                bar = "qux"
-                baz = "quux"
+                bar = 'qux'
+                baz = 'quux'
 
     ``MyModel`` will have the fields from ``FooBehavior`` added, but the field
     names will be "qux" and "quux" respectively.
