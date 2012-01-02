@@ -17,6 +17,7 @@ Contents:
    behaviors
    contact
    mail
+   forms
 
 Indices and tables
 ==================
