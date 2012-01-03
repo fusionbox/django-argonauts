@@ -18,6 +18,7 @@ Contents:
    contact
    panels
    mail
+   forms
 
 Indices and tables
 ==================
