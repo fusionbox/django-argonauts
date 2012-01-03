@@ -1,3 +1,15 @@
+"""
+The newsletter template tag library
+
+`{% load newsletter %}`
+
+To use the newsletter template tags.  It is required
+to have jquery.forms.js installed.
+
+This is included with the installation under the `static` directory.
+
+"""
+
 from django import template
 from django.core.urlresolvers import reverse
 
@@ -25,4 +37,16 @@ class NewsletterNode(template.Node):
 
 @register.tag
 def newsletter(parser, token):
+    """
+    The newsletter template tag will insert the necessary DOM elements to use
+    the newsletter app correctly.
+
+    To use:
+        {% newsletter %}
+
+    will create a `div` element with an id attribute `newsletter_container`
+
+    This is where the ajax responses will place the returned HTML from the view.
+
+    """
     return NewsletterNode()

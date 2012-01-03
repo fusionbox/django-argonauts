@@ -19,6 +19,7 @@ Contents:
    panels
    mail
    forms
+   newsletter
 
 Indices and tables
 ==================

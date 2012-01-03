@@ -1,8 +1,18 @@
+"""
+Django models for fusionbox.newsletter app
+
+"""
 from django.db import models
 
 from fusionbox.behaviors import Timestampable
 
 class Submission(Timestampable):
+    """
+    :class:`Submission` is the basic model for use with the newsletter app.
+
+    It inherits from :class:`fusionbox.behaviors.Timestampable` and contains 
+    an :class:`EmailField` with a unique constraint
+    """
     email = models.EmailField('Email', unique=True)
 
     class Meta:
