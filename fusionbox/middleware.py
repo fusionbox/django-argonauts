@@ -33,13 +33,20 @@ class GenericTemplateFinderMiddleware(object):
     autolocate a template for otherwise 404 responses.
     """
     def process_response(self, request, response):
-        if response.status_code == 404:
+        if response.status_code == 404 and not getattr(request, '_generic_template_finder_middleware_view_found', False):
             try:
                 return generic_template_finder_view(request)
             except Http404:
                 return response
         else:
             return response
+
+    def process_view(self, request, view_func, view_args, view_kwargs):
+        """
+        Informs :func:`process_response` that there was a view for this url and that
+        it threw a real 404.
+        """
+        request._generic_template_finder_middleware_view_found = True
 
 class AutoErrorClassOnFormsMiddleware(object):
     """
