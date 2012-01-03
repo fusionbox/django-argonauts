@@ -76,8 +76,8 @@ class Behavior(models.Model):
 
         class MyModel(FooBehavior):
             class FooBehavior:
-                bar = "qux"
-                baz = "quux"
+                bar = 'qux'
+                baz = 'quux'
 
     ``MyModel`` will have the fields from ``FooBehavior`` added, but the field
     names will be "qux" and "quux" respectively.
@@ -154,11 +154,11 @@ class Timestampable(Behavior):
 
     Added Fields:
         Field 1:
-            field: DateTimeField(auto_now_add=True)
+            field: DateTimeField(default=datetime.datetime.now)
             description: Timestamps set at the creation of the instance
             default_name: created_at
         Field 2:
-            field: DateTimeField(auto_now_add=True)
+            field: DateTimeField(auto_now=True)
             description: Timestamps set each time the save method is called on the instance
             default_name: updated_at
 
@@ -166,7 +166,7 @@ class Timestampable(Behavior):
     class Meta:
         abstract = True
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=datetime.datetime.now)
     updated_at = models.DateTimeField(auto_now=True)
 
 

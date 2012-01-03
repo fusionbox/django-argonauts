@@ -7,10 +7,8 @@ from django.utils.safestring import mark_safe
 register = template.Library()
 
 def addclass(elem, cls):
-    try:
-        elem['class'] += ' ' + cls
-    except KeyError:
-        elem['class'] = cls
+    elem['class'] = elem.get('class', '')
+    elem['class'] += ' ' + cls if elem['class'] else cls
 
 def is_here(current, url):
     """
@@ -110,9 +108,9 @@ class HighlightHereNode(HighlighterBase):
         except template.VariableDoesNotExist:
             path = self.options[0]
         except IndexError:
-            try:
+            if 'request' in context:
                 path = context['request'].path
-            except KeyError:
+            else:
                 raise KeyError("The request was not available in the context, please ensure that the request is made available in the context.")
 
         return (anchor for anchor in soup.findAll('a', {'href': True}) if is_here(path, anchor['href']))
@@ -156,6 +154,12 @@ class HighlightHereParentNode(HighlightHereNode):
             yield anchor.parent
 
 register.tag("highlight_here_parent", HighlightHereParentNode)
+
+@register.filter_function
+def attr(obj, arg1):
+    att, value = arg1.split("=")
+    obj.field.widget.attrs[att] = value
+    return obj
 
 @register.filter
 def json(a):
