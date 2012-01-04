@@ -21,7 +21,7 @@ class NewsletterNode(template.Node):
 
 <script type="text/javascript">
     $(document).ready(function() {
-        var newsletter_container = $('#newsletter_container')
+        var newsletter_container = $('#newsletter_container');
         $.get('%s', function(data) {
             newsletter_container.html(data);
         });
