@@ -1,12 +1,9 @@
 """
 The newsletter template tag library
 
+To load the tag in a Django template:
+
 `{% load newsletter %}`
-
-To use the newsletter template tags.  It is required
-to have jquery.forms.js installed.
-
-This is included with the installation under the `static` directory.
 
 """
 
