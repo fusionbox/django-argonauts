@@ -27,22 +27,21 @@ class NewsletterNode(template.Node):
         var newsletter_container = $('#newsletter_container')
         $.get('%s', function(data) {
             newsletter_container.html(data);
-            $('#newsletter_signup_form').live('submit', function() {
-                $.ajax({
-                    url: $(this).attr('action'),
-                    type: $(this).attr('method'),
-                    data: $(this).serialize(),
-                    context: newsletter_container,
-                    success: function(data) {
-                        $(this).fadeOut('slow', function() {
-                            $(this).fadeIn('slow', function() {
-                                $(this).html(data);
-                            });
-                        });
-                    }
-                });
-                return false;
+        });
+        $('#newsletter_signup_form').live('submit', function() {
+            var self = $(this);
+            $.ajax({
+                url: self.attr('action'),
+                type: self.attr('method'),
+                data: self.serialize(),
+                success: function(data) {
+                    newsletter_container.fadeOut('slow', function() {
+                        newsletter_container.html(data);
+                        newsletter_container.fadeIn('slow');
+                    });
+                }
             });
+            return false;
         });
     });
 </script>
