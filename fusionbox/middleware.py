@@ -3,6 +3,7 @@ from django.template import TemplateDoesNotExist, RequestContext
 from django.http import Http404
 from django.shortcuts import render_to_response
 from django.core.exceptions import ImproperlyConfigured
+from django.conf import settings
 
 
 def generic_template_finder_view(request):
