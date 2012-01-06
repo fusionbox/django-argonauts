@@ -1,3 +1,4 @@
 *.pyc
 *.swp
 doc/_build
+django_fusionbox.egg-info/
