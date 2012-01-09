@@ -6,6 +6,8 @@ Usage Notes
 
 Because behaviors are ultimately implemented using a special metaclass, any model inheritance involving behaviors must come before any other parent class which inherits from Django's built in metaclass.
 
+Example Correct and Incorrect Usage::
+
     class MyBaseModel(models.Model):
         pass
 
