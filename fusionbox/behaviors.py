@@ -36,6 +36,8 @@ class MetaBehavior(ModelBase):
         """
         found_django_meta_without_behavior = False
         for base in bases:
+            if not issubclass(object, base):
+                continue
             mro = base.mro()
             if found_django_meta_without_behavior and Behavior in mro:
                 raise ImproperlyConfigured(u'Any model inheriting from a behavior cannot have a model which inherits from models.Model ahead of it in the parent classes')
