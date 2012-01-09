@@ -43,7 +43,6 @@ class TestBehaviorBase(unittest.TestCase):
         self.assertTrue(ThirdBehavior.ChildBehavior.child_setting == 'c')
         self.assertTrue(ThirdBehavior.BaseBehavior.child_base_setting == 'b')
 
-
     def test_declared_fields_doesnt_break_modelbase(self):
         # I'm not sure if this actually tests anything
         from django.core.management.validation import get_validation_errors
@@ -82,6 +81,24 @@ class TestBehaviorBase(unittest.TestCase):
         print vars(SharedModel2.SEO)
         get_field_dict(SharedModel1)['name']
         get_field_dict(SharedModel2)['asdf']
+
+class TestMultiInheritMRO(unittest.TestCase):
+    def test_improper_mro_multi_inheritance(self):
+        print "ran 1"
+        class UpperBase(models.Model):
+            pass
+
+        with self.assertRaises(ImproperlyConfigured):
+            class MultiInherited(UpperBase, Behavior):
+                pass
+
+    def test_proper_mro_multi_inheritance(self):
+        print "ran 2"
+        class UpperBase(models.Model):
+            pass
+
+        class MultiInherited(Behavior, UpperBase):
+            pass
 
 
 def get_field_dict(model):
