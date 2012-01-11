@@ -2,7 +2,7 @@
 Views for use with the fusionbox newsletter app.
 """
 from django.shortcuts import render
-from newsletter.forms import NewsletterSignupForm
+from .forms import NewsletterSignupForm
 
 def signup(request, form_template='newsletter/signup_form.html',
         success_template='newsletter/success.html', template = None):
@@ -10,7 +10,7 @@ def signup(request, form_template='newsletter/signup_form.html',
     This view takes care of accepting newsletter POST data from the user.
 
     It accepts 3 templates as keyword arguments:
-        * `form_template`: name of the django template that contains the 
+        * `form_template`: name of the django template that contains the
         rendered form.
         * `success_template`: django template to render when a newsletter
         has been successfully submitted.
