@@ -2,8 +2,6 @@ from django.forms.forms import BaseForm
 from django.template import TemplateDoesNotExist, RequestContext
 from django.http import Http404
 from django.shortcuts import render_to_response
-from django.core.exceptions import ImproperlyConfigured
-from django.conf import settings
 
 
 def generic_template_finder_view(request):
@@ -33,16 +31,8 @@ class GenericTemplateFinderMiddleware(object):
     """
     Response middleware that uses :func:`generic_template_finder_view` to attempt to
     autolocate a template for otherwise 404 responses.
-
-    This is only intended for development.  It will not work with DEBUG set to
-    False.
     """
     def process_response(self, request, response):
-        if settings.DEBUG is False:
-            raise ImproperlyConfigured('You should not have \
-                    GenericTemplateFinderMiddleware enabled with DEBUG set to \
-                    False')
-
         if response.status_code == 404 and not getattr(request, '_generic_template_finder_middleware_view_found', False):
             try:
                 return generic_template_finder_view(request)
@@ -61,8 +51,8 @@ class GenericTemplateFinderMiddleware(object):
 class AutoErrorClassOnFormsMiddleware(object):
     """
     Middleware which adds an error class to all form widgets that have a field
-    error. 
-    
+    error.
+
     Requires that views return a TemplateResponse object.
 
     Iterates through all values in the response context looking for anything
