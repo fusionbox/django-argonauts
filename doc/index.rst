@@ -19,6 +19,7 @@ Contents:
    panels
    mail
    forms
+   fabric
 
 Indices and tables
 ==================
