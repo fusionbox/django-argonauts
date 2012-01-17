@@ -4,7 +4,7 @@ Useful tools for Django development.
 
 
 ## `GenericTemplateFinderMiddleware`
-This middleware will automagically find a template based on the request url and
+This middleware will automatically find a template based on the request url and
 render it. Useful during early design stages to allow quick static pages to use
 the template system.
 
@@ -14,7 +14,7 @@ Add `fusionbox.middleware.GenericTemplateFinderMiddleware` to your
 ### Usage examples
 - `/` renders `index.html`
 - `/foo/` renders `/foo.html` OR `/foo/index.html` OR `/foo`
-- This works for an directory depth
+- This works for any directory depth
 
 ## Behavior
 Behaviors are a [DRY](http://c2.com/cgi/wiki?DontRepeatYourself) way of
@@ -33,7 +33,7 @@ This will add the fields `created_at` and `updated_at` to your `Foo` model.
 
 Just as their names suggest, the model will have the following fields.
 
-* `created_at` => `DateTimeField(auto_now_add=True)` 
+* `created_at` => `DateTimeField(auto_now_add=True)`
 * `updated_at` => `DateTimeField(auto_now=True)`
 
 ### Custom Configuration Usage
