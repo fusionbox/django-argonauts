@@ -7,3 +7,4 @@ from fusionbox.contact.models import Submission
 class ContactForm(UncaptchaModelForm):
     class Meta:
         model = Submission
+        exclude = ('created_at',)
