@@ -45,7 +45,7 @@ def update_git(branch):
 
 
 env.tld = '.com'
-def stage(pip=False, migrate=False, branch=None):
+def stage(pip=False, migrate=False, syncdb=False, branch=None):
     """
     stage will update the remote git version to your local HEAD, collectstatic, migrate and
     update pip if necessary.
@@ -57,9 +57,12 @@ def stage(pip=False, migrate=False, branch=None):
         version = update_git(branch or get_git_branch())
         update_pip = pip or files_changed(version, "requirements.txt")
         migrate = migrate or files_changed(version, "*/migrations/* %s/settings.py requirements.txt" % env.project_name)
+        syncdb = syncdb or files_changed(version, "*/settings.py")
         with virtualenv('/var/python-environments/%s' % env.short_name):
             if update_pip:
                 run("pip install -r ./requirements.txt")
+            if syncdb:
+                run("./manage.py syncdb")
             if migrate:
                 run("./manage.py backupdb")
                 run("./manage.py migrate")
@@ -70,4 +73,4 @@ def deploy():
     """
     Like stage, but always migrates, pips, and uses the live branch
     """
-    stage(True, True, "live")
+    stage(True, True, True, "live")
