@@ -18,6 +18,7 @@ class QuerySetManager(models.Manager):
             def published(self):
                 return self.filter(is_published=True)
     """
+    use_for_related_fields = True
     def get_query_set(self):
         return self.model.QuerySet(self.model)
     def __getattr__(self, attr, *args):

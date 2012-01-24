@@ -3,6 +3,7 @@ from django import template
 from BeautifulSoup import BeautifulSoup
 from django.utils import simplejson
 from django.utils.safestring import mark_safe
+from django.contrib.humanize.templatetags.humanize import intcomma
 
 register = template.Library()
 
@@ -165,3 +166,16 @@ def attr(obj, arg1):
 def json(a):
     return mark_safe(simplejson.dumps(a))
 json.is_safe = True
+
+
+@register.filter
+def currency(dollars):
+    """
+    Takes a number and prints it as a price, with a dollar sign and two decimal
+    places.
+
+    Taken from:
+    http://stackoverflow.com/a/2180209/1013960
+    """
+    dollars = float(dollars)
+    return "$%s%s" % (intcomma(int(dollars)), ("%0.2f" % dollars)[-3:])

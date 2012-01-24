@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ImproperlyConfigured
 from django.db.models.base import ModelBase
 
 import copy
@@ -33,6 +34,16 @@ class MetaBehavior(ModelBase):
         :func:`Behavior.modify_schema` to add them back in once all config classes are
         merged.
         """
+        found_django_meta_without_behavior = False
+        for base in bases:
+            if not issubclass(object, base):
+                continue
+            mro = base.mro()
+            if found_django_meta_without_behavior and Behavior in mro:
+                raise ImproperlyConfigured(u'Any model inheriting from a behavior cannot have a model which inherits from models.Model ahead of it in the parent classes')
+            mro_modules = [klass.__module__ for klass in mro]
+            if not 'fusionbox.behaviors' in mro_modules and models.Model in mro:
+                found_django_meta_without_behavior = True
 
         declared_fields = {}
 

@@ -20,6 +20,7 @@ Contents:
    mail
    forms
    newsletter
+   fabric
 
 Indices and tables
 ==================

@@ -51,8 +51,8 @@ class GenericTemplateFinderMiddleware(object):
 class AutoErrorClassOnFormsMiddleware(object):
     """
     Middleware which adds an error class to all form widgets that have a field
-    error. 
-    
+    error.
+
     Requires that views return a TemplateResponse object.
 
     Iterates through all values in the response context looking for anything
