@@ -29,7 +29,7 @@ def index(request, template='contact/index.html',
             env = {}
             env['submission'] = submission
             env['host'] = request.get_host()
-            if recipeints:
+            if recipients:
                 send_markdown_mail(
                         email_template,
                         env,

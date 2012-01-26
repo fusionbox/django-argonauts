@@ -190,7 +190,7 @@ class PublishableManager(models.Manager):
         queryset = super(PublishableManager, self).get_query_set()
         return queryset.filter(is_published=True, publish_at__lte=datetime.datetime.now())
 
-class Publishable(models.Model):
+class Publishable(Behavior):
     """
     Base class for adding publishable behavior to a model.
 

@@ -1,0 +1,6 @@
+<p>
+    <form id="newsletter_signup_form" action="{% url newsletter:signup_form %}" method="post">
+      {% csrf_token %}
+      {{newsletter_signup_form.as_p}}
+    </form>
+</p>

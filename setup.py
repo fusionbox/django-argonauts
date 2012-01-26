@@ -18,8 +18,17 @@ setup(name='django-fusionbox',
     keywords='django boilerplate',
     long_description=__doc__,
     url='https://github.com/fusionbox/django-fusionbox',
-    packages=['fusionbox', 'fusionbox.contact', 'fusionbox.db', 'fusionbox.fix_user', 'fusionbox.forms', 'fusionbox.panels', 'fusionbox.panels.user_panel', 'fusionbox.templatetags', 'fusionbox.management', 'fusionbox.management.commands'],
-    package_data={'fusionbox.panels.user_panel': ['templates/*',]},
+    packages=[
+        'fusionbox', 'fusionbox.contact', 'fusionbox.db',
+        'fusionbox.fix_user', 'fusionbox.forms', 'fusionbox.newsletter',
+        'fusionbox.newsletter.templatetags','fusionbox.panels',
+        'fusionbox.panels.user_panel', 'fusionbox.templatetags',
+        'fusionbox.management', 'fusionbox.management.commands'
+        ],
+    package_data={
+        'fusionbox.panels.user_panel': ['templates/*',],
+        'fusionbox.newsletter': ['templates/newsletter/*',]
+        },
     platforms = "any",
     license='BSD',
     classifiers=[
@@ -29,3 +38,4 @@ setup(name='django-fusionbox',
     install_requires = ['BeautifulSoup', 'PyYAML', 'markdown'],
     requires = ['BeautifulSoup', 'PyYAML', 'markdown'],
 )
+
