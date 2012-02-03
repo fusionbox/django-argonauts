@@ -2,8 +2,10 @@ from django.forms.forms import BaseForm
 from django.template import TemplateDoesNotExist, RequestContext
 from django.http import Http404
 from django.shortcuts import render_to_response
+from django.views.decorators.csrf import requires_csrf_token
 
 
+@requires_csrf_token
 def generic_template_finder_view(request):
     """
     Find a template based on the request url and render it.
