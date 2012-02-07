@@ -23,13 +23,19 @@ Usage:
 from django import template
 from django.conf import settings
 
-
 register = template.Library()
 
 @register.simple_tag
 def literal_include(filename):
     for loader in template.loader.template_source_loaders:
-        for i in loader.get_template_sources(filename, settings.TEMPLATE_DIRS):
+        if hasattr(loader, 'get_template_sources'):
+            sources = loader.get_template_sources(filename, settings.TEMPLATE_DIRS)
+        else:
+            # Probably a cached loader
+            sources = []
+            for i in loader.loaders:
+                sources.extend(i.get_template_sources(filename, settings.TEMPLATE_DIRS))
+        for i in sources:
             try:
                 with open(i, 'r') as fp:
                     return fp.read()
