@@ -4,6 +4,9 @@ fusionbox/__init__.py
 fusionbox/behaviors.py
 fusionbox/
 fusionbox/fabric_helpers.py
+fusionbox/auth
+fusionbox/auth/__init__.py
+fusionbox/auth/backends.py
 fusionbox/contact
 fusionbox/contact/__init__.py
 fusionbox/contact/admin.py

@@ -19,7 +19,7 @@ setup(name='django-fusionbox',
     long_description=__doc__,
     url='https://github.com/fusionbox/django-fusionbox',
     packages=[
-        'fusionbox', 'fusionbox.contact', 'fusionbox.db',
+        'fusionbox', 'fusionbox.auth', 'fusionbox.contact', 'fusionbox.db',
         'fusionbox.fix_user', 'fusionbox.forms', 'fusionbox.newsletter',
         'fusionbox.newsletter.templatetags','fusionbox.panels',
         'fusionbox.panels.user_panel', 'fusionbox.templatetags',
