@@ -13,7 +13,7 @@ def fancy_import(name):
         mod = getattr(mod, comp)
     return mod
 
-if getattr(settings, 'CUSTOM_USER_MODLE', False):
+if getattr(settings, 'CUSTOM_USER_MODEL', False):
     User = fancy_import(settings.CUSTOM_USER_MODEL)
 else:
     from django.contrib.auth.models import User
