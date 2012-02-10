@@ -178,4 +178,37 @@ def currency(dollars):
     http://stackoverflow.com/a/2180209/1013960
     """
     dollars = float(dollars)
+
     return "$%s%s" % (intcomma(int(dollars)), ("%0.2f" % dollars)[-3:])
+
+
+@register.filter
+def us_dollars(value):
+    """
+    Returns the value formatted as whole US dollars.
+
+    Example:
+        if value = -20000
+        {{ value|us_dollars }} => - $20,000
+    """
+    sign = '- ' if value < 0 else ''
+    return '{sign}${value:,.0f}'.format(
+            sign=sign,
+            value=abs(value),
+            )
+
+
+@register.filter
+def us_dollars_and_cents(value):
+    """
+    Returns the value formatted as US dollars with cents.
+
+    Example:
+        if value = -20000.125
+        {{ value|us_dollars_and_cents }} => - $20,000.13
+    """
+    sign = '- ' if value < 0 else ''
+    return '{sign}${value:,.2f}'.format(
+            sign=sign,
+            value=abs(value),
+            )
