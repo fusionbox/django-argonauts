@@ -1,4 +1,5 @@
 from django import forms
+from django.middleware.csrf import get_token
 
 import hashlib
 
@@ -6,7 +7,7 @@ class UncaptchaBase(object):
     def __init__(self, request, *args, **kwargs):
         super(UncaptchaBase, self).__init__(*args, **kwargs)
         hasher = hashlib.sha256()
-        hasher.update(request.session.session_key)
+        hasher.update(get_token(request))
         self.uncaptcha_value = hasher.hexdigest()
 
     def clean_uncaptcha(self):
