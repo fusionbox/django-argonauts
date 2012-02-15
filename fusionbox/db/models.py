@@ -5,8 +5,8 @@ class QuerySetManager(models.Manager):
     http://djangosnippets.org/snippets/734/
 
     Easy extending of the base manager without needing to define multiple
-    managers and queryset classes.  
-    
+    managers and queryset classes.
+
     Example Usage
 
     from django.db.models.query import QuerySet
@@ -22,4 +22,6 @@ class QuerySetManager(models.Manager):
     def get_query_set(self):
         return self.model.QuerySet(self.model)
     def __getattr__(self, attr, *args):
+        if attr.startswith('__') or attr == 'delete':
+            raise AttributeError
         return getattr(self.get_query_set(), attr, *args)
