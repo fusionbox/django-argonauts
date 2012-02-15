@@ -67,6 +67,7 @@ class MetaBehavior(ModelBase):
 
         return new_class
 
+
 class Behavior(models.Model):
     """
     Base class for all Behaviors
@@ -107,7 +108,6 @@ class Behavior(models.Model):
         abstract = True
     __metaclass__ = MetaBehavior
 
-
     @classmethod
     def modify_schema(cls):
         """
@@ -133,7 +133,6 @@ class Behavior(models.Model):
                     setattr(getattr(parent, parent.__name__), name, name)
                 if not hasattr(cls, new_name):
                     cls.add_to_class(new_name, copy.copy(field))
-
 
     @classmethod
     def merge_parent_settings(cls):
@@ -190,6 +189,7 @@ class PublishableManager(models.Manager):
         queryset = super(PublishableManager, self).get_query_set()
         return queryset.filter(is_published=True, publish_at__lte=datetime.datetime.now())
 
+
 class Publishable(Behavior):
     """
     Base class for adding publishable behavior to a model.
@@ -208,7 +208,7 @@ class Publishable(Behavior):
         PublishableManager:
             description: overwritten get_query_set() function to only fetch published instances.
             name: published
-            usage: 
+            usage:
                 class Blog(Publishable):
                 ...
 
@@ -250,11 +250,11 @@ class SEO(Behavior):
     class Meta:
         abstract = True
 
-    seo_title = models.CharField(max_length = 255)
+    seo_title = models.CharField(max_length=255)
     seo_description = models.TextField()
     seo_keywords = models.TextField()
 
-    def formatted_seo_data(self, title='', description = '', keywords = ''):
+    def formatted_seo_data(self, title='', description='', keywords=''):
         """
         A string containing the model's SEO data marked up and ready for output
         in HTML.
