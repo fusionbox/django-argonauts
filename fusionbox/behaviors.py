@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.core.exceptions import ImproperlyConfigured, ValidationError, NON_FIELD_ERRORS
 from django.db.models.base import ModelBase
 
 import copy
@@ -339,4 +339,6 @@ class Validation(Behavior):
         try:
             self.full_clean()
         except ValidationError, e:
-            return e
+            if hasattr(e, 'message_dict'):
+                return e.message_dict
+            return {NON_FIELD_ERRORS: e.messages}
