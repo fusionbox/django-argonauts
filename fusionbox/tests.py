@@ -4,7 +4,7 @@ from django.db import models
 from django.utils import unittest
 from django.template import Template, Context
 from django.http import HttpRequest as Request
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 
 
 from fusionbox.behaviors import *
@@ -164,7 +164,13 @@ class TestValidation(unittest.TestCase):
         x = ValidationTestModel()
 
         self.assertFalse(x.is_valid())
-        self.assertTrue(isinstance(x.validation_errors(), ValidationError))
+        self.assertInstance(x.validation_errors(), dict)
+        expected_errors = {
+            NON_FIELD_ERRORS: [u'Generic Error'],
+            'foo': [u'This field cannot be blank.', u'Foo Error']
+        }
+        self.assertEqual(x.validation_errors(), expected_errors)
+
         try:
             x.save()
             self.assertTrue(False)
