@@ -4,6 +4,7 @@ from django.db import models
 from django.utils import unittest
 from django.template import Template, Context
 from django.http import HttpRequest as Request
+from django.core.exceptions import ValidationError
 
 
 from fusionbox.behaviors import *
@@ -148,6 +149,27 @@ class TestTimestampable(unittest.TestCase):
         self.assertTrue(isinstance(fields['asdf'], models.DateTimeField))
         self.assertTrue(isinstance(fields['updated_at'], models.DateTimeField))
 
+
+class TestValidation(unittest.TestCase):
+    def test_bare(self):
+        class ValidationTestModel(Validation):
+            foo = models.CharField(max_length=1)
+
+            def validate(self):
+                raise ValidationError('Generic Error')
+
+            def validate_foo(self):
+                raise ValidationError('Foo Error')
+
+        x = ValidationTestModel()
+
+        self.assertFalse(x.is_valid())
+        self.assertTrue(isinstance(x.validation_errors(), ValidationError))
+        try:
+            x.save()
+            self.assertTrue(False)
+        except ValidationError:
+            pass
 
 
 class TestSEO(unittest.TestCase):

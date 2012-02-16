@@ -1,9 +1,10 @@
 from django.db import models
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db.models.base import ModelBase
 
 import copy
 import datetime
+
 
 class EmptyObject(object):
     pass
@@ -267,3 +268,75 @@ class SEO(Behavior):
              getattr(self, self.SEO.seo_description, description),
              getattr(self, self.SEO.seo_keywords, keywords))))
         return mark_safe('<title>%s</title>\n<meta name="description" value="%s"/>\n<meta name="keywords" value="%s"/>' % escaped_data)
+
+
+class Validation(Behavior):
+    """
+    Base class for adding complex validation behavior to a model.
+
+    By inheriting from Validation, your model can have ``validate`` and ``validate_field`` methods.
+
+    ``validate`` is for generic validations, and for ``NON_FIELD_ERRORS``, errors that do not belong to any
+    one field.  In this method you can raise a ValidationError that contains a single error message, a list of
+    errors, or - if the messages **are** associated with a field - a dictionary of field-names to message-list.
+
+    You can also write ``validate_field`` methods for any columns that need custom validation.  This is for convience,
+    since it is easier and more intuitive to raise an "invalid value" from within one of these methods, and have it
+    automatically associated with the correct field.
+
+    Even if you don't implement custom validation methods, Validation changes the normal behavior of ``save`` so that
+    validation **always** occurs.  This makes it easy to write APIs without having to understand the ``clean``, ``full_clean``,
+    and ``clean_fields`` methods that must called in django.  If a validation error occurs, the exception will **not** be
+    caught, it is up to you to catch it in your view or API.
+
+    For convience, two additional methods are added to your model.
+
+    * ``validation_errors`` returns a ValidationError object or None
+    * ``is_valid`` returns True or False
+    """
+    class Meta:
+        abstract = True
+
+    def clean_fields(self, exclude=None):
+        errors = {}
+        try:
+            super(Validation, self).clean_fields(exclude)
+        except ValidationError, e:
+            errors = e.update_error_dict(errors)
+
+        # "generic" validation.  you can raise a single error, a list of errors,
+        # or a dictionary.
+        try:
+            if hasattr(self, 'validate'):
+                getattr(self, 'validate')()
+        except ValidationError, e:
+            errors = e.update_error_dict(errors)
+
+        # field validation.  Lists or a single message will be appended to the correct
+        # entry.  Dictionaries will get merged in.
+        for f in self._meta.fields:
+            try:
+                if hasattr(self, 'validate_' + f.name):
+                    getattr(self, 'validate_' + f.name)()
+            except ValidationError, e:
+                if hasattr(e, 'message_dict'):
+                    for k, v in e.message_dict.items():
+                        errors.setdefault(k, []).extend(v)
+                else:
+                    errors.setdefault(f.name, []).extend(e.messages)
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super(Validation, self).save(*args, **kwargs)
+
+    def is_valid(self):
+        return not self.validation_errors()
+
+    def validation_errors(self):
+        try:
+            self.full_clean()
+        except ValidationError, e:
+            return e
