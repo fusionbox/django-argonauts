@@ -36,7 +36,7 @@ class MetaBehavior(ModelBase):
         """
         found_django_meta_without_behavior = False
         for base in bases:
-            if not issubclass(object, base):
+            if not issubclass(base, object):
                 continue
             mro = base.mro()
             if found_django_meta_without_behavior and Behavior in mro:
