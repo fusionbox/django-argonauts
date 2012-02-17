@@ -6,14 +6,14 @@ from django.views.decorators.csrf import requires_csrf_token
 
 
 @requires_csrf_token
-def generic_template_finder_view(request):
+def generic_template_finder_view(request, base_path=''):
     """
     Find a template based on the request url and render it.
 
     * ``/`` -> ``index.html``
     * ``/foo/`` -> ``foo.html`` OR ``foo/index.html``
     """
-    path = request.path
+    path = base_path + request.path
     if not path.endswith('/'):
         path += '/'
     possibilities = (
