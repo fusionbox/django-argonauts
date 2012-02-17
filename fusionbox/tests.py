@@ -4,6 +4,7 @@ from django.db import models
 from django.utils import unittest
 from django.template import Template, Context
 from django.http import HttpRequest as Request
+from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 
 
 from fusionbox.behaviors import *
@@ -66,7 +67,6 @@ class TestBehaviorBase(unittest.TestCase):
         errors = StringIO()
         get_validation_errors(errors, app_mod)
         errors = errors.getvalue()
-        print errors
         self.assertTrue(errors == '')
 
     def test_sharing(self):
@@ -77,14 +77,11 @@ class TestBehaviorBase(unittest.TestCase):
             class SEO:
                 seo_title = 'asdf'
 
-        print vars(SharedModel1.SEO)
-        print vars(SharedModel2.SEO)
         get_field_dict(SharedModel1)['name']
         get_field_dict(SharedModel2)['asdf']
 
 class TestMultiInheritMRO(unittest.TestCase):
     def test_improper_mro_multi_inheritance(self):
-        print "ran 1"
         class UpperBase(models.Model):
             pass
 
@@ -93,7 +90,6 @@ class TestMultiInheritMRO(unittest.TestCase):
                 pass
 
     def test_proper_mro_multi_inheritance(self):
-        print "ran 2"
         class UpperBase(models.Model):
             pass
 
@@ -148,6 +144,33 @@ class TestTimestampable(unittest.TestCase):
         self.assertTrue(isinstance(fields['asdf'], models.DateTimeField))
         self.assertTrue(isinstance(fields['updated_at'], models.DateTimeField))
 
+
+class TestValidation(unittest.TestCase):
+    def test_bare(self):
+        class ValidationTestModel(Validation):
+            foo = models.CharField(max_length=1)
+
+            def validate(self):
+                raise ValidationError('Generic Error')
+
+            def validate_foo(self):
+                raise ValidationError('Foo Error')
+
+        x = ValidationTestModel()
+
+        self.assertFalse(x.is_valid())
+        self.assertInstance(x.validation_errors(), dict)
+        expected_errors = {
+            NON_FIELD_ERRORS: [u'Generic Error'],
+            'foo': [u'This field cannot be blank.', u'Foo Error']
+        }
+        self.assertEqual(x.validation_errors(), expected_errors)
+
+        try:
+            x.save()
+            self.assertTrue(False)
+        except ValidationError:
+            pass
 
 
 class TestSEO(unittest.TestCase):
