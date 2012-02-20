@@ -21,9 +21,9 @@ def get_object_page_or_throw(queryset, request, page_param='page', page_size_par
         else:
             object_page = Paginator(queryset, page_size).page(page)
     except PageNotAnInteger:
-        raise HttpResponseBadRequest("The page parameter must be an integer")
+        return HttpResponseBadRequest("The page parameter must be an integer")
     except EmptyPage:
-        raise HttpResponseNotFound("The page requested could not be found")
+        return HttpResponseNotFound("The page requested could not be found")
 
     return object_page
 

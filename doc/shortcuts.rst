@@ -20,11 +20,13 @@ get_object_page_or_throw
 
 
 **get_object_page_or_throw(queryset, request[, page_param='page'][, page_size_param='page_size'][, page_size_default=10])**
-  Paginates a queryset, returning the requested object page or raising exceptions for malformed requests.
+  Paginates a queryset, returning the requested object page or returning an http response if an error occurs.
 
-  Given a non-integer page number, a ``HttpResponseBadRequest`` will be raised.
+  Given a non-integer page number, a ``HttpResponseBadRequest`` will be returned.
 
-  Given a page number greater than 1 that returns an empty page, a ``HttpResponseNotFound`` will be raised.
+  Given a page number greater than 1 that returns an empty page, a ``HttpResponseNotFound`` will be returned.
+
+  It is up to you to return the HttpResponse.
 
   If ``pure_pagination`` is found in the ``INSTALLED_APPS``, this function will use ``pure_pagination.Paginator`` as opposed to the default ``django.core.paginator.Paginator``.
 
