@@ -1,6 +1,7 @@
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseBadRequest, HttpResponseNotFound
 from django.conf import settings
+from django.http import Http404
 
 if 'pure_pagination' in settings.INSTALLED_APPS:
     from pure_pagination import Paginator, EmptyPage, PageNotAnInteger
@@ -21,9 +22,9 @@ def get_object_page_or_throw(queryset, request, page_param='page', page_size_par
         else:
             object_page = Paginator(queryset, page_size).page(page)
     except PageNotAnInteger:
-        return HttpResponseBadRequest("The page parameter must be an integer")
+        raise Http404("The page parameter must be an integer")
     except EmptyPage:
-        return HttpResponseNotFound("The page requested could not be found")
+        raise Http404("The page requested could not be found")
 
     return object_page
 
