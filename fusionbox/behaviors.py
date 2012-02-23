@@ -178,6 +178,9 @@ class ManagedQuerySet(Behavior):
     class QuerySet(QuerySet):
         pass
 
+    class Meta:
+        abstract = True
+
     @classmethod
     def merge_parent_settings(cls):
         """
