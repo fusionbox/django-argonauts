@@ -1,9 +1,12 @@
 from django.db import models
 from django.core.exceptions import ImproperlyConfigured, ValidationError, NON_FIELD_ERRORS
 from django.db.models.base import ModelBase
+from django.db.models.query import QuerySet
 
 import copy
 import datetime
+
+from fusionbox.db.models import QuerySetManager
 
 
 class EmptyObject(object):
@@ -150,6 +153,8 @@ class Behavior(models.Model):
                 parent_settings.update(child_settings)
                 getattr(cls, behavior).__dict__ = parent_settings
 
+
+
     @classmethod
     def base_behaviors(cls):
         behaviors = []
@@ -157,6 +162,32 @@ class Behavior(models.Model):
             if hasattr(parent, parent.__name__):
                 behaviors.append(parent)
         return behaviors
+
+
+class ManagedQuerySet(Behavior):
+    """
+    This behavior is meant to be used in conjunction with
+    `fusionbox.db.models.QuerySetManager`
+
+    A class which inherits from this class will any inner QuerySet classes
+    found in the `mro` merged into a single class
+    """
+
+    objects = QuerySetManager()
+
+    class QuerySet(QuerySet):
+        pass
+
+    @classmethod
+    def merge_parent_settings(cls):
+        """
+        Merge QuerySet classes
+        """
+        querysets = [getattr(parent, 'QuerySet', False) for parent in cls.mro()]
+        querysets = filter(bool, querysets)
+        if querysets:
+            cls.QuerySet = type('QuerySet', tuple(querysets), {})
+        return super(Behavior, cls).__thisclass__.merge_parent_settings()
 
 
 class Timestampable(Behavior):

@@ -25,10 +25,10 @@ class TestBehaviorBase(unittest.TestCase):
                 base_setting = 'a'
 
         class ChildBehavior(BaseBehavior):
-                class BaseBehavior:
-                    child_base_setting = 'b'
-                class ChildBehavior:
-                    child_setting = 'c'
+            class BaseBehavior:
+                child_base_setting = 'b'
+            class ChildBehavior:
+                child_setting = 'c'
 
         class ThirdBehavior(ChildBehavior):
             class BaseBehavior:
@@ -159,7 +159,7 @@ class TestValidation(unittest.TestCase):
         x = ValidationTestModel()
 
         self.assertFalse(x.is_valid())
-        self.assertInstance(x.validation_errors(), dict)
+        self.assertIsInstance(x.validation_errors(), dict)
         expected_errors = {
             NON_FIELD_ERRORS: [u'Generic Error'],
             'foo': [u'This field cannot be blank.', u'Foo Error']
@@ -171,6 +171,30 @@ class TestValidation(unittest.TestCase):
             self.assertTrue(False)
         except ValidationError:
             pass
+
+class TestMergedQuerySet(unittest.TestCase):
+    def test_bare(self):
+        from django.db.models.query import QuerySet
+        class QuerySetTestModel_A(models.Model):
+            class QuerySet(QuerySet):
+                def foo(self):
+                    pass
+
+        class QuerySetTestModel_B(models.Model):
+            class QuerySet(QuerySet):
+                def bar(self):
+                    pass
+
+        class QuerySetTestModel_C(ManagedQuerySet, QuerySetTestModel_A, QuerySetTestModel_B):
+            class QuerySet(QuerySet):
+                def baz(self):
+                    pass
+
+        x = QuerySetTestModel_C()
+
+        self.assertTrue(hasattr(x.QuerySet, 'foo'))
+        self.assertTrue(hasattr(x.QuerySet, 'bar'))
+        self.assertTrue(hasattr(x.QuerySet, 'baz'))
 
 
 class TestSEO(unittest.TestCase):
