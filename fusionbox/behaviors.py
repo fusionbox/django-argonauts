@@ -184,7 +184,7 @@ class ManagedQuerySet(Behavior):
         Merge QuerySet classes
         """
         querysets = [getattr(parent, 'QuerySet', False) for parent in cls.mro()]
-        querysets = filter(bool, querysets)
+        querysets = set(filter(bool, querysets))
         if querysets:
             cls.QuerySet = type('QuerySet', tuple(querysets), {})
         return super(Behavior, cls).__thisclass__.merge_parent_settings()
