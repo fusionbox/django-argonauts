@@ -190,11 +190,20 @@ class ManagedQuerySet(Behavior):
         """
         Merge QuerySet classes
         """
-        querysets = [getattr(parent, 'QuerySet', False) for parent in cls.mro()]
-        querysets = set(filter(bool, querysets))
+        # get a list of all of the inner QuerySet classes from the bases
+        querysets = [getattr(parent, 'QuerySet', False) for parent in cls.__bases__]
+        # add in the inner QuerySet class defined on the child
+        if 'QuerySet' in cls.__dict__:
+            querysets = [cls.QuerySet] + querysets
+        # remove False values from the the list.
+        querysets = filter(bool, querysets)
         if querysets:
+            # Create the new inner QuerySet class and put it on the new child.
             cls.QuerySet = type('QuerySet', tuple(querysets), {})
-        return super(Behavior, cls).__thisclass__.merge_parent_settings()
+        # Conditional bailout since ManageQuerySet is not defined during it's instantiation
+        if cls.__name__ == 'ManagedQuerySet':
+            return
+        return super(ManagedQuerySet, cls).merge_parent_settings()
 
 
 class Timestampable(Behavior):
