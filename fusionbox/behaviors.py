@@ -10,7 +10,8 @@ from fusionbox.db.models import QuerySetManager
 
 
 class EmptyObject(object):
-    pass
+    def __nonzero__(self):
+        return False
 
 
 class MetaBehavior(ModelBase):
@@ -146,13 +147,16 @@ class Behavior(models.Model):
         those inner classes.
         """
         behaviors = [behavior.__name__ for behavior in cls.base_behaviors()]
-        for parent in cls.mro():
-            for behavior in behaviors:
-                parent_settings = dict(getattr(parent, behavior, EmptyObject()).__dict__)
-                child_settings = getattr(cls, behavior, EmptyObject()).__dict__
-                parent_settings.update(child_settings)
-                getattr(cls, behavior).__dict__ = parent_settings
-
+        for behavior in behaviors:
+            parent_settings = [getattr(parent, behavior, False) for parent in cls.__bases__]
+            if behavior in cls.__dict__:
+                parent_settings = [getattr(cls, behavior)] + parent_settings
+            parent_settings = filter(bool, parent_settings)
+            if parent_settings:
+                try:
+                    setattr(cls, behavior, type(behavior, tuple(parent_settings), {}))
+                except TypeError:
+                    setattr(cls, behavior, type(behavior, tuple(parent_settings + [object]), {}))
 
 
     @classmethod
