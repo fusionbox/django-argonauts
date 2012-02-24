@@ -97,7 +97,7 @@ class Behavior(models.Model):
                 baz = 'quux'
 
     ``MyModel`` will have the fields from ``FooBehavior`` added, but the field
-    names will be "qux" and "quux" respectively.
+    names will be 'qux' and 'quux' respectively.
 
     EXAMPLE C::
 
@@ -277,11 +277,11 @@ class SEO(Behavior):
             default_name: seo_title
         Field 2:
             field: TextField()
-            description: Text field intended for use in html <meta name="description"> tag.
+            description: Text field intended for use in html <meta name='description'> tag.
             default_name: seo_description
         Field 3:
             field: TextField()
-            description: Text field intended for use in html <meta name="keywords"> tag.
+            description: Text field intended for use in html <meta name='keywords'> tag.
             validation: comma separated text strings
             default_name: seo_keywords
 
@@ -319,7 +319,7 @@ class Validation(Behavior):
     errors, or - if the messages **are** associated with a field - a dictionary of field-names to message-list.
 
     You can also write ``validate_field`` methods for any columns that need custom validation.  This is for convience,
-    since it is easier and more intuitive to raise an "invalid value" from within one of these methods, and have it
+    since it is easier and more intuitive to raise an 'invalid value' from within one of these methods, and have it
     automatically associated with the correct field.
 
     Even if you don't implement custom validation methods, Validation changes the normal behavior of ``save`` so that
@@ -342,7 +342,7 @@ class Validation(Behavior):
         except ValidationError, e:
             errors = e.update_error_dict(errors)
 
-        # "generic" validation.  you can raise a single error, a list of errors,
+        # 'generic' validation.  you can raise a single error, a list of errors,
         # or a dictionary.
         try:
             if hasattr(self, 'validate'):
