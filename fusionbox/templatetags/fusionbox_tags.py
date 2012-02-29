@@ -1,3 +1,6 @@
+from decimal import Decimal, ROUND_UP
+import locale
+
 from django import template
 
 from BeautifulSoup import BeautifulSoup
@@ -191,11 +194,11 @@ def us_dollars(value):
         if value = -20000
         {{ value|us_dollars }} => - $20,000
     """
-    sign = '- ' if value < 0 else ''
-    return '{sign}${value:,.0f}'.format(
-            sign=sign,
-            value=abs(value),
-            )
+    locale.setlocale(locale.LC_ALL, '')
+    return locale.currency(
+            Decimal(value).quantize(Decimal('1'), rounding=ROUND_UP),
+            grouping=True
+            )[:-3]
 
 
 @register.filter
@@ -207,8 +210,8 @@ def us_dollars_and_cents(value):
         if value = -20000.125
         {{ value|us_dollars_and_cents }} => - $20,000.13
     """
-    sign = '- ' if value < 0 else ''
-    return '{sign}${value:,.2f}'.format(
-            sign=sign,
-            value=abs(value),
+    locale.setlocale(locale.LC_ALL, '')
+    return locale.currency(
+            Decimal(value).quantize(Decimal('1.00'), rounding=ROUND_UP),
+            grouping=True
             )
