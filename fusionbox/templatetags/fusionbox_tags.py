@@ -192,7 +192,7 @@ def us_dollars(value):
 
     Example:
         if value = -20000
-        {{ value|us_dollars }} => - $20,000
+        {{ value|us_dollars }} => -$20,000
     """
     locale.setlocale(locale.LC_ALL, '')
     return locale.currency(
@@ -208,7 +208,7 @@ def us_dollars_and_cents(value):
 
     Example:
         if value = -20000.125
-        {{ value|us_dollars_and_cents }} => - $20,000.13
+        {{ value|us_dollars_and_cents }} => -$20,000.13
     """
     locale.setlocale(locale.LC_ALL, '')
     return locale.currency(
