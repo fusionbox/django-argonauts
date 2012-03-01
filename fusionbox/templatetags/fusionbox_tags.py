@@ -1,4 +1,4 @@
-from decimal import Decimal, ROUND_UP
+from decimal import Decimal, ROUND_HALF_UP
 import locale
 
 from django import template
@@ -196,7 +196,7 @@ def us_dollars(value):
     """
     locale.setlocale(locale.LC_ALL, '')
     return locale.currency(
-            Decimal(value).quantize(Decimal('1'), rounding=ROUND_UP),
+            Decimal(value).quantize(Decimal('1'), rounding=ROUND_HALF_UP),
             grouping=True
             )[:-3]
 
@@ -212,6 +212,6 @@ def us_dollars_and_cents(value):
     """
     locale.setlocale(locale.LC_ALL, '')
     return locale.currency(
-            Decimal(value).quantize(Decimal('1.00'), rounding=ROUND_UP),
+            Decimal(value).quantize(Decimal('1.00'), rounding=ROUND_HALF_UP),
             grouping=True
             )
