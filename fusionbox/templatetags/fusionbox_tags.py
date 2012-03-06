@@ -215,3 +215,31 @@ def us_dollars_and_cents(value):
             Decimal(value).quantize(Decimal('1.00'), rounding=ROUND_HALF_UP),
             grouping=True
             )
+
+@register.filter
+def add_commas(value, round = None):
+    """
+    Add commas to a numeric value, while rounding it to a specific number of
+    places.  Humanize's intcomma is not adequate since it does not allow
+    formatting of real numbers.
+
+    Example:
+        if value = 20000
+        {{ value|add_commas }} => 20,000
+        {{ value|add_commas:3 }} => 20,000.000
+
+        if value = 1234.5678
+        {{ value|add_commas:2 }} => 1,234.57
+    """
+    locale.setlocale(locale.LC_ALL, '')
+    # Decimals honor locale settings correctly
+    value = Decimal(str(value))
+    # Round the value if necessary
+    if round != None:
+        if round > 0:
+            format = Decimal('1.' + round * '0')
+        else:
+            format = Decimal('1')
+        value = value.quantize(format, rounding=ROUND_HALF_UP)
+    # Locale settings properly format Decimals with commas
+    return '{:n}'.format(value)
