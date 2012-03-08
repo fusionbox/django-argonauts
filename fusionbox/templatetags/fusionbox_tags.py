@@ -1,4 +1,4 @@
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 import locale
 
 from django import template
@@ -194,27 +194,54 @@ def us_dollars(value):
         if value = -20000
         {{ value|us_dollars }} => -$20,000
     """
+    # Try to convert to Decimal
+    try:
+        value = Decimal(value).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+    except InvalidOperation as e:
+        if e[0] == "Invalid literal for Decimal: ''":
+            raise InvalidOperation('Cannot format empty string as dollar value')
+        else:
+            raise e
+    # Format as currency value
     locale.setlocale(locale.LC_ALL, '')
-    return locale.currency(
-            Decimal(value).quantize(Decimal('1'), rounding=ROUND_HALF_UP),
-            grouping=True
-            )[:-3]
+    return locale.currency(value, grouping=True)[:-3]
 
 
 @register.filter
-def us_dollars_and_cents(value):
+def us_dollars_and_cents(value, cent_places = 2):
     """
-    Returns the value formatted as US dollars with cents.
+    Returns the value formatted as US dollars with cents.  May optionally
+    include extra digits for fractional cents.  This is common when displaying
+    utility rates, for instance.
 
     Example:
         if value = -20000.125
         {{ value|us_dollars_and_cents }} => -$20,000.13
+
+        if value = 0.082  (8.2 cents)
+        {{ value|us_dollars_and_cents:3 }} => $0.082
     """
+    # Try to convert to Decimal
+    try:
+        value = Decimal(value).quantize(Decimal('1.' + '0' * cent_places), rounding=ROUND_HALF_UP)
+    except InvalidOperation as e:
+        if e[0] == "Invalid literal for Decimal: ''":
+            raise InvalidOperation('Cannot format empty string as dollar value')
+        else:
+            raise e
+    # Require cent_places >= 2
+    if cent_places < 2:
+        cent_places = 2
+    # Get extra cent places if needed
+    if cent_places > 2:
+        extra_places = cent_places - 2
+        extra_places = str(value)[-extra_places:]
+    else:
+        extra_places = ''
+    # Format as currency value
     locale.setlocale(locale.LC_ALL, '')
-    return locale.currency(
-            Decimal(value).quantize(Decimal('1.00'), rounding=ROUND_HALF_UP),
-            grouping=True
-            )
+    return locale.currency(value, grouping=True) + extra_places
+
 
 @register.filter
 def add_commas(value, round = None):
