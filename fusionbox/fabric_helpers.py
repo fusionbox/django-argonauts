@@ -39,7 +39,8 @@ def update_git(branch):
         put(StringIO(local('git rev-parse %s' % branch, capture=True) + "\n"), 'static/.git_version.txt', mode=0775)
         local("git archive %s | tar xf - -C %s" % (branch, loc))
         # env.cwd is documented as private, but I'm not sure how else to do this
-        local("rsync -r --times --omit-dir-times --perms --chmod=g=rwX,a+rX %s/ dev:%s" % (loc, env.cwd))
+        with settings(warn_only=True):
+            local("rsync -r --perms --chmod=g=rwX,a+rX %s/ %s:%s" % (loc, env.host_string, env.cwd))
     finally:
         shutil.rmtree(loc)
     return remote_head
