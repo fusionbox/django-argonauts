@@ -385,6 +385,7 @@ class Validation(Behavior):
     def validation_errors(self):
         try:
             self.full_clean()
+            return {}
         except ValidationError, e:
             if hasattr(e, 'message_dict'):
                 return e.message_dict
