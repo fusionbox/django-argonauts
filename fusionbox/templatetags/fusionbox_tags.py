@@ -269,4 +269,4 @@ def add_commas(value, round = None):
             format = Decimal('1')
         value = value.quantize(format, rounding=ROUND_HALF_UP)
     # Locale settings properly format Decimals with commas
-    return '{:n}'.format(value)
+    return locale.format("%.2f", value, grouping=True)
