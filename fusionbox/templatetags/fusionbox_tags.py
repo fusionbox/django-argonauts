@@ -1,7 +1,9 @@
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 import locale
+import re
 
 from django import template
+from django.conf import settings
 
 from BeautifulSoup import BeautifulSoup
 from django.utils import simplejson
@@ -185,6 +187,11 @@ def currency(dollars):
     return "$%s%s" % (intcomma(int(dollars)), ("%0.2f" % dollars)[-3:])
 
 
+if hasattr(settings, 'FORMAT_TAG_ERROR_VALUE'):
+    FORMAT_TAG_ERROR_VALUE = settings.FORMAT_TAG_ERROR_VALUE
+else:
+    FORMAT_TAG_ERROR_VALUE = ''
+
 @register.filter
 def us_dollars(value):
     """
@@ -198,8 +205,8 @@ def us_dollars(value):
     try:
         value = Decimal(value).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
     except InvalidOperation as e:
-        if e[0] == "Invalid literal for Decimal: ''":
-            raise InvalidOperation('Cannot format empty string as dollar value')
+        if re.search('Invalid literal for Decimal', e[0]):
+            return FORMAT_TAG_ERROR_VALUE
         else:
             raise e
     # Format as currency value
@@ -225,8 +232,8 @@ def us_dollars_and_cents(value, cent_places = 2):
     try:
         value = Decimal(value).quantize(Decimal('1.' + '0' * cent_places), rounding=ROUND_HALF_UP)
     except InvalidOperation as e:
-        if e[0] == "Invalid literal for Decimal: ''":
-            raise InvalidOperation('Cannot format empty string as dollar value')
+        if re.search('Invalid literal for Decimal', e[0]):
+            return FORMAT_TAG_ERROR_VALUE
         else:
             raise e
     # Require cent_places >= 2
@@ -260,7 +267,13 @@ def add_commas(value, round = None):
     """
     locale.setlocale(locale.LC_ALL, '')
     # Decimals honor locale settings correctly
-    value = Decimal(str(value))
+    try:
+        value = Decimal(str(value))
+    except InvalidOperation as e:
+        if re.search('Invalid literal for Decimal', e[0]):
+            return FORMAT_TAG_ERROR_VALUE
+        else:
+            raise e
     # Round the value if necessary
     if round != None:
         if round > 0:
