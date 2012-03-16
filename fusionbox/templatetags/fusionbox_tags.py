@@ -190,7 +190,7 @@ def currency(dollars):
 if hasattr(settings, 'FORMAT_TAG_ERROR_VALUE'):
     FORMAT_TAG_ERROR_VALUE = settings.FORMAT_TAG_ERROR_VALUE
 else:
-    FORMAT_TAG_ERROR_VALUE = ''
+    FORMAT_TAG_ERROR_VALUE = 'error'
 
 @register.filter
 def us_dollars(value):
