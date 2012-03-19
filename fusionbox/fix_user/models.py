@@ -13,11 +13,18 @@ User._meta.get_field('username').max_length = 255
 User._meta.get_field('username').help_text = _("Required. 255 characters or fewer. Letters, numbers and @/./+/-/_ characters")
 User._meta.get_field('username').validators[0].limit_value = 255
 
+User._meta.get_field('email').max_length = 255
+User._meta.get_field('email').validators[0].limit_value = 255
+
 from django.contrib.auth.forms import AuthenticationForm
 
 AuthenticationForm.base_fields['username'].max_length = 255 # I guess not needed
 AuthenticationForm.base_fields['username'].widget.attrs['maxlength'] = 255 # html
 AuthenticationForm.base_fields['username'].validators[0].limit_value = 255
+
+AuthenticationForm.base_fields['email'].max_length = 255 # I guess not needed
+AuthenticationForm.base_fields['email'].widget.attrs['maxlength'] = 255 # html
+AuthenticationForm.base_fields['email'].validators[0].limit_value = 255
 
 from django.contrib.auth.forms import UserCreationForm
 
@@ -32,3 +39,7 @@ UserChangeForm.base_fields['username'].max_length = 255
 UserChangeForm.base_fields['username'].widget.attrs['maxlength'] = 255 # html
 UserChangeForm.base_fields['username'].validators[0].limit_value = 255
 UserChangeForm.base_fields['username'].help_text = _("Required. 255 characters or fewer. Letters, numbers and @/./+/-/_ characters")
+
+UserChangeForm.base_fields['email'].max_length = 255
+UserChangeForm.base_fields['email'].widget.attrs['maxlength'] = 255 # html
+UserChangeForm.base_fields['email'].validators[0].limit_value = 255
