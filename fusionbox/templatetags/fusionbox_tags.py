@@ -159,15 +159,23 @@ class HighlightHereParentNode(HighlightHereNode):
 
 register.tag("highlight_here_parent", HighlightHereParentNode)
 
+
 @register.filter_function
 def attr(obj, arg1):
     att, value = arg1.split("=")
     obj.field.widget.attrs[att] = value
     return obj
 
+
+def encode_decimal(d):
+    if isinstance(d, Decimal):
+        return float(d)
+    raise TypeError("%r is not JSON serializable" % (d,))
+
+
 @register.filter
 def json(a):
-    return mark_safe(simplejson.dumps(a))
+    return mark_safe(simplejson.dumps(a, default=encode_decimal))
 json.is_safe = True
 
 
