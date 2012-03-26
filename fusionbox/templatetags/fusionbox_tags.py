@@ -169,7 +169,7 @@ def attr(obj, arg1):
 
 def encode_decimal(d):
     if isinstance(d, Decimal):
-        return float(d)
+        return str(d)
     raise TypeError("%r is not JSON serializable" % (d,))
 
 
