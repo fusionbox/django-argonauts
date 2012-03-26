@@ -1,22 +1,21 @@
 from django.contrib.auth.backends import ModelBackend
 from django.conf import settings
 
+
 def fancy_import(name):
     """
     This takes a fully qualified object name, like 'accounts.models.ProxyUser'
     and turns it into the accounts.models.ProxyUser object.
     """
-
-    components = name.split('.')
-    mod = __import__(components[0])
-    for comp in components[1:]:
-        mod = getattr(mod, comp)
-    return mod
+    import_path, import_me = name.rsplit('.', 1)
+    imported = __import__(import_path, globals(), locals(), [import_me], -1)
+    return getattr(imported, import_me)
 
 if getattr(settings, 'CUSTOM_USER_MODEL', False):
     User = fancy_import(settings.CUSTOM_USER_MODEL)
 else:
     from django.contrib.auth.models import User
+
 
 class CustomModelBackend(ModelBackend):
     """

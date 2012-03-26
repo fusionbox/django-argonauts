@@ -338,7 +338,7 @@ class Validation(Behavior):
 
     For convience, two additional methods are added to your model.
 
-    * ``validation_errors`` returns a ValidationError object or None
+    * ``validation_errors`` returns a dictionary of errors
     * ``is_valid`` returns True or False
     """
     class Meta:
@@ -385,6 +385,7 @@ class Validation(Behavior):
     def validation_errors(self):
         try:
             self.full_clean()
+            return {}
         except ValidationError, e:
             if hasattr(e, 'message_dict'):
                 return e.message_dict
