@@ -2,14 +2,14 @@ from functools import wraps
 
 from django.utils import simplejson as json
 from django.views.decorators.http import require_http_methods
-from django.http import HttpResponseNotAllowed
+from django.http import HttpResponseBadRequest
 
 
 require_PUT = require_http_methods(['PUT'])
 require_DELETE = require_http_methods(['DELETE'])
 
 
-def require_JSON(func, raise_on_error=HttpResponseNotAllowed, encoding='utf-8'):
+def require_JSON(func, raise_on_error=HttpResponseBadRequest, encoding='utf-8'):
     """
     Decorator to parse JSON requests.  If the JSON data is not present,
     or if it is malformed, an error response is returned.  Otherwise,
