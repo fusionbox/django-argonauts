@@ -27,13 +27,14 @@ def require_AJAX(func, raise_on_error=HttpResponseBadRequest):
     def decorator(func):
         @wraps(func)
         def inner(request, *args, **kwargs):
-            message = 'Expected AJAX request'
-            if not request.is_ajax():
-                if isinstance(raise_on_error, type):
-                    return raise_on_error(message)
-                else:
-                    return raise_on_error
+            if request.is_ajax():
                 return func(request, *args, **kwargs)
+
+            message = 'Expected AJAX request'
+            if isinstance(raise_on_error, type):
+                return raise_on_error(message)
+            else:
+                return raise_on_error
         return inner
 
     if func:
@@ -69,13 +70,13 @@ def require_JSON(func, raise_on_error=HttpResponseBadRequest, encoding=None):
         def inner(request, *args, **kwargs):
             message = 'Expected Content-Type application/json'
             if request.META.get('CONTENT_TYPE') == 'application/json':
+                if encoding:
+                    my_encoding = encoding
+                elif request.encoding:
+                    my_encoding = request.encoding
+                else:
+                    my_encoding = settings.DEFAULT_CHARSET
                 try:
-                    if encoding:
-                        my_encoding = encoding
-                    elif request.encoding:
-                        my_encoding = request.encoding
-                    else:
-                        my_encoding = settings.DEFAULT_CHARSET
                     request.payload = json.loads(request.read().decode(my_encoding))
                     return func(request, *args, **kwargs)
                 except ValueError as e:
