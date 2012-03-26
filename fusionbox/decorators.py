@@ -1,6 +1,6 @@
 from functools import wraps
 
-from django.settings import DEFAULT_CHARSET
+from django.conf import settings
 from django.utils import simplejson as json
 from django.views.decorators.http import require_http_methods
 from django.http import HttpResponseBadRequest
@@ -75,7 +75,7 @@ def require_JSON(func, raise_on_error=HttpResponseBadRequest, encoding=None):
                     elif request.encoding:
                         my_encoding = request.encoding
                     else:
-                        my_encoding = DEFAULT_CHARSET
+                        my_encoding = settings.DEFAULT_CHARSET
                     request.payload = json.loads(request.read().decode(my_encoding))
                     return func(request, *args, **kwargs)
                 except ValueError as e:
