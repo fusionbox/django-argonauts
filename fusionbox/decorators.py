@@ -9,6 +9,37 @@ require_PUT = require_http_methods(['PUT'])
 require_DELETE = require_http_methods(['DELETE'])
 
 
+def require_AJAX(func, raise_on_error=HttpResponseBadRequest):
+    """
+    Decorator that returns an ``HttpResponseBadRequest`` if the request is not
+    an AJAX request.  The response can be customized using the
+    ``raise_on_error`` argument::
+
+        @require_AJAX
+        def my_view(request):
+            # ...
+
+        @require_AJAX(raise_on_error=HttpResponseForbidden)
+        def my_view(request):
+            # ...
+    """
+    def decorator(func):
+        @wraps(func)
+        def inner(request, *args, **kwargs):
+            message = 'Expected AJAX request'
+            if not request.is_ajax():
+                if isinstance(raise_on_error, type):
+                    return raise_on_error(message)
+                else:
+                    return raise_on_error
+                return func(request, *args, **kwargs)
+        return inner
+
+    if func:
+        return decorator(func)
+    return decorator
+
+
 def require_JSON(func, raise_on_error=HttpResponseBadRequest, encoding='utf-8'):
     """
     Decorator to parse JSON requests.  If the JSON data is not present,
