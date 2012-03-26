@@ -1,5 +1,6 @@
 from functools import wraps
 
+from django.settings import DEFAULT_CHARSET
 from django.utils import simplejson as json
 from django.views.decorators.http import require_http_methods
 from django.http import HttpResponseBadRequest
@@ -40,7 +41,7 @@ def require_AJAX(func, raise_on_error=HttpResponseBadRequest):
     return decorator
 
 
-def require_JSON(func, raise_on_error=HttpResponseBadRequest, encoding='utf-8'):
+def require_JSON(func, raise_on_error=HttpResponseBadRequest, encoding=None):
     """
     Decorator to parse JSON requests.  If the JSON data is not present,
     or if it is malformed, an error response is returned.  Otherwise,
@@ -69,7 +70,13 @@ def require_JSON(func, raise_on_error=HttpResponseBadRequest, encoding='utf-8'):
             message = 'Expected Content-Type application/json'
             if request.META.get('CONTENT_TYPE') == 'application/json':
                 try:
-                    request.JSON = json.loads(request.read().decode(encoding))
+                    if encoding:
+                        my_encoding = encoding
+                    elif request.encoding:
+                        my_encoding = request.encoding
+                    else:
+                        my_encoding = DEFAULT_CHARSET
+                    request.JSON = json.loads(request.read().decode(my_encoding))
                     return func(request, *args, **kwargs)
                 except ValueError as e:
                     request.JSON_ERROR = message = e.message
