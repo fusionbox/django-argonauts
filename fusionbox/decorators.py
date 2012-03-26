@@ -46,7 +46,7 @@ def require_JSON(func, raise_on_error=HttpResponseBadRequest, encoding=None):
     Decorator to parse JSON requests.  If the JSON data is not present,
     or if it is malformed, an error response is returned.  Otherwise,
     the JSON data will be decoded (using ``encoding``) and made available
-    in request.JSON.  The error can be disabled or customized by setting
+    in request.payload.  The error can be disabled or customized by setting
     raise_on_error to Falsey (disable) an ``HttpResponse`` instance, or a class
     (the JSON error message will be assigned to the constructor).  If the
     error is disabled, the message will be in ``request.JSON_ERROR``::
@@ -76,7 +76,7 @@ def require_JSON(func, raise_on_error=HttpResponseBadRequest, encoding=None):
                         my_encoding = request.encoding
                     else:
                         my_encoding = DEFAULT_CHARSET
-                    request.JSON = json.loads(request.read().decode(my_encoding))
+                    request.payload = json.loads(request.read().decode(my_encoding))
                     return func(request, *args, **kwargs)
                 except ValueError as e:
                     request.JSON_ERROR = message = e.message
