@@ -40,7 +40,7 @@ def update_git(branch):
         local("git archive %s | tar xf - -C %s" % (branch, loc))
         # env.cwd is documented as private, but I'm not sure how else to do this
         with settings(warn_only=True):
-            local("rsync -r --perms --chmod=g=rwX,a+rX %s/ %s:%s" % (loc, env.host_string, env.cwd))
+            local("rsync -r --perms --chmod=g=rwX,a+rX %s/ %s@%s:%s" % (loc, env.user, env.host_string, env.cwd))
     finally:
         shutil.rmtree(loc)
     return remote_head
