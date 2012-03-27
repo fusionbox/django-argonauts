@@ -64,8 +64,10 @@ def send_markdown_mail(template,
         raise Exception("Template didn't give a subject and neither did you")
 
     to = meta.get('to', to)
-    if not subject:
+    if not to:
         raise Exception("Template didn't give a to and neither did you")
+    if isinstance(to, basestring):
+        to = (to,)
 
     from_address = meta.get('from', from_address)
 
