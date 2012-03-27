@@ -1,7 +1,9 @@
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 import locale
+import re
 
 from django import template
+from django.conf import settings
 
 from BeautifulSoup import BeautifulSoup
 from django.utils import simplejson
@@ -159,15 +161,23 @@ class HighlightHereParentNode(HighlightHereNode):
 
 register.tag("highlight_here_parent", HighlightHereParentNode)
 
+
 @register.filter_function
 def attr(obj, arg1):
     att, value = arg1.split("=")
     obj.field.widget.attrs[att] = value
     return obj
 
+
+def encode_decimal(d):
+    if isinstance(d, Decimal):
+        return float(d)
+    raise TypeError("%r is not JSON serializable" % (d,))
+
+
 @register.filter
 def json(a):
-    return mark_safe(simplejson.dumps(a))
+    return mark_safe(simplejson.dumps(a, default=encode_decimal))
 json.is_safe = True
 
 
@@ -185,6 +195,11 @@ def currency(dollars):
     return "$%s%s" % (intcomma(int(dollars)), ("%0.2f" % dollars)[-3:])
 
 
+if hasattr(settings, 'FORMAT_TAG_ERROR_VALUE'):
+    FORMAT_TAG_ERROR_VALUE = settings.FORMAT_TAG_ERROR_VALUE
+else:
+    FORMAT_TAG_ERROR_VALUE = 'error'
+
 @register.filter
 def us_dollars(value):
     """
@@ -198,8 +213,8 @@ def us_dollars(value):
     try:
         value = Decimal(value).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
     except InvalidOperation as e:
-        if e[0] == "Invalid literal for Decimal: ''":
-            raise InvalidOperation('Cannot format empty string as dollar value')
+        if re.search('Invalid literal for Decimal', e[0]):
+            return FORMAT_TAG_ERROR_VALUE
         else:
             raise e
     # Format as currency value
@@ -225,8 +240,8 @@ def us_dollars_and_cents(value, cent_places = 2):
     try:
         value = Decimal(value).quantize(Decimal('1.' + '0' * cent_places), rounding=ROUND_HALF_UP)
     except InvalidOperation as e:
-        if e[0] == "Invalid literal for Decimal: ''":
-            raise InvalidOperation('Cannot format empty string as dollar value')
+        if re.search('Invalid literal for Decimal', e[0]):
+            return FORMAT_TAG_ERROR_VALUE
         else:
             raise e
     # Require cent_places >= 2
@@ -260,7 +275,13 @@ def add_commas(value, round = None):
     """
     locale.setlocale(locale.LC_ALL, '')
     # Decimals honor locale settings correctly
-    value = Decimal(str(value))
+    try:
+        value = Decimal(str(value))
+    except InvalidOperation as e:
+        if re.search('Invalid literal for Decimal', e[0]):
+            return FORMAT_TAG_ERROR_VALUE
+        else:
+            raise e
     # Round the value if necessary
     if round != None:
         if round > 0:
@@ -269,4 +290,5 @@ def add_commas(value, round = None):
             format = Decimal('1')
         value = value.quantize(format, rounding=ROUND_HALF_UP)
     # Locale settings properly format Decimals with commas
-    return '{:n}'.format(value)
+    # Super gross, but it works for both 2.6 and 2.7.
+    return locale.format("%." + str(round) + "f", value, grouping=True)
