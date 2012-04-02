@@ -1,0 +1,38 @@
+{% load fusionbox_tags %}
+<div class="blogroll">
+  <article>
+  <p class="breadcrumb"><a href="/">Home</a> > <a href="/blog/">Blog</a> ></p>
+  <hgroup>
+    <h1>{{post.title}}</h1>
+  </hgroup>
+  <p class="author">by {{ post.author }} | {{ post.created_at|date:"F d, Y" }}</p>
+  
+  <ul class="messages">
+      {% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+      {% endfor %}
+  </ul>
+  
+  {{ post.body }}
+  {% block comment %}
+  {% endblock %}
+</div><!--/blogroll -->
+
+<aside class="column">  
+  <p class="title">Categories:</p>
+  {% include "blog/tags.html" %}
+  <section class="callout">
+    {% block callout %}
+    {% endblock %}
+  </section>
+  
+  <section class="callout plain">
+    {% block calloutplain %}
+    {% endblock %}
+  </section>
+
+  <p class="title">Subscribe via RSS:</p>
+</aside>
+
+{% block column %}
+{% endblock %}
