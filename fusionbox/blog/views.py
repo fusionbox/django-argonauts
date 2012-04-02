@@ -1,4 +1,4 @@
-from django.views.generic import *
+from django.views.generic import (ListView, DetailView)
 
 from tagging.models import Tag
 
