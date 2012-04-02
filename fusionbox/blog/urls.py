@@ -5,7 +5,7 @@ urlpatterns:
 
     `url(r'^blog/', include('fusionbox.blog.urls','blog'))`
 
-Note: It is important that the namespace is set to newsletter for the templatetags to work.
+Note: It is important that the namespace is set to blog for the templatetags to work.
 """
 
 from django.conf.urls import patterns, url
