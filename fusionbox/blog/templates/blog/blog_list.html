@@ -1,37 +1,41 @@
+{% extends "base.html" %}
 {% load fusionbox_tags %}
-<div class="blogroll rfq">
-  <article>
-  <p class="breadcrumb"><a href="/">Home</a> &gt;</p>
-  <hgroup>
-    {% block headergroup %}
-      <h1>Blog</h1>
-      <h2>We Would Love to Hear What You Have to Say.</h2>
-    {% endblock %}
-  </hgroup>
-  {% block subheadergroup %}
-    <p> This blog contains information &amp; updates for our readers. This portion of our website will include postings from our representatives
-    and will include a variety of topics.</p>
-  {% endblock %}
 
-  <ul class="blog html">
-  {% for post in posts %}
+{% block content %}
+  <div class="blogroll rfq">
+    <article>
+    <p class="breadcrumb"><a href="/">Home</a> &gt;</p>
+    <hgroup>
+      {% block headergroup %}
+        <h1>Blog</h1>
+        <h2>We Would Love to Hear What You Have to Say.</h2>
+      {% endblock %}
+    </hgroup>
+    {% block subheadergroup %}
+      <p> This blog contains information &amp; updates for our readers. This portion of our website will include postings from our representatives
+      and will include a variety of topics.</p>
+    {% endblock %}
+
+    <ul class="blog html">
+    {% for post in posts %}
       <li>
         <p class="title"><a href="{{post.get_absolute_url}}">{{post.title}}</a></p>
         <p class="date">{{ post.created_at|date:"F d, Y" }}</p>
         {{ post.body|truncatewords_html:30 }} 
         <p><a href="{{post.get_absolute_url}}">read more &raquo;</a></p>
-  {% endfor %}
-  </ul>
+    {% endfor %}
+    </ul>
 
-  {% block articlefooter %}
+    {% block articlefooter %}
+    {% endblock %}
+    </article>
+  </div><!--/blogroll -->
+
+  <aside class="column">
+    <p class="title">Tags:</p>  
+    {% include "blog/tags.html" %}
+  </aside>
+
+  {% block column %}
   {% endblock %}
-  </article>
-</div><!--/blogroll -->
-
-<aside class="column">
-  <p class="title">Tags:</p>  
-  {% include "blog/tags.html" %}
-</aside>
-
-{% block column %}
 {% endblock %}
