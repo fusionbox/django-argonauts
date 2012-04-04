@@ -174,8 +174,8 @@ def attr(obj, arg1):
 def more_json(obj):
     if isinstance(obj, Decimal):
         return float(obj)
-    if hasattr(obj, 'to_dict'):
-        return obj.to_dict()
+    if hasattr(obj, 'to_json'):
+        return obj.to_json()
     raise TypeError("%r is not JSON serializable" % (obj,))
 
 
