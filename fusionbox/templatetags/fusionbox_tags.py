@@ -169,15 +169,17 @@ def attr(obj, arg1):
     return obj
 
 
-def encode_decimal(d):
-    if isinstance(d, Decimal):
-        return float(d)
-    raise TypeError("%r is not JSON serializable" % (d,))
+def more_json(obj):
+    if isinstance(obj, Decimal):
+        return float(obj)
+    if hasattr(obj, 'to_json'):
+        return obj.to_json()
+    raise TypeError("%r is not JSON serializable" % (obj,))
 
 
 @register.filter
 def json(a):
-    return mark_safe(simplejson.dumps(a, default=encode_decimal))
+    return mark_safe(simplejson.dumps(a, default=more_json))
 json.is_safe = True
 
 
