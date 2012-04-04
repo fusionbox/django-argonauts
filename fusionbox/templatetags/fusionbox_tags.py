@@ -12,9 +12,11 @@ from django.contrib.humanize.templatetags.humanize import intcomma
 
 register = template.Library()
 
+
 def addclass(elem, cls):
     elem['class'] = elem.get('class', '')
     elem['class'] += ' ' + cls if elem['class'] else cls
+
 
 def is_here(current, url):
     """
@@ -202,6 +204,7 @@ if hasattr(settings, 'FORMAT_TAG_ERROR_VALUE'):
 else:
     FORMAT_TAG_ERROR_VALUE = 'error'
 
+
 @register.filter
 def us_dollars(value):
     """
@@ -225,7 +228,7 @@ def us_dollars(value):
 
 
 @register.filter
-def us_dollars_and_cents(value, cent_places = 2):
+def us_dollars_and_cents(value, cent_places=2):
     """
     Returns the value formatted as US dollars with cents.  May optionally
     include extra digits for fractional cents.  This is common when displaying
@@ -261,7 +264,7 @@ def us_dollars_and_cents(value, cent_places = 2):
 
 
 @register.filter
-def add_commas(value, round = None):
+def add_commas(value, round=None):
     """
     Add commas to a numeric value, while rounding it to a specific number of
     places.  Humanize's intcomma is not adequate since it does not allow
