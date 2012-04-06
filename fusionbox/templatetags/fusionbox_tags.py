@@ -2,6 +2,13 @@ from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 import locale
 import re
 
+inflect = None
+try:
+    import inflect
+    inflect = inflect.engine()
+except ImportError:
+    pass
+
 from django import template
 from django.conf import settings
 
@@ -297,3 +304,26 @@ def add_commas(value, round=None):
     # Locale settings properly format Decimals with commas
     # Super gross, but it works for both 2.6 and 2.7.
     return locale.format("%." + str(round) + "f", value, grouping=True)
+
+
+@register.filter
+def pluralize_with(count, noun):
+    """
+    Pluralizes ``noun`` depending on ``count``.  Returns only the
+    noun, either pluralized or not pluralized.
+
+    Usage:
+        {{ number_of_cats|pluralize_with:"cat" }}
+
+    Outputs:
+        number_of_cats == 0: "0 cats"
+        number_of_cats == 1: "1 cat"
+        number_of_cats == 2: "2 cats"
+
+    Requires the ``inflect`` module.  If it isn't available, this filter
+    will not be loaded.
+    """
+    if not inflect:
+        raise ImportError('"inflect" module is not available.  Install using `pip install inflect`.')
+
+    return str(count) + " " + inflect.plural(noun, count)
