@@ -2,6 +2,13 @@ from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 import locale
 import re
 
+inflect = None
+try:
+    import inflect
+    inflect = inflect.engine()
+except ImportError:
+    pass
+
 from django import template
 from django.conf import settings
 
@@ -12,9 +19,11 @@ from django.contrib.humanize.templatetags.humanize import intcomma
 
 register = template.Library()
 
+
 def addclass(elem, cls):
     elem['class'] = elem.get('class', '')
     elem['class'] += ' ' + cls if elem['class'] else cls
+
 
 def is_here(current, url):
     """
@@ -169,15 +178,17 @@ def attr(obj, arg1):
     return obj
 
 
-def encode_decimal(d):
-    if isinstance(d, Decimal):
-        return float(d)
-    raise TypeError("%r is not JSON serializable" % (d,))
+def more_json(obj):
+    if isinstance(obj, Decimal):
+        return float(obj)
+    if hasattr(obj, 'to_json'):
+        return obj.to_json()
+    raise TypeError("%r is not JSON serializable" % (obj,))
 
 
 @register.filter
 def json(a):
-    return mark_safe(simplejson.dumps(a, default=encode_decimal))
+    return mark_safe(simplejson.dumps(a, default=more_json))
 json.is_safe = True
 
 
@@ -199,6 +210,7 @@ if hasattr(settings, 'FORMAT_TAG_ERROR_VALUE'):
     FORMAT_TAG_ERROR_VALUE = settings.FORMAT_TAG_ERROR_VALUE
 else:
     FORMAT_TAG_ERROR_VALUE = 'error'
+
 
 @register.filter
 def us_dollars(value):
@@ -223,7 +235,7 @@ def us_dollars(value):
 
 
 @register.filter
-def us_dollars_and_cents(value, cent_places = 2):
+def us_dollars_and_cents(value, cent_places=2):
     """
     Returns the value formatted as US dollars with cents.  May optionally
     include extra digits for fractional cents.  This is common when displaying
@@ -259,7 +271,7 @@ def us_dollars_and_cents(value, cent_places = 2):
 
 
 @register.filter
-def add_commas(value, round = None):
+def add_commas(value, round=None):
     """
     Add commas to a numeric value, while rounding it to a specific number of
     places.  Humanize's intcomma is not adequate since it does not allow
@@ -292,3 +304,26 @@ def add_commas(value, round = None):
     # Locale settings properly format Decimals with commas
     # Super gross, but it works for both 2.6 and 2.7.
     return locale.format("%." + str(round) + "f", value, grouping=True)
+
+
+@register.filter
+def pluralize_with(count, noun):
+    """
+    Pluralizes ``noun`` depending on ``count``.  Returns only the
+    noun, either pluralized or not pluralized.
+
+    Usage:
+        {{ number_of_cats|pluralize_with:"cat" }}
+
+    Outputs:
+        number_of_cats == 0: "0 cats"
+        number_of_cats == 1: "1 cat"
+        number_of_cats == 2: "2 cats"
+
+    Requires the ``inflect`` module.  If it isn't available, this filter
+    will not be loaded.
+    """
+    if not inflect:
+        raise ImportError('"inflect" module is not available.  Install using `pip install inflect`.')
+
+    return str(count) + " " + inflect.plural(noun, count)

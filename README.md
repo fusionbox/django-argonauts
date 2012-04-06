@@ -69,3 +69,22 @@ to `here`.
             <a href="/">/</a>
             <a href="/blog/">blog</a>
         {% endhighlight %}
+
+## Decorators
+
+`require_PUT`, `require_DELETE` - just like the built-in `require_POST` and `require_GET` decorators.
+
+`require_AJAX` - uses django's `request.is_ajax()` method, returns
+`HttpResponseBadRequest` if the request is not an AJAX request.
+
+    @require_AJAX
+    def my_view(request):
+        pass
+
+`require_JSON` - makes sure that the `Content-Type` header is `application/json`,
+and parses the JSON if it is.  Assigns the result to `request.payload`.  If an
+error occurs, an `HttpResponseBadRequest` is returned.
+
+    @require_JSON
+    def my_view(request):
+        print request.payload
