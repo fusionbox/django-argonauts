@@ -211,7 +211,6 @@ if hasattr(settings, 'FORMAT_TAG_ERROR_VALUE'):
 else:
     FORMAT_TAG_ERROR_VALUE = 'error'
 
-
 @register.filter
 def us_dollars(value):
     """
@@ -235,7 +234,45 @@ def us_dollars(value):
 
 
 @register.filter
-def us_dollars_and_cents(value, cent_places=2):
+def us_cents(value, places = 1):
+    """
+    Returns the value formatted as US cents.  May specify decimal places for
+    fractional cents.
+
+    Example:
+        where c means cents symbol:
+
+        if value = -20.125
+        {{ value|us_cents }} => -c20.1
+
+        if value = 0.082
+        {{ value|us_cents:3 }} => c0.082
+    """
+    # Try to convert to float
+    try:
+        value = float(value)
+    except ValueError as e:
+        if re.search('invalid literal for float', e[0]):
+            return FORMAT_TAG_ERROR_VALUE
+        else:
+            raise e
+    # Require places >= 0
+    places = max(0, places)
+    # Get negative sign
+    sign = u'-' if value < 0 else u''
+    # Get formatted value
+    locale.setlocale(locale.LC_ALL, '')
+    formatted = unicode(locale.format(
+        '%0.'+str(places)+'f',
+        abs(value),
+        grouping=True,
+        ))
+    # Return value with sign and cents symbol
+    return sign + u'\u00a2' + formatted
+
+
+@register.filter
+def us_dollars_and_cents(value, cent_places = 2):
     """
     Returns the value formatted as US dollars with cents.  May optionally
     include extra digits for fractional cents.  This is common when displaying
