@@ -268,7 +268,7 @@ def us_cents(value, places = 1):
         grouping=True,
         ))
     # Return value with sign and cents symbol
-    return sign + formatted + ' \u00a2'
+    return sign + formatted + u'\u00a2'
 
 
 @register.filter
