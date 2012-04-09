@@ -243,10 +243,10 @@ def us_cents(value, places = 1):
         where c means cents symbol:
 
         if value = -20.125
-        {{ value|us_cents }} => -c20.1
+        {{ value|us_cents }} => -20.1 \u00a2
 
         if value = 0.082
-        {{ value|us_cents:3 }} => c0.082
+        {{ value|us_cents:3 }} => 0.082 \u00a2
     """
     # Try to convert to float
     try:
@@ -268,7 +268,7 @@ def us_cents(value, places = 1):
         grouping=True,
         ))
     # Return value with sign and cents symbol
-    return sign + u'\u00a2' + formatted
+    return sign + formatted + ' \u00a2'
 
 
 @register.filter
