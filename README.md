@@ -16,7 +16,33 @@ Add `fusionbox.middleware.GenericTemplateFinderMiddleware` to your
 - `/foo/` renders `/foo.html` OR `/foo/index.html` OR `/foo`
 - This works for any directory depth
 
-## Behavior
+## `RedirectFallbackMiddleware`
+Middleware for handling 3xx redirects and 410 pages.  Scrapes `/redirects/` in your project, or a path defined in `settings.REDIRECTS_DIRECTORY` for any CSV files.  CSV files should be in the format of `old_url, new_url, status_code`.  If `status_code` is omitted, a 301 will be issued.  If both `new_url` and `status_code` are omitted, a 410 will be issued.  Both url fields can be either relative or fully qualified urls.  Redirects will only be issued for pages which would normally result in a 404.
+
+Errors are raised when any url produces a redirect chain.  Since fully qualified urls are accepted, warnings are raised in the event that a redirect could produce a circular redirect dependent on the site's domain.
+
+This middleware should be placed before django's built in 'CommonMiddleware'.
+
+Add `fusionbox.middleware.RedirectFallbackMiddleware` to your
+`MIDDLEWARE_CLASSES` to activate.  Run `./manage.py validate_redirects` to check redirects for problem and view any warnings raised.
+
+### Example Valid CSV
+    http://www.fusionbox.com/foo/, /bar/
+    http://www.fusionbox.com/baz/, /asdf/, 302
+    /fdsa/, http://www.fusionbox.com/asdf/
+    /something/, http://www.google.com/
+    /another-thing/
+
+### Example CSV with circular redirects or error redirects
+    http://www.fusionbox.com/foo/, /bar/
+    http://www.fusionbox.com/bar/, /baz/
+
+    http://www.fusionbox.com/bar/, /bar/
+
+### Example CSV with redirects which raise warnings.
+    /foo/, http://www.fusionbox.com/foo/
+
+## Behaviors
 Behaviors are a [DRY](http://c2.com/cgi/wiki?DontRepeatYourself) way of
 re-using common fields and methods on models. Behaviors function seamlessly
 through python inheritance and are fully configurable. Behaviors also support
