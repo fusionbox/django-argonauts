@@ -1,4 +1,8 @@
+import os
+import os.path
+
 from django.forms.forms import BaseForm
+from django.conf import settings
 from django.template import TemplateDoesNotExist, RequestContext
 from django.http import Http404
 from django.shortcuts import render_to_response
@@ -77,4 +81,51 @@ class AutoErrorClassOnFormsMiddleware(object):
                             cls += ' error'
                             cls = cls.strip()
                         field.widget.attrs['class'] = cls
+        return response
+
+
+class RedirectFallbackMiddleware(object):
+    """
+    Handles redirects.
+    """
+    @property
+    def redirects(self):
+        if not hasattr(self, '_redirects'):
+            self._redirects = self.get_redirects()
+        return self.get_redirects()
+
+    def get_redirects(self):
+        # Get redirect directory
+        redirect_path = getattr(settings, 'REDIRECTS_DIRECTORY', os.path.join(settings.PROJECT_PATH, 'redirects'))
+        if not os.path.isdir(redirect_path):
+            return response
+
+        csv_files = []
+        for filename in os.listdir(redirect_path):
+            if filename.endswith('.csv'):
+                csv_files.append(os.path.join(redirect_path, filename))
+
+        redirects = {}
+        for file in csv_files:
+            reader = csv.DictReader(open(file, 'r'), fieldnames=['old', 'new', 'status_code'])
+            for redirect in reader:
+                old = redirect['old']
+                new = redirect['new']
+                status_code = redirect['status_code'] or 301
+
+        return redirects
+
+    def process_response(self, request, response):
+        if response.status_code != 404:
+            return response # No need to check for a redirect for non-404 responses.
+        path = request.get_full_path()
+
+        r, status_code = self.redirects.get(path, (None, None))
+        if r is None and settings.APPEND_SLASH:
+            # Try removing the trailing slash.
+            r, status_code = self.redirects.get(path[:path.rfind('/')]+path[path.rfind('/')+1:], (None, None))
+        if r is not None:
+            # Handle different status codes
+            return http.HttpResponsePermanentRedirect(r)
+        # No redirect was found. Return the response.
         return response
