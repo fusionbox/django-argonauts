@@ -558,3 +558,124 @@ class TestHighlightParentTags(unittest.TestCase):
                          '<a class="blog" href="/blog/">Blog</a>'
                          '</li>', t.render(c))
 
+from fusionbox.middleware import get_redirect, preprocess_redirects
+from django.http import HttpResponseRedirect, HttpResponsePermanentRedirect
+from fusionbox.http import HttpResponseSeeOther
+from django.core.exceptions import ImproperlyConfigured
+import warnings
+
+class TestRedirectMiddleware(unittest.TestCase):
+    def setUp(self):
+        raw_redirects = (
+                {'old': '/foo/', 'new': '/bar/', 'status_code': None},
+                {'old': '/foo/302/', 'new': '/bar/', 'status_code': 302},
+                {'old': '/foo/303/', 'new': '/bar/', 'status_code': 303},
+                {'old': 'http://www.fusionbox.com/asdf/', 'new': '/foo/bar/', 'status_code': None},
+                )
+        self.redirects = preprocess_redirects(raw_redirects)
+
+    def test_basic_redirect(self):
+        path = '/foo/'
+        response = get_redirect(self.redirects, path, '')
+        self.assertEqual(response['Location'], '/bar/')
+        self.assertEqual(response.status_code, 301)
+
+    def test_basic_redirect_with_domain(self):
+        path = '/asdf/'
+        full_path = 'http://www.fusionbox.com/asdf/'
+        response = get_redirect(self.redirects, path, full_path)
+        self.assertEqual(response['Location'], '/foo/bar/')
+        self.assertEqual(response.status_code, 301)
+
+    def test_302_redirect(self):
+        path = '/foo/302/'
+        response = get_redirect(self.redirects, path, '')
+        self.assertEqual(response['Location'], '/bar/')
+        self.assertEqual(response.status_code, 302)
+
+    def test_303_redirect(self):
+        path = '/foo/303/'
+        response = get_redirect(self.redirects, path, '')
+        self.assertEqual(response['Location'], '/bar/')
+        self.assertEqual(response.status_code, 303)
+
+    def test_410_gone(self):
+        path = '/bar/'
+        redirects = (
+                {'old': '/bar/', 'new': None, 'status_code': None},
+            )
+        response = get_redirect(preprocess_redirects(redirects), path, '')
+        self.assertEqual(response.status_code, 410)
+
+    def test_circular_redirect(self):
+        redirects = (
+                {'old': '/bar/', 'new': '/bar/', 'status_code': None},
+            )
+        with self.assertRaises(ImproperlyConfigured):
+            preprocess_redirects(redirects)
+        redirects = (
+                {'old': '/bar/', 'new': '/baz/', 'status_code': None},
+                {'old': '/foo/', 'new': '/bar/', 'status_code': None},
+            )
+        with self.assertRaises(ImproperlyConfigured):
+            preprocess_redirects(redirects)
+        redirects = (
+                {'old': '/foo/', 'new': '/bar/', 'status_code': None},
+                {'old': '/bar/', 'new': '/baz/', 'status_code': None},
+            )
+        with self.assertRaises(ImproperlyConfigured):
+            preprocess_redirects(redirects)
+
+    def test_domain_circular_redirect(self):
+        redirects = (
+                {'old': 'http://www.fusionbox.com/bar/', 'new': '/bar/', 'status_code': None},
+            )
+        with self.assertRaises(ImproperlyConfigured):
+            preprocess_redirects(redirects)
+        redirects = (
+                {'old': 'http://www.fusionbox.com/bar/', 'new': '/foo/', 'status_code': None},
+                {'old': 'http://www.google.com/foo/', 'new': '/asdf/', 'status_code': None},
+            )
+        preprocess_redirects(redirects)
+        redirects = (
+                {'old': 'http://www.fusionbox.com/foo/', 'new': '/asdf/', 'status_code': None},
+                {'old': 'http://www.fusionbox.com/bar/', 'new': '/foo/', 'status_code': None},
+            )
+        with self.assertRaises(ImproperlyConfigured):
+            preprocess_redirects(redirects)
+        redirects = (
+                {'old': 'http://www.fusionbox.com/bar/', 'new': '/foo/', 'status_code': None},
+                {'old': 'http://www.fusionbox.com/foo/', 'new': '/asdf/', 'status_code': None},
+            )
+        with self.assertRaises(ImproperlyConfigured):
+            preprocess_redirects(redirects)
+
+    def test_duplicate_redirect(self):
+        redirects = (
+                {'old': '/bar/', 'new': '/baz/', 'status_code': None},
+                {'old': '/bar/', 'new': '/asdf/', 'status_code': None},
+            )
+        with warnings.catch_warnings(record=True) as w:
+            preprocess_redirects(redirects)
+            assert len(w)
+
+    def test_possible_circular_redirect(self):
+        redirects = (
+                {'old': '/bar/', 'new': 'http://fusionbox.com/foo/', 'status_code': None},
+                {'old': '/foo/', 'new': '/asdf/', 'status_code': None},
+            )
+        with warnings.catch_warnings(record=True) as w:
+            preprocess_redirects(redirects)
+            assert len(w)
+        redirects = (
+                {'old': '/foo/', 'new': 'http://fusionbox.com/foo/', 'status_code': None},
+            )
+        with warnings.catch_warnings(record=True) as w:
+            preprocess_redirects(redirects)
+            assert len(w)
+
+    def test_cross_domain_redirect(self):
+        redirects = (
+                {'old': 'http://www.fusionbox.com/bar/', 'new': 'http://www.google.com/bar/', 'status_code': None},
+            )
+        preprocess_redirects(redirects)
