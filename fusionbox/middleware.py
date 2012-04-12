@@ -1,8 +1,7 @@
 import os
-import glob
 import csv
-import os.path
 import urlparse
+import warnings
 
 from collections import defaultdict
 
@@ -91,16 +90,6 @@ class AutoErrorClassOnFormsMiddleware(object):
                         field.widget.attrs['class'] = cls
         return response
 
-def with_slash(url):
-    if url.endwith('/'):
-        return url
-    else:
-        return url + '/'
-
-def without_slash(url):
-    return url.rstrip('/')
-
-import warnings
 
 def preprocess_redirects(redirects):
     processed_redirects = {}

@@ -4,9 +4,10 @@ from django.db import models
 from django.utils import unittest
 from django.template import Template, Context
 from django.http import HttpRequest as Request
-from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
+from django.core.exceptions import ValidationError, NON_FIELD_ERRORS, ImproperlyConfigured
+import warnings
 
-
+from fusionbox.middleware import get_redirect, preprocess_redirects
 from fusionbox.behaviors import *
 from fusionbox.templatetags import fusionbox_tags
 
@@ -557,12 +558,6 @@ class TestHighlightParentTags(unittest.TestCase):
                          '<li class="blog yellow">'
                          '<a class="blog" href="/blog/">Blog</a>'
                          '</li>', t.render(c))
-
-from fusionbox.middleware import get_redirect, preprocess_redirects
-from django.http import HttpResponseRedirect, HttpResponsePermanentRedirect
-from fusionbox.http import HttpResponseSeeOther
-from django.core.exceptions import ImproperlyConfigured
-import warnings
 
 class TestRedirectMiddleware(unittest.TestCase):
     def setUp(self):
