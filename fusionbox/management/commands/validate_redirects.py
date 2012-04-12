@@ -15,4 +15,4 @@ class Command(BaseCommand):
     help = "Loads all CSV redirect files in '{path}' and checks for problems".format(path=redirect_path)
 
     def handle(self, *args, **options):
-       RedirectFallbackMiddleware()
+        RedirectFallbackMiddleware()
