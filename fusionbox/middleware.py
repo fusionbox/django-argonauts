@@ -92,11 +92,14 @@ class AutoErrorClassOnFormsMiddleware(object):
 
 def get_redirect(redirects, path, full_uri):
     if full_uri in redirects:
-        target, status_code = redirects[full_uri][:2]
+        redirec = redirects[full_uri]
     elif path in redirects:
-        target, status_code = redirects[path][:2]
+        redirec = redirects[path]
     else:
         return None
+
+    target = redirec['target']
+    status_code = redirec['status_code']
 
     response = HttpResponse('', status=status_code)
     response['Location'] = target or None
@@ -108,7 +111,7 @@ def scrape_redirects(redirect_path):
     for filename in os.listdir(redirect_path):
         if filename.endswith('.csv'):
             path = os.path.join(redirect_path, filename)
-            reader = csv.DictReader(open(path, 'r'), fieldnames=['old', 'new', 'status_code'])
+            reader = csv.DictReader(open(path, 'r'), fieldnames=['source', 'target', 'status_code'])
             for index, line in enumerate(reader):
                 line['filename'] = filename
                 line['line_number'] = index
@@ -121,45 +124,61 @@ def preprocess_redirects(lines, raise_errors=True):
 
     processed_redirects = {}
     for line in lines:
-        old = line['old'].strip()
-        new = (line['new'] or '').strip()
-        if settings.APPEND_SLASH and not new.endswith('/') and not '.' in os.path.basename(new):
-            warning_messages[old].append("{filename}:{line_number} -  Destination url does not appear to be file yet does not end with a '/' ({new})".format(**line))
-        if new:
+        source = line['source'].strip()
+        target = (line['target'] or '').strip()
+        if target:
             status_code = int(line['status_code'] or 301)
         else:
+            # set status codes to 410 if no target url is given
             status_code = 410
 
+        # Catch non 3xx or 410 status codes.
         if status_code < 300 or status_code > 399 and not status_code == 410:
-            error_messages[old].append("{filename}:{line_number} - Non 3xx/410 status code({line.status_code})".format(**line))
-        if old in processed_redirects:
-            first = processed_redirects[old]
-            warning_messages[old].append("{filename}:{line_number} -  Duplicate declaration of url".format(**line))
-        processed_redirects[old] = (new, status_code, line['filename'], line['line_number'])
-    
-    for source_url, (destination_url, status_code, filename, line_number) in processed_redirects.items():
-        from_url = urlparse.urlparse(source_url)
-        to_url = urlparse.urlparse(destination_url)
-        format_kwargs = { 'source': source_url, 'destination':
-                destination_url, 'from': from_url, 'to': to_url, 'filename':
-                filename, 'line_number': line_number, }
-        if destination_url in processed_redirects or destination_url == from_url.path:
-            error_messages[source_url].append('{filename}:{line_number} - Circular redirect: {source} => {destination}'.format(**format_kwargs))
-        elif urlparse.urljoin(from_url.geturl(), to_url.path) in processed_redirects and not status_code == 410:
-            if to_url.netloc:
-                if not from_url.netloc:
-                    warning_messages[source_url].append('{filename}:{line_number} - Possible circular redirect if hosting on domain {to.netloc}: {source} => {destination}'.format(**format_kwargs))
-            else:
-                error_messages[source_url].append('{filename}:{line_number} - Circular redirect: {source} => {destination}'.format(**format_kwargs))
+            error_messages[source].append("ERROR: {filename}:{line_number} - Non 3xx/410 status code({line.status_code})".format(**line))
 
+        # Catch duplicate declaration of source urls.
+        if source in processed_redirects:
+            first = processed_redirects[source]
+            warning_messages[source].append("WARNING: {filename}:{line_number} -  Duplicate declaration of url".format(**line))
+        processed_redirects[source] = {
+                'target': target,
+                'status_code': status_code,
+                'filename': line['filename'],
+                'line_number': line['line_number'],
+                }
+
+    def validate_redirect(source, redirect, with_slash=False):
+        from_url = urlparse.urlparse(source)
+        to_url = urlparse.urlparse(redirect['target'])
+        if with_slash:
+            if not to_url.path.endswith('/'):
+                to_url = to_url._replace(path=to_url.path + '/')
+            else:
+                pass
+        format_kwargs = {'source': source, 'from': from_url, 'to': to_url}
+        format_kwargs.update(redirect)
+        if redirect['target'] in processed_redirects or redirect['target'] == from_url.path:
+            error_messages[source].append('ERROR: {filename}:{line_number} - Circular redirect: {source} => {target}'.format(**format_kwargs))
+        elif urlparse.urljoin(from_url.geturl(), to_url.path) in processed_redirects and not redirect['status_code'] == 410:
+            if not to_url.netloc:
+                error_messages[source].append('ERROR: {filename}:{line_number} - Circular redirect: {source} => {target}'.format(**format_kwargs))
+            elif to_url.netloc and not from_url.netloc:
+                warning_messages[source].append('WARNING: {filename}:{line_number}: - Possible circular redirect if hosting on domain {to.netloc}: {source} => {target}'.format(**format_kwargs))
+    
+    # Check for circular redirects.
+    for source, redirect in processed_redirects.items():
+        validate_redirect(source, redirect)
+        if settings.APPEND_SLASH:
+            validate_redirect(source, redirect, with_slash=True)
+
+    # Now that we're done, either raise an exception if an error was raised and
+    # we are not just running in validation mode
     if error_messages and raise_errors:
         raise ImproperlyConfigured('There were errors while parsing redirects.  Run ./manage.py validate_redirects for error details')
-    for url, messages in warning_messages.items():
+    # Output warnings for all errors and warnings found.
+    for messages in warning_messages.values() + error_messages.values():
         for message in messages:
             warnings.warn(message)
-    for url, messages in error_messages.items():
-        for message in messages:
-            warnings.warn(message, RuntimeWarning)
 
     return processed_redirects
 
@@ -175,9 +194,9 @@ class RedirectFallbackMiddleware(object):
     `<project_path>/redirects/` or an absolute path declared in
     `settings.REDIRECTS_DIRECTORY`.
 
-    CSV files should not contain any headers, and be in the format `old_url,
-    new_url, status_code` where `status_code` is optional and defaults to 301.
-    To issue a 410, leave off new url and status code.
+    CSV files should not contain any headers, and be in the format `source_url,
+    target_url, status_code` where `status_code` is optional and defaults to 301.
+    To issue a 410, leave off target url and status code.
     """
     def __init__(self, *args, **kwargs):
         raise_errors = kwargs.pop('raise_errors', True)
