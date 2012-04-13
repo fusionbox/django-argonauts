@@ -1,6 +1,7 @@
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
 import locale
 import re
+import warnings
 
 inflect = None
 try:
@@ -16,6 +17,7 @@ from BeautifulSoup import BeautifulSoup
 from django.utils import simplejson
 from django.utils.safestring import mark_safe
 from django.contrib.humanize.templatetags.humanize import intcomma
+from django.core.exceptions import ImproperlyConfigured
 
 register = template.Library()
 
@@ -83,8 +85,17 @@ class HighlighterBase(template.Node):
     def render(self, context):
         soup = self.build_soup(context)
 
-        for elem in self.elems_to_highlight(soup, context):
-            self.highlight(elem)
+        try:
+            for elem in self.elems_to_highlight(soup, context):
+                self.highlight(elem)
+        except ImproperlyConfigured as e:
+            if settings.DEBUG:
+                raise
+            else:
+                # This is because the django 500 error view does not use a
+                # request context. We still need to be able to render some kind
+                # of error page, so we'll just return our contents unchanged.
+                warnings.warn(e.args[0])
 
         return str(soup)
 
@@ -126,7 +137,8 @@ class HighlightHereNode(HighlighterBase):
             if 'request' in context:
                 path = context['request'].path
             else:
-                raise KeyError("The request was not available in the context, please ensure that the request is made available in the context.")
+                raise ImproperlyConfigured(
+                        "The request was not available in the context, please ensure that the request is made available in the context.")
 
         return (anchor for anchor in soup.findAll('a', {'href': True}) if is_here(path, anchor['href']))
 
