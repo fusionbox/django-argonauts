@@ -3,6 +3,8 @@ import csv
 import urlparse
 import warnings
 
+from collections import defaultdict
+
 from django.forms.forms import BaseForm
 from django.conf import settings
 from django.template import TemplateDoesNotExist, RequestContext
@@ -88,50 +90,11 @@ class AutoErrorClassOnFormsMiddleware(object):
         return response
 
 
-def preprocess_redirects(redirects):
-    processed_redirects = {}
-    for line in redirects:
-        old = line['old'].strip()
-        new = (line['new'] or '').strip()
-        status_code = int(line['status_code'] or 301)
-
-        if status_code < 300 or status_code > 399 and not status_code == 410:
-            raise ImproperlyConfigured(
-                    'Received non 3xx status code({code}) while parsing \'{path}\''.format(code=status_code, path=file))
-        if not new:
-            status_code = 410
-        if old in processed_redirects:
-            warnings.warn(
-                    "The url {old} is being redirected at least twice '{first}, {second}'".format(old=old, first=processed_redirects[old], second=new))
-        processed_redirects[old] = (new, status_code)
-
-    # Detect circular redirect
-    for from_url, (to_url, status_code) in processed_redirects.items():
-        from_url = urlparse.urlparse(from_url)
-        to_url = urlparse.urlparse(to_url)
-        if to_url.geturl() in processed_redirects or to_url.geturl() == from_url.path:
-            raise ImproperlyConfigured(
-                    'Circular redirect detected: {old} => {new}'.format(old=from_url.geturl(), new=to_url.geturl()))
-        if urlparse.urljoin(from_url.geturl(), to_url.path) in processed_redirects and not status_code == 410:
-            if to_url.netloc:
-                if not from_url.netloc:
-                    warnings.warn(
-                            'If this site is being hosted on {domain}: {old_url} => {new_url} will be a circular redirect'.format(
-                                domain=to_url.netloc,
-                                old_url=from_url.geturl(),
-                                new_url=to_url.geturl(),
-                                ))
-            else:
-                raise ImproperlyConfigured(
-                        'Circular redirect detected: {old} => {new}'.format(old=from_url.geturl(), new=to_url.geturl()))
-    return processed_redirects
-
-
 def get_redirect(redirects, path, full_uri):
     if full_uri in redirects:
-        target, status_code = redirects[full_uri]
+        target, status_code = redirects[full_uri][:2]
     elif path in redirects:
-        target, status_code = redirects[path]
+        target, status_code = redirects[path][:2]
     else:
         return None
 
@@ -139,6 +102,66 @@ def get_redirect(redirects, path, full_uri):
     response['Location'] = target or None
 
     return response
+
+def scrape_redirects(redirect_path):
+    lines = []
+    for filename in os.listdir(redirect_path):
+        if filename.endswith('.csv'):
+            path = os.path.join(redirect_path, filename)
+            reader = csv.DictReader(open(path, 'r'), fieldnames=['old', 'new', 'status_code'])
+            for index, line in enumerate(reader):
+                line['filename'] = filename
+                line['line_number'] = index
+                lines.append(line)
+    return lines
+
+def preprocess_redirects(lines, raise_errors=True):
+    error_messages = defaultdict(list) 
+    warning_messages = defaultdict(list)
+
+    processed_redirects = {}
+    for line in lines:
+        old = line['old'].strip()
+        new = (line['new'] or '').strip()
+        if settings.APPEND_SLASH and not new.endswith('/') and not '.' in os.path.basename(new):
+            warning_messages[old].append("{filename}:{line_number} -  Destination url does not appear to be file yet does not end with a '/' ({new})".format(**line))
+        if new:
+            status_code = int(line['status_code'] or 301)
+        else:
+            status_code = 410
+
+        if status_code < 300 or status_code > 399 and not status_code == 410:
+            error_messages[old].append("{filename}:{line_number} - Non 3xx/410 status code({line.status_code})".format(**line))
+        if old in processed_redirects:
+            first = processed_redirects[old]
+            warning_messages[old].append("{filename}:{line_number} -  Duplicate declaration of url".format(**line))
+        processed_redirects[old] = (new, status_code, line['filename'], line['line_number'])
+    
+    for source_url, (destination_url, status_code, filename, line_number) in processed_redirects.items():
+        from_url = urlparse.urlparse(source_url)
+        to_url = urlparse.urlparse(destination_url)
+        format_kwargs = { 'source': source_url, 'destination':
+                destination_url, 'from': from_url, 'to': to_url, 'filename':
+                filename, 'line_number': line_number, }
+        if destination_url in processed_redirects or destination_url == from_url.path:
+            error_messages[source_url].append('{filename}:{line_number} - Circular redirect: {source} => {destination}'.format(**format_kwargs))
+        elif urlparse.urljoin(from_url.geturl(), to_url.path) in processed_redirects and not status_code == 410:
+            if to_url.netloc:
+                if not from_url.netloc:
+                    warning_messages[source_url].append('{filename}:{line_number} - Possible circular redirect if hosting on domain {to.netloc}: {source} => {destination}'.format(**format_kwargs))
+            else:
+                error_messages[source_url].append('{filename}:{line_number} - Circular redirect: {source} => {destination}'.format(**format_kwargs))
+
+    if error_messages and raise_errors:
+        raise ImproperlyConfigured('There were errors while parsing redirects.  Run ./manage.py validate_redirects for error details')
+    for url, messages in warning_messages.items():
+        for message in messages:
+            warnings.warn(message)
+    for url, messages in error_messages.items():
+        for message in messages:
+            warnings.warn(message, RuntimeWarning)
+
+    return processed_redirects
 
 
 class RedirectFallbackMiddleware(object):
@@ -157,25 +180,21 @@ class RedirectFallbackMiddleware(object):
     To issue a 410, leave off new url and status code.
     """
     def __init__(self, *args, **kwargs):
+        raise_errors = kwargs.pop('raise_errors', True)
         super(RedirectFallbackMiddleware, self).__init__(*args, **kwargs)
-        self.redirects = self.get_redirects()
+        raw_redirects = self.get_redirects()
+        self.redirects = preprocess_redirects(raw_redirects, raise_errors)
 
     def get_redirects(self):
         # Get redirect directory
-        redirect_path = getattr(settings,
-                               'REDIRECTS_DIRECTORY',
+        redirect_path = getattr(settings, 'REDIRECTS_DIRECTORY',
                                os.path.join(settings.PROJECT_PATH, '..', 'redirects'))
 
         # Crawl the REDIRECTS_DIRECTORY scraping any CSV files found
-        lines = []
-        for filename in os.listdir(redirect_path):
-            if filename.endswith('.csv'):
-                path = os.path.join(redirect_path, filename)
-                reader = csv.DictReader(open(path, 'r'), fieldnames=['old', 'new', 'status_code'])
-                lines += list(reader)
+        lines = scrape_redirects(redirect_path)
 
-        redirects = preprocess_redirects(lines)
-        return redirects
+        #redirects = preprocess_redirects(lines)
+        return lines
 
     def process_response(self, request, response):
         if response.status_code != 404:
