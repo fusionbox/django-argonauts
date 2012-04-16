@@ -31,5 +31,5 @@ class TagDetailView(WithTagMixin, DetailView):
 detail = TagDetailView.as_view(
         model=Blog,
         context_object_name = 'post',
-        template_name="blog/tags.html"
+        template_name="blog/blog_details.html"
         )
