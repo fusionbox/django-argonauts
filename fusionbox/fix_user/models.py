@@ -46,6 +46,10 @@ UserChangeForm.base_fields['username'].help_text = _("Required. 255 characters o
 
 old_init = UserChangeForm.__init__
 def new_init(self, *args, **kwargs):
+    if args:
+        data = args[0]
+    else:
+        data = {}
     ret = old_init(self, *args, **kwargs)
     self.fields['email'].label = 'Username'
     self.fields['email'].max_length = 255
@@ -54,9 +58,22 @@ def new_init(self, *args, **kwargs):
     self.fields['email'].widget.attrs['maxlength'] = 254  # html
     self.fields['email'].widget.attrs['readonly'] = 'readonly'
     self.fields['email'].widget.attrs['disabled'] = 'disabled'
+
+    if data:
+        data[self['email'].name] = data[self['username'].name]
     return ret
 
 UserChangeForm.__init__ = new_init
+
+
+old_clean = UserChangeForm.clean
+def new_clean(self, *args, **kwargs):
+    ret = old_clean(self, *args, **kwargs)
+    if 'email' in self._errors:
+        del self._errors['email']
+    return ret
+
+UserChangeForm.clean = new_clean
 
 
 def copy_username_to_email(sender, instance, *args, **kwargs):
