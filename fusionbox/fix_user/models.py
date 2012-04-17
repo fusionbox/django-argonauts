@@ -8,6 +8,7 @@ It patches:
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 from django.db.models.signals import pre_save
+from django.core.validators import validate_email
 
 User._meta.get_field('username').verbose_name = _('email')
 User._meta.get_field('username').max_length = 255
@@ -29,6 +30,8 @@ UserCreationForm.base_fields['username'].label = 'Email'
 UserCreationForm.base_fields['username'].max_length = 255
 UserCreationForm.base_fields['username'].widget.attrs['maxlength'] = 255  # html
 UserCreationForm.base_fields['username'].validators[0].limit_value = 255
+UserCreationForm.base_fields['username'].validators[1] = validate_email
+UserCreationForm.base_fields['username'].error_messages['invalid'] = _(u'Enter a valid e-mail address.')
 UserCreationForm.base_fields['username'].help_text = _("Required. 255 characters or fewer. Must be a valid email address")
 
 from django.contrib.auth.forms import UserChangeForm
