@@ -26,7 +26,7 @@ AuthenticationForm.base_fields['username'].validators[0].limit_value = 255
 
 from django.contrib.auth.forms import UserCreationForm
 
-UserCreationForm.base_fields['username'].label = 'Email'
+UserCreationForm.base_fields['username'].label = _('Email')
 UserCreationForm.base_fields['username'].max_length = 255
 UserCreationForm.base_fields['username'].widget.attrs['maxlength'] = 255  # html
 UserCreationForm.base_fields['username'].validators[0].limit_value = 255
@@ -36,10 +36,12 @@ UserCreationForm.base_fields['username'].help_text = _("Required. 255 characters
 
 from django.contrib.auth.forms import UserChangeForm
 
-UserChangeForm.base_fields['username'].label = 'Email'
+UserChangeForm.base_fields['username'].label = _('Email')
 UserChangeForm.base_fields['username'].max_length = 255
 UserChangeForm.base_fields['username'].widget.attrs['maxlength'] = 255  # html
 UserChangeForm.base_fields['username'].validators[0].limit_value = 255
+UserChangeForm.base_fields['username'].validators[1] = validate_email
+UserChangeForm.base_fields['username'].error_messages['invalid'] = _(u'Enter a valid e-mail address.')
 UserChangeForm.base_fields['username'].help_text = _("Required. 255 characters or fewer. Must be a valid email address")
 
 old_init = UserChangeForm.__init__
