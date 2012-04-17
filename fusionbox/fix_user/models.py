@@ -33,6 +33,7 @@ UserCreationForm.base_fields['username'].help_text = _("Required. 255 characters
 
 from django.contrib.auth.forms import UserChangeForm
 
+UserChangeForm.base_fields['username'].label = 'Email'
 UserChangeForm.base_fields['username'].max_length = 255
 UserChangeForm.base_fields['username'].widget.attrs['maxlength'] = 255  # html
 UserChangeForm.base_fields['username'].validators[0].limit_value = 255
@@ -41,15 +42,17 @@ UserChangeForm.base_fields['username'].help_text = _("Required. 255 characters o
 old_init = UserChangeForm.__init__
 def new_init(self, *args, **kwargs):
     ret = old_init(self, *args, **kwargs)
+    self.fields['email'].label = 'Username'
     self.fields['email'].max_length = 255
     self.fields['email'].validators[0].limit_value = 255
-    self.fields['email'].help_text = _("This will be set to the username")
+    self.fields['email'].help_text = _("This will be set to the email")
     self.fields['email'].widget.attrs['maxlength'] = 254  # html
     self.fields['email'].widget.attrs['readonly'] = 'readonly'
     self.fields['email'].widget.attrs['disabled'] = 'disabled'
     return ret
 
 UserChangeForm.__init__ = new_init
+
 
 def copy_username_to_email(sender, instance, *args, **kwargs):
     """
