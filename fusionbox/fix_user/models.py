@@ -24,6 +24,7 @@ AuthenticationForm.base_fields['username'].validators[0].limit_value = 255
 
 from django.contrib.auth.forms import UserCreationForm
 
+UserCreationForm.base_fields['username'].label = 'Email'
 UserCreationForm.base_fields['username'].max_length = 255
 UserCreationForm.base_fields['username'].widget.attrs['maxlength'] = 255 # html
 UserCreationForm.base_fields['username'].validators[0].limit_value = 255
