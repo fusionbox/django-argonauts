@@ -5,13 +5,14 @@ urlpatterns:
 
     `url(r'^blog/', include('fusionbox.blog.urls','blog'))`
 
-Note: It is important that the namespace is set to blog for the templatetags to work.
+Note: It is important that the namespace is set to blog
+for the templatetags to work.
 """
 
 from django.conf.urls import patterns, url
 
 urlpatterns = patterns('fusionbox.blog.views',
-        url('^$', 'index'),
-        url('^tag/(?P<tag>.+)/$', 'index'),
-        url('^(?P<slug>.+)/$', 'detail'),
+        url('^$', 'index', name='blog_index'),
+        url('^tag/(?P<tag>.+)/$', 'index', name='tag_index'),
+        url('^(?P<slug>.+)/$', 'detail', name='blog_detail'),
 )

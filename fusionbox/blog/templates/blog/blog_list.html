@@ -2,6 +2,8 @@
 {% load fusionbox_tags %}
 
 {% block content %}
+<section class="wrapper content">
+  <div class="inner">
   <div class="blogroll rfq">
     <article>
     <p class="breadcrumb"><a href="/">Home</a> &gt;</p>
@@ -19,10 +21,10 @@
     <ul class="blog html">
     {% for post in posts %}
       <li>
-        <p class="title"><a href="{{post.get_absolute_url}}">{{post.title}}</a></p>
+        <p class="title"><a href="{% url blog_detail post.slug %}">{{post.title}}</a></p>
         <p class="date">{{ post.created_at|date:"F d, Y" }}</p>
         {{ post.body|truncatewords_html:30 }} 
-        <p><a href="{{post.get_absolute_url}}">read more &raquo;</a></p>
+        <p><a href="{% url blog_detail post.slug %}">read more &raquo;</a></p>
     {% endfor %}
     </ul>
 
@@ -33,9 +35,10 @@
 
   <aside class="column">
     <p class="title">Tags:</p>  
-    {% include "blog/tags.html" %}
   </aside>
 
   {% block column %}
   {% endblock %}
+  </div>
+</section>
 {% endblock %}

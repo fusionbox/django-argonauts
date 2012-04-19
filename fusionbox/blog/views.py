@@ -11,8 +11,9 @@ class WithTagMixin(object):
         context['tags'] = Tag.objects.all()
         return context
 
+
 class IndexView(WithTagMixin, ListView):
-    model=Blog
+    model = Blog
     context_object_name = 'posts'
     paginate_by = 10
 
@@ -25,11 +26,12 @@ class IndexView(WithTagMixin, ListView):
 
 index = IndexView.as_view(template_name="blog/blog_list.html")
 
+
 class TagDetailView(WithTagMixin, DetailView):
     pass
 
 detail = TagDetailView.as_view(
         model=Blog,
-        context_object_name = 'post',
+        context_object_name='post',
         template_name="blog/blog_details.html"
         )

@@ -12,7 +12,8 @@ from .models import *
 class BlogAdmin(VersionAdmin):
     fieldsets = (
             (None, {
-                'fields': ['title', 'author', 'body', 'tags', 'created_at']
+                'fields': ['title', 'author', 'body', 'tags',
+                'created_at', 'image']
                 }),
             ('Publishing', {
                 'fields': ('publish_at', 'is_published',),
@@ -27,6 +28,7 @@ class BlogAdmin(VersionAdmin):
 admin.site.register(Blog, BlogAdmin)
 
 from django.contrib.comments.moderation import CommentModerator, moderator
+
 
 class BlogModerator(CommentModerator):
     email_notification = True

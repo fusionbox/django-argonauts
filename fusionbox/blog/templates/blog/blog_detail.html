@@ -5,7 +5,7 @@
     <div class="inner">
       <div class="blogroll">
         <article>
-          <p class="breadcrumb"><a href="/">Home</a> > <a href="/blog/">Blog</a> ></p>
+          <p class="breadcrumb"><a href="/">Home</a> &lt; <a href="{% url blog_index %}">Blog</a> &lt; {{ post.title }}</p>
           <hgroup>
             <h1>{{post.title}}</h1>
           </hgroup>
