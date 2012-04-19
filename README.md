@@ -108,15 +108,25 @@ returned.
 
 ## Forms
 
-###`fusionbox.forms.SearchForm`
+### `fusionbox.forms.SearchForm`
 
 Mixin form class which provides a searching interface on a model
 
-###`fusionbox.forms.SortForm`
+### `fusionbox.forms.SortForm`
 
 Mixin form class which provides singular and progressive sorting on a model
 along with headers for use in template rendering.
 
-###`fusionbox.forms.FilterForm`
+### `fusionbox.forms.FilterForm`
 
 Mixin form class which provides a filtering interface on a model
+
+### Usage
+
+Forms inheriting from these form mixin classes should be instantiated with
+`request.GET` along with an optional initial queryset.
+
+    FooSearchForm(request.GET, queryset=User.objects.filter(is_active=True)
+
+These form mixins provide a `get_queryset` method which handles all of the
+filtering, searching, and/or sorting logic.
