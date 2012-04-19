@@ -105,3 +105,18 @@ as an argument, defaulting to `here`.
 returned.
 
     @require_JSON def my_view(request): print request.payload
+
+## Forms
+
+###`fusionbox.forms.SearchForm`
+
+Mixin form class which provides a searching interface on a model
+
+###`fusionbox.forms.SortForm`
+
+Mixin form class which provides singular and progressive sorting on a model
+along with headers for use in template rendering.
+
+###`fusionbox.forms.FilterForm`
+
+Mixin form class which provides a filtering interface on a model

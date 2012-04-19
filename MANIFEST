@@ -23,6 +23,7 @@ fusionbox/fix_user
 fusionbox/fix_user/models.py
 fusionbox/forms
 fusionbox/forms/__init__.py
+fusionbox/forms/forms.py
 fusionbox/forms/models.py
 fusionbox/http.py
 fusionbox/mail.py
