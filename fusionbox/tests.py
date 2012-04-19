@@ -562,10 +562,10 @@ class TestHighlightParentTags(unittest.TestCase):
 class TestRedirectMiddleware(unittest.TestCase):
     def setUp(self):
         raw_redirects = (
-                {'old': '/foo/', 'new': '/bar/', 'status_code': None},
-                {'old': '/foo/302/', 'new': '/bar/', 'status_code': 302},
-                {'old': '/foo/303/', 'new': '/bar/', 'status_code': 303},
-                {'old': 'http://www.fusionbox.com/asdf/', 'new': '/foo/bar/', 'status_code': None},
+                {'source': '/foo/', 'target': '/bar/', 'status_code': None, 'filename': '', 'line_number':1},
+                {'source': '/foo/302/', 'target': '/bar/', 'status_code': 302, 'filename': '', 'line_number':1},
+                {'source': '/foo/303/', 'target': '/bar/', 'status_code': 303, 'filename': '', 'line_number':1},
+                {'source': 'http://www.fusionbox.com/asdf/', 'target': '/foo/bar/', 'status_code': None, 'filename': '', 'line_number':1},
                 )
         self.redirects = preprocess_redirects(raw_redirects)
 
@@ -597,58 +597,58 @@ class TestRedirectMiddleware(unittest.TestCase):
     def test_410_gone(self):
         path = '/bar/'
         redirects = (
-                {'old': '/bar/', 'new': None, 'status_code': None},
+                {'source': '/bar/', 'target': None, 'status_code': None, 'filename': '', 'line_number':1},
             )
         response = get_redirect(preprocess_redirects(redirects), path, '')
         self.assertEqual(response.status_code, 410)
 
     def test_circular_redirect(self):
         redirects = (
-                {'old': '/bar/', 'new': '/bar/', 'status_code': None},
+                {'source': '/bar/', 'target': '/bar/', 'status_code': None, 'filename': '', 'line_number':1},
             )
         with self.assertRaises(ImproperlyConfigured):
             preprocess_redirects(redirects)
         redirects = (
-                {'old': '/bar/', 'new': '/baz/', 'status_code': None},
-                {'old': '/foo/', 'new': '/bar/', 'status_code': None},
+                {'source': '/bar/', 'target': '/baz/', 'status_code': None, 'filename': '', 'line_number':1},
+                {'source': '/foo/', 'target': '/bar/', 'status_code': None, 'filename': '', 'line_number':1},
             )
         with self.assertRaises(ImproperlyConfigured):
             preprocess_redirects(redirects)
         redirects = (
-                {'old': '/foo/', 'new': '/bar/', 'status_code': None},
-                {'old': '/bar/', 'new': '/baz/', 'status_code': None},
+                {'source': '/foo/', 'target': '/bar/', 'status_code': None, 'filename': '', 'line_number':1},
+                {'source': '/bar/', 'target': '/baz/', 'status_code': None, 'filename': '', 'line_number':1},
             )
         with self.assertRaises(ImproperlyConfigured):
             preprocess_redirects(redirects)
 
     def test_domain_circular_redirect(self):
         redirects = (
-                {'old': 'http://www.fusionbox.com/bar/', 'new': '/bar/', 'status_code': None},
+                {'source': 'http://www.fusionbox.com/bar/', 'target': '/bar/', 'status_code': None, 'filename': '', 'line_number':1},
             )
         with self.assertRaises(ImproperlyConfigured):
             preprocess_redirects(redirects)
         redirects = (
-                {'old': 'http://www.fusionbox.com/bar/', 'new': '/foo/', 'status_code': None},
-                {'old': 'http://www.google.com/foo/', 'new': '/asdf/', 'status_code': None},
+                {'source': 'http://www.fusionbox.com/bar/', 'target': '/foo/', 'status_code': None, 'filename': '', 'line_number':1},
+                {'source': 'http://www.google.com/foo/', 'target': '/asdf/', 'status_code': None, 'filename': '', 'line_number':1},
             )
         preprocess_redirects(redirects)
         redirects = (
-                {'old': 'http://www.fusionbox.com/foo/', 'new': '/asdf/', 'status_code': None},
-                {'old': 'http://www.fusionbox.com/bar/', 'new': '/foo/', 'status_code': None},
+                {'source': 'http://www.fusionbox.com/foo/', 'target': '/asdf/', 'status_code': None, 'filename': '', 'line_number':1},
+                {'source': 'http://www.fusionbox.com/bar/', 'target': '/foo/', 'status_code': None, 'filename': '', 'line_number':1},
             )
         with self.assertRaises(ImproperlyConfigured):
             preprocess_redirects(redirects)
         redirects = (
-                {'old': 'http://www.fusionbox.com/bar/', 'new': '/foo/', 'status_code': None},
-                {'old': 'http://www.fusionbox.com/foo/', 'new': '/asdf/', 'status_code': None},
+                {'source': 'http://www.fusionbox.com/bar/', 'target': '/foo/', 'status_code': None, 'filename': '', 'line_number':1},
+                {'source': 'http://www.fusionbox.com/foo/', 'target': '/asdf/', 'status_code': None, 'filename': '', 'line_number':1},
             )
         with self.assertRaises(ImproperlyConfigured):
             preprocess_redirects(redirects)
 
     def test_duplicate_redirect(self):
         redirects = (
-                {'old': '/bar/', 'new': '/baz/', 'status_code': None},
-                {'old': '/bar/', 'new': '/asdf/', 'status_code': None},
+                {'source': '/bar/', 'target': '/baz/', 'status_code': None, 'filename': '', 'line_number':1},
+                {'source': '/bar/', 'target': '/asdf/', 'status_code': None, 'filename': '', 'line_number':1},
             )
         with warnings.catch_warnings(record=True) as w:
             preprocess_redirects(redirects)
@@ -656,14 +656,14 @@ class TestRedirectMiddleware(unittest.TestCase):
 
     def test_possible_circular_redirect(self):
         redirects = (
-                {'old': '/bar/', 'new': 'http://fusionbox.com/foo/', 'status_code': None},
-                {'old': '/foo/', 'new': '/asdf/', 'status_code': None},
+                {'source': '/bar/', 'target': 'http://fusionbox.com/foo/', 'status_code': None, 'filename': '', 'line_number':1},
+                {'source': '/foo/', 'target': '/asdf/', 'status_code': None, 'filename': '', 'line_number':1},
             )
         with warnings.catch_warnings(record=True) as w:
             preprocess_redirects(redirects)
             assert len(w)
         redirects = (
-                {'old': '/foo/', 'new': 'http://fusionbox.com/foo/', 'status_code': None},
+                {'source': '/foo/', 'target': 'http://fusionbox.com/foo/', 'status_code': None, 'filename': '', 'line_number':1},
             )
         with warnings.catch_warnings(record=True) as w:
             preprocess_redirects(redirects)
@@ -671,6 +671,6 @@ class TestRedirectMiddleware(unittest.TestCase):
 
     def test_cross_domain_redirect(self):
         redirects = (
-                {'old': 'http://www.fusionbox.com/bar/', 'new': 'http://www.google.com/bar/', 'status_code': None},
+                {'source': 'http://www.fusionbox.com/bar/', 'target': 'http://www.google.com/bar/', 'status_code': None, 'filename': '', 'line_number':1},
             )
         preprocess_redirects(redirects)
