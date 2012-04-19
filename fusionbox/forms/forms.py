@@ -116,7 +116,6 @@ class SortForm(BaseChangeListForm):
         - querystring which can be used to sort only by this header
     """
     HEADERS = tuple()
-    # HEADERS = ({'column', 'title', 'sortable'})
     sort = forms.CharField(required=False, widget=forms.HiddenInput())
 
     def clean_sort(self):
@@ -125,13 +124,19 @@ class SortForm(BaseChangeListForm):
         sorts = filter(bool, sorts)
         if not sorts:
             return []
+        # Ensure that the sort parameter does not contain non-numeric sort indexes
         if not all([sort.strip('-').isdigit() for sort in sorts]):
             raise ValidationError("Unknown or invalid sort '{sort}'".format(sort=cleaned_data.get('sort', '')))
         sorts = [int(sort) for sort in sorts]
+        # Ensure not un-sortable fields are being sorted by
         for sort in map(abs, sorts):
             header = self.HEADERS[sort-1]
             if not header['sortable']:
                 raise ValidationError("Invalid sort parameter '{sort}'".format(sort=cleaned_data.get('sort', '')))
+        # Ensure that all of our sort parameters are in range of our header values
+        if any([abs(sort) > len(self.HEADERS) for sort in sorts]):
+            raise ValidationError("Invalid sort parameter '{sort}'".format(sort=cleaned_data.get('sort', '')))
+
         return sorts
 
     def headers(self):
@@ -142,7 +147,7 @@ class SortForm(BaseChangeListForm):
             sorts = []
         params = copy.copy(self.data)
         #for index, column, title, sortable in self.SORT_CHOICES:
-        for index, header in enumerate(self.HEADERS):
+        for index, header in enumerate(self.HEADERS, 1):
             header = copy.copy(header)
             header['classes'] = []
 
