@@ -240,6 +240,8 @@ def us_dollars(value):
             return FORMAT_TAG_ERROR_VALUE
         else:
             raise e
+    except TypeError:
+        return FORMAT_TAG_ERROR_VALUE
     # Format as currency value
     locale.setlocale(locale.LC_ALL, '')
     return locale.currency(value, grouping=True)[:-3]
@@ -268,6 +270,8 @@ def us_cents(value, places = 1):
             return FORMAT_TAG_ERROR_VALUE
         else:
             raise e
+    except TypeError:
+        return FORMAT_TAG_ERROR_VALUE
     # Require places >= 0
     places = max(0, places)
     # Get negative sign
@@ -305,6 +309,8 @@ def us_dollars_and_cents(value, cent_places = 2):
             return FORMAT_TAG_ERROR_VALUE
         else:
             raise e
+    except TypeError:
+        return FORMAT_TAG_ERROR_VALUE
     # Require cent_places >= 2
     if cent_places < 2:
         cent_places = 2
@@ -343,6 +349,8 @@ def add_commas(value, round=None):
             return FORMAT_TAG_ERROR_VALUE
         else:
             raise e
+    except TypeError:
+        return FORMAT_TAG_ERROR_VALUE
     # Round the value if necessary
     if round != None:
         if round > 0:
