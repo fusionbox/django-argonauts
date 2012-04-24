@@ -10,6 +10,9 @@ class BaseChangeListForm(forms.Form):
     Base class for SearchForm, FilterForm, and SortForm mixin classes for
     displaying, sorting, searching and filtering a model.
     """
+    error_css_class = 'error'
+    required_css_class = 'required'
+
     def __init__(self, *args, **kwargs):
         self.queryset = kwargs.pop('queryset', None)
         super(BaseChangeListForm, self).__init__(*args, **kwargs)
