@@ -46,7 +46,8 @@ http://www.fusionbox.com/foo/, /bar/ http://www.fusionbox.com/bar/, /baz/
 ### Example CSV with redirects which raise warnings.  /foo/,
 http://www.fusionbox.com/foo/
 
-## Behaviors Behaviors are a [DRY](http://c2.com/cgi/wiki?DontRepeatYourself)
+## Behaviors
+Behaviors are a [DRY](http://c2.com/cgi/wiki?DontRepeatYourself)
 way of re-using common fields and methods on models. Behaviors function
 seamlessly through python inheritance and are fully configurable. Behaviors
 also support multi-inheritance so adding multiple behaviors to a single model
