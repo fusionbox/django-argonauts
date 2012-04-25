@@ -4,6 +4,8 @@ import urllib
 from django import forms
 from django.db.models import Q
 from django.core.exceptions import ValidationError
+from django.utils.datastructures import SortedDict
+
 
 class BaseChangeListForm(forms.Form):
     """
@@ -143,7 +145,7 @@ class SortForm(BaseChangeListForm):
         return sorts
 
     def headers(self):
-        headers = []
+        headers = SortedDict()
         if self.is_valid():
             sorts = self.cleaned_data.get('sort', '')
         else:
@@ -185,7 +187,7 @@ class SortForm(BaseChangeListForm):
                 except ValueError:
                     header['priority'] = None
 
-            headers.append(header)
+            headers[header['column']] = header
         return headers
 
     def get_queryset(self):
