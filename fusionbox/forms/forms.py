@@ -50,12 +50,26 @@ class SearchForm(BaseChangeListForm):
     CASE_SENSITIVE = False
     q = forms.CharField(label="Search", required=False, min_length=3)
 
+    def pre_search(self, qs):
+        """
+        Hook for modifying the queryset prior to the search
+        """
+        return qs
+
+    def post_search(self, qs):
+        """
+        Hook for modifying the queryset after the search
+        """
+        return qs
+
     def get_queryset(self):
         qs = super(SearchForm, self).get_queryset()
 
         # Ensure that the form is valid
         if not self.is_valid():
             return qs
+
+        qs = self.pre_search(qs)
 
         # Do Searching
         q = self.cleaned_data.get('q', None)
@@ -68,6 +82,8 @@ class SearchForm(BaseChangeListForm):
                     kwarg = {field + '__icontains': q}
                 args.append(Q(**kwarg))
             qs = qs.filter(reduce(lambda x,y: x|y, args))
+
+        qs = self.post_search(qs)
 
         return qs
 
@@ -189,11 +205,27 @@ class SortForm(BaseChangeListForm):
             headers.append(header)
         return headers
 
+    def pre_sort(self, qs):
+        """
+        Hook for doing pre-sort modification of the queryset
+        """
+        return qs
+
+    def post_sort(self, qs):
+        """
+        Hook for doing post-sort modification of the queryset
+        """
+        return qs
+
     def get_queryset(self):
         qs = super(SortForm, self).get_queryset()
 
+        # Ensure that the form is valid
         if not self.is_valid():
             return qs
+
+        qs = self.pre_sort(qs)
+
         # Do Sorting
         sorts = self.cleaned_data.get('sort', [])
         order_by = []
@@ -205,6 +237,8 @@ class SortForm(BaseChangeListForm):
 
         if order_by:
             qs = qs.order_by(*order_by)
+
+        qs = self.post_sort(qs)
 
         return qs
 
@@ -230,14 +264,32 @@ class FilterForm(BaseChangeListForm):
     """
     FILTERS = {}
 
+    def pre_filter(self, qs):
+        """
+        Hook for doing pre-filter modification to the queryset
+        """
+        return qs
+
+    def post_filter(self, qs):
+        """
+        Hook for doing post-filter modification to the queryset
+        """
+        return qs
+
     def get_queryset(self):
         qs = super(FilterForm, self).get_queryset()
 
+        #  Ensure that the form is valid
         if not self.is_valid():
             return qs
+
+        qs = self.pre_filter(qs)
+
         # Do filtering
         for field, column_name in self.FILTERS.items():
-            if self.cleaned_data.get(field, ''):
+            if column_name and self.cleaned_data.get(field, ''):
                 qs = qs.filter(**{column_name: self.cleaned_data[field]})
+
+        qs = self.post_filter(qs)
 
         return qs
