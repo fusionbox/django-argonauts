@@ -4,6 +4,16 @@ import urllib
 from django import forms
 from django.db.models import Q
 from django.core.exceptions import ValidationError
+from django.utils.datastructures import SortedDict
+
+class Headers(SortedDict):
+    """
+    Extension of djangos built in sorted dictionary class which iterates
+    through the values rather than keys.
+    """
+    def __iter__(self):
+        for name in self.keys():
+            yield self[name]
 
 
 class BaseChangeListForm(forms.Form):
@@ -160,7 +170,7 @@ class SortForm(BaseChangeListForm):
         return sorts
 
     def headers(self):
-        headers = []
+        headers = Headers()
         if self.is_valid():
             sorts = self.cleaned_data.get('sort', '')
         else:
@@ -202,7 +212,8 @@ class SortForm(BaseChangeListForm):
                 except ValueError:
                     header['priority'] = None
 
-            headers.append(header)
+            #headers.append(header)
+            headers[header.get('name', header['column'])] = header
         return headers
 
     def pre_sort(self, qs):
