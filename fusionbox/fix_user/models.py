@@ -39,3 +39,11 @@ UserChangeForm.base_fields['username'].help_text = _("Required. 255 characters o
 UserChangeForm.base_fields['email'].max_length = 255
 UserChangeForm.base_fields['email'].widget.attrs['maxlength'] = 255 # html
 UserChangeForm.base_fields['email'].validators[0].limit_value = 255
+
+
+from fusionbox.passwords import validate_password
+from django.contrib.auth.forms import SetPasswordForm
+
+User._meta.get_field('password').validators.append(validate_password)
+UserCreationForm.base_fields['password2'].validators.append(validate_password)
+SetPasswordForm.base_fields['new_password1'].validators.append(validate_password)
