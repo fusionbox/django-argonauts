@@ -298,11 +298,11 @@ class FilterForm(BaseChangeListForm):
 
     In the example above, you could do the following in the template for display links for the published filter
 
-    {% for filter in form.filters.published %}
-        {% if filter.active %}
-            {{ filter.display }} (<a href="{{ filter.remove }}">remove</a>)
+    {% for choice in form.filters.published %}
+        {% if choice.active %}
+            {{ choice.display }} (<a href='?{{ choice.remove }}'>remove</a>)
         {% else %}
-            <a href="{{ filter.querystring }}">{{ filter.display }}</a>
+            <a href='?{{ choice.querystring }}'>{{ choice.display }}</a>
         {% endif %}
     {% endfor %}
     """
