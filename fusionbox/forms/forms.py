@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.utils.datastructures import SortedDict
 
-class Headers(SortedDict):
+class IterDict(SortedDict):
     """
     Extension of djangos built in sorted dictionary class which iterates
     through the values rather than keys.
@@ -170,7 +170,7 @@ class SortForm(BaseChangeListForm):
         return sorts
 
     def headers(self):
-        headers = Headers()
+        headers = IterDict()
         if self.is_valid():
             sorts = self.cleaned_data.get('sort', '')
         else:
@@ -262,18 +262,83 @@ class FilterForm(BaseChangeListForm):
     class UserFilterForm(FilterForm):
         FILTERS = {
             'active': 'is_active',
-            'staff': 'is_staff',
             'date_joined': 'date_joined__gte',
+            'published': None, # Custom filtering
             }
         model = User
 
+        PUBLISHED_CHOICES = (
+                ('', 'All'),
+                ('before', 'Before Today'),
+                ('after', 'After Today'),
+                )
+
         active = forms.BooleanField(required=False)
-        staff = forms.BooleanField(required=False)
         date_joined = forms.DateTimeField(required=False)
+        published = forms.ChoiceField(choices=PUBLISHED_CHOICES, widget=forms.HiddenInput())
+
+        def pre_filter(self, queryset):
+            published = self.cleaned_data.get('published')
+            if published == '':
+                return queryset
+            elif published == 'before':
+                return queryset.filter(published_at__lte=datetime.datetime.now())
+            elif published == 'after':
+                return queryset.filter(published_at__gte=datetime.datetime.now())
+            
 
     `FILTERS` defines a mapping of form fields to queryset filters.
+
+    The `pre_filter` and `post_filter` function hooks allow you to do custom
+    filtering that does not correspond directly to column values
+
+    When displaying in the template, this form also provides you with url querystrings for all of your filters.
+
+    `form.filters` is a dictionary of all of the filters defined on your form.
+
+    In the example above, you could do the following in the template for display links for the published filter
+
+    {% for filter in form.filters.published %}
+        {% if filter.active %}
+            {{ filter.display }} (<a href="{{ filter.remove }}">remove</a>)
+        {% else %}
+            <a href="{{ filter.querystring }}">{{ filter.display }}</a>
+        {% endif %}
+    {% endfor %}
     """
     FILTERS = {}
+
+    @property
+    def filters(self):
+        """
+        Generates a dictionary of filters with proper queryset links to
+        maintian multiple filters
+        """
+        filters = IterDict()
+        for key in self.FILTERS:
+            filter = IterDict()
+            filter_param = ((self.prefix or '') + '-' + key).strip('-')
+
+            for value, display in self.fields[key].choices:
+                choice = {}
+                choice['value'] = value
+                choice['display'] = display
+
+                # These are raw values so they must come from data, and be
+                # coerced to strings
+                choice['active'] = str(value) == self.data.get(filter_param)
+
+                params = copy.copy(self.data)
+                # Filter by this current choice
+                params[filter_param] = value
+                choice['querystring'] = urllib.urlencode(params)
+                # remove this filter
+                params[filter_param] = ''
+                choice['remove'] = urllib.urlencode(params)
+
+                filter[value] = choice
+            filters[key] = filter
+        return filters
 
     def pre_filter(self, qs):
         """
