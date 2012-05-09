@@ -326,7 +326,7 @@ class FilterForm(BaseChangeListForm):
 
                 # These are raw values so they must come from data, and be
                 # coerced to strings
-                choice['active'] = str(value) == self.data.get(filter_param)
+                choice['active'] = str(value) == self.data.get(filter_param, '')
 
                 params = copy.copy(self.data)
                 # Filter by this current choice
