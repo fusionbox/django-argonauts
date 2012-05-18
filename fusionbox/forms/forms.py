@@ -91,7 +91,10 @@ class SearchForm(BaseChangeListForm):
                 else:
                     kwarg = {field + '__icontains': q}
                 args.append(Q(**kwarg))
-            qs = qs.filter(reduce(lambda x,y: x|y, args))
+            if len(args) > 1:
+                qs = qs.filter(reduce(lambda x,y: x|y, args))
+            elif len(args) == 1:
+                qs = qs.filter(args[0])
 
         qs = self.post_search(qs)
 
