@@ -82,7 +82,7 @@ class SearchForm(BaseChangeListForm):
         qs = self.pre_search(qs)
 
         # Do Searching
-        q = self.cleaned_data.get('q', None)
+        q = self.cleaned_data.get('q', None).strip()
         if q:
             args = []
             for field in self.SEARCH_FIELDS:
