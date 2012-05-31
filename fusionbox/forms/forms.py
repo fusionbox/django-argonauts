@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.utils.datastructures import SortedDict
 
+
 class IterDict(SortedDict):
     """
     Extension of djangos built in sorted dictionary class which iterates
@@ -99,6 +100,7 @@ class SearchForm(BaseChangeListForm):
         qs = self.post_search(qs)
 
         return qs
+
 
 class SortForm(BaseChangeListForm):
     """
@@ -256,6 +258,7 @@ class SortForm(BaseChangeListForm):
 
         return qs
 
+
 class FilterForm(BaseChangeListForm):
     """
     Base class for implementing filtering on a model.
@@ -288,7 +291,7 @@ class FilterForm(BaseChangeListForm):
                 return queryset.filter(published_at__lte=datetime.datetime.now())
             elif published == 'after':
                 return queryset.filter(published_at__gte=datetime.datetime.now())
-            
+
 
     `FILTERS` defines a mapping of form fields to queryset filters.
 
