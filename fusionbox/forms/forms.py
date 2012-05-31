@@ -93,7 +93,7 @@ class SearchForm(BaseChangeListForm):
                     kwarg = {field + '__icontains': q}
                 args.append(Q(**kwarg))
             if len(args) > 1:
-                qs = qs.filter(reduce(lambda x,y: x|y, args))
+                qs = qs.filter(reduce(lambda x, y: x | y, args))
             elif len(args) == 1:
                 qs = qs.filter(args[0])
 
@@ -165,7 +165,7 @@ class SortForm(BaseChangeListForm):
         sorts = [int(sort) for sort in sorts]
         # Ensure not un-sortable fields are being sorted by
         for sort in map(abs, sorts):
-            header = self.HEADERS[sort-1]
+            header = self.HEADERS[sort - 1]
             if not header['sortable']:
                 raise ValidationError("Invalid sort parameter '{sort}'".format(sort=cleaned_data.get('sort', '')))
         # Ensure that all of our sort parameters are in range of our header values
@@ -246,7 +246,7 @@ class SortForm(BaseChangeListForm):
         sorts = self.cleaned_data.get('sort', [])
         order_by = []
         for sort in sorts:
-            param = self.HEADERS[abs(sort)-1]['column']
+            param = self.HEADERS[abs(sort) - 1]['column']
             if sort < 0:
                 param = '-' + param
             order_by.append(param)
