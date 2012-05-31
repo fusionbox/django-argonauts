@@ -1,9 +1,12 @@
+import cStringIO
 import copy
+import csv
 import urllib
 
 from django import forms
-from django.db.models import Q
 from django.core.exceptions import ValidationError
+from django.db import models
+from django.db.models import Q
 from django.utils.datastructures import SortedDict
 
 
@@ -375,3 +378,148 @@ class FilterForm(BaseChangeListForm):
         qs = self.post_filter(qs)
 
         return qs
+
+
+def csv_getattr(obj, attr_name):
+    """
+    Helper function for CsvForm class that gets an attribute from a model with
+    a custom exception.
+    """
+    try:
+        return getattr(obj, attr_name)
+    except AttributeError:
+        raise AttributeError('CsvForm: No \'{0}\' attribute found on \'{1}\' object'.format(
+            attr_name,
+            obj._meta.object_name,
+            ))
+
+
+def csv_getvalue(obj, path):
+    """
+    Helper function for CsvForm class that retrieves a value from an object
+    described by a django-style query path.  The value can be a model field,
+    property method, foreign key field, or instance method on the model.
+
+    Example:
+    >>> # full_name is a property method
+    >>> csv_getvalue(instance, 'project__employee__full_name')
+    u'David Sanders'
+    """
+    path = path.split('__', 1)
+    attr_name = path[0]
+
+    if obj is None:
+        # Record object is empty, return None
+        return None
+    if len(path) == 1:
+        # Return the last leaf of the path after evaluation
+        attr = csv_getattr(obj, attr_name)
+
+        if isinstance(attr, models.Model):
+            # Attribute is a model instance.  Return unicode.
+            return unicode(attr)
+        elif hasattr(attr, '__call__'):
+            # Attribute is a callable method.  Return its value when called.
+            return attr()
+        else:
+            # Otherwise, assume attr is a simple value
+            return attr
+    elif len(path) == 2:
+        # More of path is remaining to be traversed
+        attr = csv_getattr(obj, attr_name)
+
+        if attr is None:
+            return None
+        elif isinstance(attr, models.Model):
+            # If attribute is a model instance, traverse into it
+            return csv_getvalue(attr, path[1])
+        else:
+            raise AttributeError('CsvForm: Attribute \'{0}\' on object \'{1}\' is not a related model'.format(
+                attr_name,
+                obj._meta.object_name,
+                ))
+
+
+class CsvForm(BaseChangeListForm):
+    """
+    Base class for implementing csv generation on a model.
+
+    Example:
+
+    # Given this class...
+    class UserFilterForm(FilterForm):
+        model = User
+
+        CSV_COLUMNS = (
+                {'column': 'id', 'title': 'Id'},
+                {'column': 'username', 'title': 'Username'},
+                {'column': 'email__domain_name', 'title': 'Email Domain'},
+                )
+
+        FILTERS = {
+            'active': 'is_active',
+            'date_joined': 'date_joined__gte',
+            'published': None, # Custom filtering
+            }
+
+        PUBLISHED_CHOICES = (
+                ('', 'All'),
+                ('before', 'Before Today'),
+                ('after', 'After Today'),
+                )
+
+        active = forms.BooleanField(required=False)
+        date_joined = forms.DateTimeField(required=False)
+        published = forms.ChoiceField(choices=PUBLISHED_CHOICES, widget=forms.HiddenInput())
+
+        def pre_filter(self, queryset):
+            published = self.cleaned_data.get('published')
+            if published == '':
+                return queryset
+            elif published == 'before':
+                return queryset.filter(published_at__lte=datetime.datetime.now())
+            elif published == 'after':
+                return queryset.filter(published_at__gte=datetime.datetime.now())
+
+
+    >>> # This code in a repl will produce a string buffer with csv output for
+    >>> # the form's queryset
+    >>> form = UserFilterForm(request.GET, queryset=User.objects.all())
+    >>> form.csv_content()
+    <cStringIO.StringO object at 0x102fd2f48>
+    >>>
+
+
+    `CSV_COLUMNS` defines a list of properties to fetch from each obj in the
+    queryset which will be output in the csv content.  The `column` key defines
+    the lookup path for the property.  This can lookup a field, property
+    method, or method on the model which may span relationships.  The `title`
+    key defines the column header to use for that property in the csv content.
+
+    The `csv_content` method returns a string buffer with csv content for the
+    form's queryset.
+    """
+    def csv_content(self):
+        """
+        Returns the objects in the form's current queryset as csv content.
+        """
+        if not hasattr(self, 'CSV_COLUMNS'):
+            raise NotImplementedError('Child classes of CsvForm must implement the CSV_COLUMNS constant')
+
+        # Get column fields and headers
+        csv_columns = [i['column'] for i in self.CSV_COLUMNS]
+        csv_headers = [i['title'] for i in self.CSV_COLUMNS]
+
+        # Build data for csv writer
+        csv_data = []
+        for obj in self.get_queryset():
+            csv_data.append([csv_getvalue(obj, column) for column in csv_columns])
+
+        # Create buffer with csv content
+        content = cStringIO.StringIO()
+        writer = csv.writer(content)
+        writer.writerow(csv_headers)
+        writer.writerows(csv_data)
+        content.seek(0)
+
+        return content
