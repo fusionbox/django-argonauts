@@ -1,5 +1,9 @@
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
+
+# `setlocale` is not threadsafe
 import locale
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+
 import re
 import warnings
 
@@ -244,7 +248,6 @@ def us_dollars(value):
     except TypeError:
         return FORMAT_TAG_ERROR_VALUE
     # Format as currency value
-    locale.setlocale(locale.LC_ALL, 'en_CA.UTF-8')
     return locale.currency(value, grouping=True)[:-3]
 
 
@@ -278,7 +281,6 @@ def us_cents(value, places=1):
     # Get negative sign
     sign = u'-' if value < 0 else u''
     # Get formatted value
-    locale.setlocale(locale.LC_ALL, 'en_CA.UTF-8')
     formatted = unicode(locale.format(
         '%0.' + str(places) + 'f',
         abs(value),
@@ -322,7 +324,6 @@ def us_dollars_and_cents(value, cent_places=2):
     else:
         extra_places = ''
     # Format as currency value
-    locale.setlocale(locale.LC_ALL, 'en_CA.UTF-8')
     return locale.currency(value, grouping=True) + extra_places
 
 
@@ -341,7 +342,6 @@ def add_commas(value, round=None):
         if value = 1234.5678
         {{ value|add_commas:2 }} => 1,234.57
     """
-    locale.setlocale(locale.LC_ALL, 'en_CA.UTF-8')
     # Decimals honor locale settings correctly
     try:
         value = Decimal(str(value))
