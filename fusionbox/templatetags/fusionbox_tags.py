@@ -61,7 +61,7 @@ class HighlighterBase(template.Node):
     def parse_options(self, tokens):
         self.options = tokens[1:]
         try:
-            self.highlight_class = self.options.pop(0).replace('"','')
+            self.highlight_class = self.options.pop(0).replace('"', '')
         except IndexError:
             self.highlight_class = None
 
@@ -223,6 +223,7 @@ if hasattr(settings, 'FORMAT_TAG_ERROR_VALUE'):
 else:
     FORMAT_TAG_ERROR_VALUE = 'error'
 
+
 @register.filter
 def us_dollars(value):
     """
@@ -248,7 +249,7 @@ def us_dollars(value):
 
 
 @register.filter
-def us_cents(value, places = 1):
+def us_cents(value, places=1):
     """
     Returns the value formatted as US cents.  May specify decimal places for
     fractional cents.
@@ -279,7 +280,7 @@ def us_cents(value, places = 1):
     # Get formatted value
     locale.setlocale(locale.LC_ALL, '')
     formatted = unicode(locale.format(
-        '%0.'+str(places)+'f',
+        '%0.' + str(places) + 'f',
         abs(value),
         grouping=True,
         ))
@@ -288,7 +289,7 @@ def us_cents(value, places = 1):
 
 
 @register.filter
-def us_dollars_and_cents(value, cent_places = 2):
+def us_dollars_and_cents(value, cent_places=2):
     """
     Returns the value formatted as US dollars with cents.  May optionally
     include extra digits for fractional cents.  This is common when displaying
