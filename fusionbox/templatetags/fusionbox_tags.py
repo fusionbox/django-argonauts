@@ -365,6 +365,35 @@ def add_commas(value, round=None):
 
 
 @register.filter
+def naturalduration(time, show_minutes=None):
+    """
+    Displays a time delta in a form that is more human-readable.  Accepts a
+    datetime.timedelta object.  Microseconds in timedelta objects are ignored.
+    The `show_minutes` argument specifies whether or not to include the number
+    of minutes in the display.  If it evaluates to false, minutes are not
+    included and are rounded into the number of hours.
+
+    Example:
+        if time = datetime.timedelta(2, 7280, 142535)
+        {{ time|naturalduration }} => 2 days, 2 hours
+        {{ time|naturalduration:"minutes" }} => 2 days, 2 hours, 1 minute
+    """
+    days = time.days
+    hours = int(time.seconds / 3600) if show_minutes else int(round(time.seconds / 3600.0))
+    minutes = int((time.seconds % 3600) / 60) if show_minutes else 0
+
+    display = []
+    if days:
+        display.append('{0} days'.format(days))
+    if hours:
+        display.append('{0} hours'.format(hours))
+    if minutes:
+        display.append('{0} minutes'.format(minutes))
+
+    return ', '.join(display)
+
+
+@register.filter
 def pluralize_with(count, noun):
     """
     Pluralizes ``noun`` depending on ``count``.  Returns only the
