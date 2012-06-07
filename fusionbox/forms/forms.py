@@ -1,4 +1,4 @@
-import cStringIO
+import StringIO
 import copy
 import csv
 import urllib
@@ -486,7 +486,7 @@ class CsvForm(BaseChangeListForm):
     >>> # the form's queryset
     >>> form = UserFilterForm(request.GET, queryset=User.objects.all())
     >>> form.csv_content()
-    <cStringIO.StringO object at 0x102fd2f48>
+    <StringIO.StringO object at 0x102fd2f48>
     >>>
 
 
@@ -508,15 +508,15 @@ class CsvForm(BaseChangeListForm):
 
         # Get column fields and headers
         csv_columns = [i['column'] for i in self.CSV_COLUMNS]
-        csv_headers = [i['title'] for i in self.CSV_COLUMNS]
+        csv_headers = [i['title'].encode('utf-8') for i in self.CSV_COLUMNS]
 
         # Build data for csv writer
         csv_data = []
         for obj in self.get_queryset():
-            csv_data.append([csv_getvalue(obj, column) for column in csv_columns])
+            csv_data.append([unicode(csv_getvalue(obj, column)).encode('utf-8') for column in csv_columns])
 
         # Create buffer with csv content
-        content = cStringIO.StringIO()
+        content = StringIO.StringIO()
         writer = csv.writer(content)
         writer.writerow(csv_headers)
         writer.writerows(csv_data)
