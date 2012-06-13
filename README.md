@@ -46,7 +46,8 @@ http://www.fusionbox.com/foo/, /bar/ http://www.fusionbox.com/bar/, /baz/
 ### Example CSV with redirects which raise warnings.  /foo/,
 http://www.fusionbox.com/foo/
 
-## Behaviors Behaviors are a [DRY](http://c2.com/cgi/wiki?DontRepeatYourself)
+## Behaviors
+Behaviors are a [DRY](http://c2.com/cgi/wiki?DontRepeatYourself)
 way of re-using common fields and methods on models. Behaviors function
 seamlessly through python inheritance and are fully configurable. Behaviors
 also support multi-inheritance so adding multiple behaviors to a single model
@@ -71,10 +72,11 @@ Just as their names suggest, the model will have the following fields.
 This will add the same fields as in the standard usage, but the fields will
 instead be named `creation_date` and `date_updated` respectively
 
-## fusionbox\_tags Put `{% load fusionbox_tags %}` in your template to use
-these.
+## fusionbox\_tags
+Put `{% load fusionbox_tags %}` in your template to use these.
 
-### `{% higlight_here %}` This template tag will parse all anchor tags between
+### `{% higlight_here %}`
+This template tag will parse all anchor tags between
 `higlight_here` and `endhighlight` and add a class to the ones that are
 considered 'parents' of the current page's url. It takes an optional class name
 as an argument, defaulting to `here`.

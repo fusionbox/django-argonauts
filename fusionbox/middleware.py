@@ -49,6 +49,8 @@ class GenericTemplateFinderMiddleware(object):
                 return generic_template_finder_view(request)
             except Http404:
                 return response
+            except UnicodeEncodeError:
+                return response
         else:
             return response
 

@@ -1,5 +1,9 @@
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
+
+# `setlocale` is not threadsafe
 import locale
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+
 import re
 import warnings
 
@@ -61,7 +65,7 @@ class HighlighterBase(template.Node):
     def parse_options(self, tokens):
         self.options = tokens[1:]
         try:
-            self.highlight_class = self.options.pop(0).replace('"','')
+            self.highlight_class = self.options.pop(0).replace('"', '')
         except IndexError:
             self.highlight_class = None
 
@@ -223,6 +227,7 @@ if hasattr(settings, 'FORMAT_TAG_ERROR_VALUE'):
 else:
     FORMAT_TAG_ERROR_VALUE = 'error'
 
+
 @register.filter
 def us_dollars(value):
     """
@@ -240,13 +245,14 @@ def us_dollars(value):
             return FORMAT_TAG_ERROR_VALUE
         else:
             raise e
+    except TypeError:
+        return FORMAT_TAG_ERROR_VALUE
     # Format as currency value
-    locale.setlocale(locale.LC_ALL, '')
     return locale.currency(value, grouping=True)[:-3]
 
 
 @register.filter
-def us_cents(value, places = 1):
+def us_cents(value, places=1):
     """
     Returns the value formatted as US cents.  May specify decimal places for
     fractional cents.
@@ -268,14 +274,15 @@ def us_cents(value, places = 1):
             return FORMAT_TAG_ERROR_VALUE
         else:
             raise e
+    except TypeError:
+        return FORMAT_TAG_ERROR_VALUE
     # Require places >= 0
     places = max(0, places)
     # Get negative sign
     sign = u'-' if value < 0 else u''
     # Get formatted value
-    locale.setlocale(locale.LC_ALL, '')
     formatted = unicode(locale.format(
-        '%0.'+str(places)+'f',
+        '%0.' + str(places) + 'f',
         abs(value),
         grouping=True,
         ))
@@ -284,7 +291,7 @@ def us_cents(value, places = 1):
 
 
 @register.filter
-def us_dollars_and_cents(value, cent_places = 2):
+def us_dollars_and_cents(value, cent_places=2):
     """
     Returns the value formatted as US dollars with cents.  May optionally
     include extra digits for fractional cents.  This is common when displaying
@@ -305,6 +312,8 @@ def us_dollars_and_cents(value, cent_places = 2):
             return FORMAT_TAG_ERROR_VALUE
         else:
             raise e
+    except TypeError:
+        return FORMAT_TAG_ERROR_VALUE
     # Require cent_places >= 2
     if cent_places < 2:
         cent_places = 2
@@ -315,7 +324,6 @@ def us_dollars_and_cents(value, cent_places = 2):
     else:
         extra_places = ''
     # Format as currency value
-    locale.setlocale(locale.LC_ALL, '')
     return locale.currency(value, grouping=True) + extra_places
 
 
@@ -334,7 +342,6 @@ def add_commas(value, round=None):
         if value = 1234.5678
         {{ value|add_commas:2 }} => 1,234.57
     """
-    locale.setlocale(locale.LC_ALL, '')
     # Decimals honor locale settings correctly
     try:
         value = Decimal(str(value))
@@ -343,6 +350,8 @@ def add_commas(value, round=None):
             return FORMAT_TAG_ERROR_VALUE
         else:
             raise e
+    except TypeError:
+        return FORMAT_TAG_ERROR_VALUE
     # Round the value if necessary
     if round != None:
         if round > 0:
@@ -353,6 +362,35 @@ def add_commas(value, round=None):
     # Locale settings properly format Decimals with commas
     # Super gross, but it works for both 2.6 and 2.7.
     return locale.format("%." + str(round) + "f", value, grouping=True)
+
+
+@register.filter
+def naturalduration(time, show_minutes=None):
+    """
+    Displays a time delta in a form that is more human-readable.  Accepts a
+    datetime.timedelta object.  Microseconds in timedelta objects are ignored.
+    The `show_minutes` argument specifies whether or not to include the number
+    of minutes in the display.  If it evaluates to false, minutes are not
+    included and are rounded into the number of hours.
+
+    Example:
+        if time = datetime.timedelta(2, 7280, 142535)
+        {{ time|naturalduration }} => 2 days, 2 hours
+        {{ time|naturalduration:"minutes" }} => 2 days, 2 hours, 1 minute
+    """
+    days = time.days
+    hours = int(time.seconds / 3600) if show_minutes else int(round(time.seconds / 3600.0))
+    minutes = int((time.seconds % 3600) / 60) if show_minutes else 0
+
+    display = []
+    if days:
+        display.append('{0} days'.format(days))
+    if hours:
+        display.append('{0} hours'.format(hours))
+    if minutes:
+        display.append('{0} minutes'.format(minutes))
+
+    return ', '.join(display)
 
 
 @register.filter
