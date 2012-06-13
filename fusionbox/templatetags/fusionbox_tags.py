@@ -328,7 +328,7 @@ def us_dollars_and_cents(value, cent_places=2):
 
 
 @register.filter
-def add_commas(value, round=None):
+def add_commas(value, round=0):
     """
     Add commas to a numeric value, while rounding it to a specific number of
     places.  Humanize's intcomma is not adequate since it does not allow
@@ -352,13 +352,12 @@ def add_commas(value, round=None):
             raise e
     except TypeError:
         return FORMAT_TAG_ERROR_VALUE
-    # Round the value if necessary
-    if round != None:
-        if round > 0:
-            format = Decimal('1.' + round * '0')
-        else:
-            format = Decimal('1')
-        value = value.quantize(format, rounding=ROUND_HALF_UP)
+    # Round the value
+    if round > 0:
+        format = Decimal('1.' + round * '0')
+    else:
+        format = Decimal('1')
+    value = value.quantize(format, rounding=ROUND_HALF_UP)
     # Locale settings properly format Decimals with commas
     # Super gross, but it works for both 2.6 and 2.7.
     return locale.format("%." + str(round) + "f", value, grouping=True)
