@@ -29,4 +29,4 @@ class Blog(behaviors.Timestampable, behaviors.SEO, behaviors.Publishable):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('blog.views.detail', (), {'slug': self.slug})
+        return ('blog:fusionbox.blog.views.detail', (), {'slug': self.slug})
