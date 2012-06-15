@@ -61,7 +61,7 @@ ${ name }</span> <span class="filesize">[${ size } bytes]</span>
         container = u'<div id="%s"></div>' % container_id
         binding = u"""
 <script type="text/javascript">
-$('input[type=file]').multifile('#{container_id}', '#{tmpl_id}');
+jQuery('input[type=file]').multifile('#{container_id}', '#{tmpl_id}');
 </script>""".format(tmpl_id=tmpl_id, container_id=container_id)
 
         return mark_safe(u"{tmpl}{input}{container}{binding}"\
