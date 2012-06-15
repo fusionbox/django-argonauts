@@ -17,6 +17,9 @@ class MultiFileWidget(FileInput):
     If you would like to use a different jquery-tmpl
     """
 
+    class Media:
+        js = ('js/jquery.tmpl.js', 'js/jquery.multifile.js',)
+
     def __init__(self, *args, **kwargs):
         self.render_jquery_tmpl_func = kwargs.pop('jquery_tmpl_func',
                 self.render_jquery_tmpl)
