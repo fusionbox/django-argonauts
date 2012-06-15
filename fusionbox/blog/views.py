@@ -20,9 +20,15 @@ class IndexView(WithTagMixin, ListView):
     def get_queryset(self):
         qs = Blog.published.order_by('-created_at')
         try:
-            return self.model.tagged.with_all([self.kwargs['tag']], qs)
+            qs = self.model.tagged.with_all([self.kwargs['tag']], qs)
         except KeyError:
-            return qs
+            pass
+        try:
+            qs = qs.filter(author__id = self.kwargs['author_id'])
+        except KeyError:
+            pass
+
+        return qs
 
 index = IndexView.as_view(template_name="blog/blog_list.html")
 

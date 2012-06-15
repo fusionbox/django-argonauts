@@ -15,5 +15,6 @@ for the templatetags to work.
 urlpatterns = patterns('fusionbox.blog.views',
         url('^$', 'index', name='blog_index'),
         url('^tag/(?P<tag>.+)/$', 'index', name='tag_index'),
+        url('^author/(?P<author_id>.+)/$', 'index', name='author'),
         url('^(?P<slug>.+)/$', 'detail', name='blog_detail'),
 )
