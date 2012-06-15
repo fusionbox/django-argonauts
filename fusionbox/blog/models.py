@@ -16,7 +16,7 @@ add_introspection_rules([], ["^tagging\.fields\.TagField"])
 class Blog(behaviors.Timestampable, behaviors.SEO, behaviors.Publishable):
     slug = AutoSlugField(populate_from='title')
     title = models.CharField(max_length=255)
-    author = models.ForeignKey(User)
+    author = models.ForeignKey(User, related_name='blogs')
     body = RichTextField()
     tags = tagging.fields.TagField()
     image = models.ImageField(blank=True, upload_to='blog_icons')
