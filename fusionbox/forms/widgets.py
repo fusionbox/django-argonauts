@@ -10,7 +10,7 @@ class MultiFileWidget(FileInput):
     Provides a widget to enable multifile uploads for a file field.
 
     Static Requirements:
-        - jquery
+        - jquery.js
         - jquery.tmpl.js
         - jquery.multifile.js
 
