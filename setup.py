@@ -26,6 +26,7 @@ setup(name='django-fusionbox',
         'fusionbox.management', 'fusionbox.management.commands'
         ],
     package_data={
+        'fusionbox': ['static/*'],
         'fusionbox.panels.user_panel': ['templates/*',],
         'fusionbox.newsletter': ['templates/newsletter/*',]
         },
