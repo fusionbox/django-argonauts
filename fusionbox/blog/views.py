@@ -18,13 +18,18 @@ class IndexView(WithTagMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        qs = Blog.published.order_by('-created_at')
+        qs = Blog.objects.published().order_by('-created_at')
         try:
             qs = self.model.tagged.with_all([self.kwargs['tag']], qs)
         except KeyError:
             pass
         try:
             qs = qs.filter(author__id = self.kwargs['author_id'])
+        except KeyError:
+            pass
+
+        try:
+            qs = qs.search(self.request.GET['search'])
         except KeyError:
             pass
 
