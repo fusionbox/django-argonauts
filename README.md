@@ -36,8 +36,9 @@ check redirects for problem and view any warnings raised.
 ### Example Valid CSV
 
     http://www.fusionbox.com/foo/, /bar/
-    http://www.fusionbox.com/baz/, /asdf/, 302 /fdsa/,
-    http://www.fusionbox.com/asdf/ /something/, http://www.google.com/
+    http://www.fusionbox.com/baz/, /asdf/, 302
+    /fdsa/, http://www.fusionbox.com/asdf/
+    /something/, http://www.google.com/
     /another-thing/
 
 ### Example CSV with circular redirects or error redirects
