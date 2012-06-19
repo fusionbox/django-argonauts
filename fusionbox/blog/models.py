@@ -1,4 +1,5 @@
 import datetime
+import collections
 
 from django.db import models
 from ckeditor.fields import RichTextField
@@ -39,6 +40,25 @@ class Blog(behaviors.Timestampable, behaviors.SEO, behaviors.Publishable):
         def published(self):
             # duplicated from behaviors.Publishable because we need a method, not an extra manager
             return self.filter(is_published=True, publish_at__lte=datetime.datetime.now())
+
+        def year_month_groups(self):
+            """
+            returns a dictionary of year -> (dictionary of month -> list of objects)
+            """
+
+            res = collections.defaultdict(lambda: collections.defaultdict(list))
+            # this does too many queries, because all the tags are fetched. it
+            # should use defer('tags'), but that causes a bug. See the
+            # BlogTest.test_year_month_groups for a test that'll fail when
+            # defer is used here.
+            for obj in self:
+                res[obj.created_at.year][obj.created_at.month].append(obj)
+
+            # defaultdicts don't work right in django templates (.items # resolves as ['items'])
+            # so convert to normal dicts
+            for k in res:
+                res[k] = dict(res[k])
+            return dict(res)
 
 
     @models.permalink

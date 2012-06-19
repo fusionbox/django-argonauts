@@ -6,6 +6,7 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 import re
 import warnings
+import calendar
 
 inflect = None
 try:
@@ -414,3 +415,8 @@ def pluralize_with(count, noun):
         raise ImportError('"inflect" module is not available.  Install using `pip install inflect`.')
 
     return str(count) + " " + inflect.plural(noun, count)
+
+
+@register.filter
+def month_name(month_number):
+    return calendar.month_name[month_number]

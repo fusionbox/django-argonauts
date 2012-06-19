@@ -11,14 +11,21 @@ class WithTagMixin(object):
         context['tags'] = Tag.objects.all()
         return context
 
+class WithLeftNavMixin(object):
+    def get_context_data(self, *args, **kwargs):
+        context = super(WithLeftNavMixin, self).get_context_data(*args, **kwargs)
+        # lambda makes it lazy
+        context['blogs_for_left_nav'] = lambda: Blog.objects.published().year_month_groups()
+        return context
 
-class IndexView(WithTagMixin, ListView):
+
+class IndexView(WithTagMixin, WithLeftNavMixin, ListView):
     model = Blog
     context_object_name = 'posts'
     paginate_by = 10
 
     def get_queryset(self):
-        qs = Blog.objects.published().order_by('-created_at')
+        qs = Blog.objects.published().order_by('-created_at').select_related('author')
         try:
             qs = self.model.tagged.with_all([self.kwargs['tag']], qs)
         except KeyError:
@@ -38,7 +45,7 @@ class IndexView(WithTagMixin, ListView):
 index = IndexView.as_view(template_name="blog/blog_list.html")
 
 
-class TagDetailView(WithTagMixin, DetailView):
+class TagDetailView(WithTagMixin, WithLeftNavMixin, DetailView):
     pass
 
 detail = TagDetailView.as_view(
