@@ -33,18 +33,21 @@ Add `fusionbox.middleware.RedirectFallbackMiddleware` to your
 `MIDDLEWARE_CLASSES` to activate.  Run `./manage.py validate_redirects` to
 check redirects for problem and view any warnings raised.
 
-### Example Valid CSV http://www.fusionbox.com/foo/, /bar/
-http://www.fusionbox.com/baz/, /asdf/, 302 /fdsa/,
-http://www.fusionbox.com/asdf/ /something/, http://www.google.com/
-/another-thing/
+### Example Valid CSV
+
+    http://www.fusionbox.com/foo/, /bar/
+    http://www.fusionbox.com/baz/, /asdf/, 302 /fdsa/,
+    http://www.fusionbox.com/asdf/ /something/, http://www.google.com/
+    /another-thing/
 
 ### Example CSV with circular redirects or error redirects
-http://www.fusionbox.com/foo/, /bar/ http://www.fusionbox.com/bar/, /baz/
 
+    http://www.fusionbox.com/foo/, /bar/ http://www.fusionbox.com/bar/, /baz/
     http://www.fusionbox.com/bar/, /bar/
 
-### Example CSV with redirects which raise warnings.  /foo/,
-http://www.fusionbox.com/foo/
+### Example CSV with redirects which raise warnings.
+
+    /foo/, http://www.fusionbox.com/foo/
 
 ## Behaviors
 Behaviors are a [DRY](http://c2.com/cgi/wiki?DontRepeatYourself)
