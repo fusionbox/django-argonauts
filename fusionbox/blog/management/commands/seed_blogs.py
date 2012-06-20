@@ -1,7 +1,7 @@
 import random
 import datetime
 import urllib
-import tempfile
+from optparse import make_option
 
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
@@ -29,13 +29,19 @@ def random_text(nwords, choices=word_list):
         got_words += 1
     return ' '.join(words)
 
-def random_image():
-    tmpfile, header = urllib.urlretrieve('http://placenoun.com/unicorn')
+def random_image(word='unicorn'):
+    tmpfile, header = urllib.urlretrieve('http://placenoun.com/' + urllib.quote_plus(word))
     name = random_text(3)
     return default_storage.save(name, File(open(tmpfile), name=name))
 
 class Command(BaseCommand):
     help = "Creates some random blogs"
+    option_list = BaseCommand.option_list + (
+    make_option('--images',
+        action='store_true',
+        default=False,
+        help='Include some random images'),
+    )
     def handle(self, *args, **options):
         author = User.objects.create(
                 first_name=random_text(1, names),
@@ -46,8 +52,9 @@ class Command(BaseCommand):
 
         for i in range(25):
             body = random_text(500)
+            title_first = random_text(1)
             Blog.objects.create(
-                    title=random_text(5),
+                    title=title_first + ' ' + random_text(4),
                     author=author,
                     summary=body[:40],
                     body=body,
@@ -55,5 +62,5 @@ class Command(BaseCommand):
                     is_published=True,
                     publish_at=datetime.datetime.now() - datetime.timedelta(days=random.randint(1, 1000)),
                     created_at=datetime.datetime.now() - datetime.timedelta(days=random.randint(1, 1000)),
-                    image=random_image() if random.randint(0,10)==0 else None,
+                    image=random_image(title_first) if options['images'] and random.randint(0,3)==0 else None,
                     )
