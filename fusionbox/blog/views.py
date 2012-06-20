@@ -42,8 +42,19 @@ class IndexView(WithTagMixin, WithLeftNavMixin, ListView):
         except KeyError:
             pass
 
-
         return qs
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(IndexView, self).get_context_data(*args, **kwargs)
+        try:
+            context['tag'] = Tag.objects.get(name=self.kwargs['tag'])
+        except:
+            pass
+        try:
+            context['author'] = User.objects.get(id=self.kwargs['author_id'])
+        except:
+            pass
+        return context
 
 index = IndexView.as_view(template_name="blog/blog_list.html")
 
