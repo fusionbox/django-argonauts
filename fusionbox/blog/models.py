@@ -2,19 +2,21 @@ import datetime
 import collections
 
 from django.db import models
-from ckeditor.fields import RichTextField
-from fusionbox import behaviors
+from django.core.cache import cache
+from django.db.models.signals import post_save
+from django.contrib.auth.models import User
 from django_extensions.db.fields import AutoSlugField
-from south.modelsinspector import add_introspection_rules
+
 import tagging
 import tagging.fields
 import tagging.managers
-from django.contrib.auth.models import User
 
+from ckeditor.fields import RichTextField
 
-from fusionbox.behaviors import AdminSearchableQueryset
+from fusionbox import behaviors
 from fusionbox.db.models import QuerySetManager
 
+from south.modelsinspector import add_introspection_rules
 add_introspection_rules([], ['^ckeditor\.fields\.RichTextField'])
 add_introspection_rules([], ["^tagging\.fields\.TagField"])
 
@@ -35,7 +37,7 @@ class Blog(behaviors.Timestampable, behaviors.SEO, behaviors.Publishable):
         return self.title
 
 
-    class QuerySet(AdminSearchableQueryset):
+    class QuerySet(behaviors.AdminSearchableQueryset):
         search_fields = ('title', 'author__first_name', 'author__last_name', 'body', 'tags')
 
         def published(self):
@@ -65,3 +67,11 @@ class Blog(behaviors.Timestampable, behaviors.SEO, behaviors.Publishable):
     @models.permalink
     def get_absolute_url(self):
         return ('blog:fusionbox.blog.views.detail', (), {'slug': self.slug})
+
+
+def update_cache_version(*args, **kwargs):
+    cache.add('fusionbox.blog.all_blogs.version', 0)
+    cache.incr('fusionbox.blog.all_blogs.version')
+
+post_save.connect(update_cache_version, sender=User)
+post_save.connect(update_cache_version, sender=Blog)

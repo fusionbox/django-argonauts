@@ -16,6 +16,7 @@ class WithLeftNavMixin(object):
         context = super(WithLeftNavMixin, self).get_context_data(*args, **kwargs)
         # lambda makes it lazy
         context['blogs_for_left_nav'] = lambda: Blog.objects.published().year_month_groups()
+        context['blogs_cache_version'] = lambda: cache.get('fusionbox.blog.all_blogs.version')
         return context
 
 
