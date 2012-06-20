@@ -12,7 +12,7 @@ from .models import *
 class BlogAdmin(VersionAdmin):
     fieldsets = (
             (None, {
-                'fields': ['title', 'author', 'body', 'tags',
+                'fields': ['title', 'author', 'summary', 'body', 'tags',
                 'created_at', 'image']
                 }),
             ('Publishing', {
