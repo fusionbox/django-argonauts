@@ -27,7 +27,7 @@ class IndexView(WithTagMixin, WithLeftNavMixin, ListView):
     def get_queryset(self):
         qs = Blog.objects.published().order_by('-created_at').select_related('author')
         try:
-            qs = self.model.tagged.with_all([self.kwargs['tag']], qs)
+            qs = qs.search(self.request.GET['search'])
         except KeyError:
             pass
         try:
@@ -35,10 +35,12 @@ class IndexView(WithTagMixin, WithLeftNavMixin, ListView):
         except KeyError:
             pass
 
+        # this must go last, the tagged manager returns a different queryset
         try:
-            qs = qs.search(self.request.GET['search'])
+            qs = self.model.tagged.with_all([self.kwargs['tag']], qs)
         except KeyError:
             pass
+
 
         return qs
 
