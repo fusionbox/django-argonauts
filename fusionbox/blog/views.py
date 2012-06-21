@@ -1,8 +1,11 @@
 from django.views.generic import (ListView, DetailView)
+from django.core.cache import cache
+from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
 
 from tagging.models import Tag
 
-from .models import *
+from .models import Blog
 
 
 class WithTagMixin(object):
@@ -11,16 +14,16 @@ class WithTagMixin(object):
         context['tags'] = Tag.objects.all()
         return context
 
-class WithLeftNavMixin(object):
+class BlogContextMixin(object):
     def get_context_data(self, *args, **kwargs):
-        context = super(WithLeftNavMixin, self).get_context_data(*args, **kwargs)
+        context = super(BlogContextMixin, self).get_context_data(*args, **kwargs)
         # lambda makes it lazy
         context['blogs_for_left_nav'] = lambda: Blog.objects.published().year_month_groups()
         context['blogs_cache_version'] = lambda: cache.get('fusionbox.blog.all_blogs.version')
         return context
 
 
-class IndexView(WithTagMixin, WithLeftNavMixin, ListView):
+class IndexView(WithTagMixin, BlogContextMixin, ListView):
     model = Blog
     context_object_name = 'posts'
     paginate_by = 10
@@ -47,22 +50,22 @@ class IndexView(WithTagMixin, WithLeftNavMixin, ListView):
     def get_context_data(self, *args, **kwargs):
         context = super(IndexView, self).get_context_data(*args, **kwargs)
         try:
-            context['tag'] = Tag.objects.get(name=self.kwargs['tag'])
-        except:
+            context['tag'] = get_object_or_404(Tag, name=self.kwargs['tag'])
+        except KeyError:
             pass
         try:
-            context['author'] = User.objects.get(id=self.kwargs['author_id'])
-        except:
+            context['author'] = get_object_or_404(User, id=self.kwargs['author_id'])
+        except KeyError:
             pass
         return context
 
 index = IndexView.as_view(template_name="blog/blog_list.html")
 
 
-class TagDetailView(WithTagMixin, WithLeftNavMixin, DetailView):
+class BlogDetailView(WithTagMixin, BlogContextMixin, DetailView):
     pass
 
-detail = TagDetailView.as_view(
+detail = BlogDetailView.as_view(
         model=Blog,
         context_object_name='post',
         template_name="blog/blog_details.html"
