@@ -53,8 +53,12 @@ class Command(BaseCommand):
         for i in range(25):
             body = random_text(500)
             title_first = random_text(1)
+            title = title_first + ' ' + random_text(4)
             Blog.objects.create(
-                    title=title_first + ' ' + random_text(4),
+                    title=title,
+                    seo_title='Blog ' + title,
+                    seo_keywords=random_text(5),
+                    seo_description=body[:40],
                     author=author,
                     summary=body[:40],
                     body=body,
