@@ -35,7 +35,7 @@ class MultiFileWidget(FileInput):
             - size (in bytes)
         """
         return u"""
-<p class="uploaded_file">
+<p class="uploaded_image">
 <a href="" class="remove_input">x</a> <span class="filename">
 ${ name }</span> <span class="filesize">[${ size } bytes]</span>
 </p>"""
