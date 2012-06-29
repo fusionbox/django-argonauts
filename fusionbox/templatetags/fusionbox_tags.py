@@ -195,6 +195,9 @@ def attr(obj, arg1):
 
 
 def more_json(obj):
+    """
+    Allows decimals and objects with `to_json` methods to be serialized.
+    """
     if isinstance(obj, Decimal):
         return float(obj)
     if hasattr(obj, 'to_json'):
@@ -204,7 +207,25 @@ def more_json(obj):
 
 @register.filter
 def json(a):
-    return mark_safe(simplejson.dumps(a, default=more_json))
+    """
+    Output the json encoding of its argument.
+
+    This will escape all the HTML/XML special characters with their unicode
+    escapes, so it is safe to be output anywhere except for inside a tag
+    attribute.
+
+    If the output needs to be put in an attribute, entitize the output of this
+    filter.
+    """
+    json_str = simplejson.dumps(a, default=more_json)
+
+    # Escape all the XML/HTML special characters.
+    escapes = ['<', '>', '&',]
+    for c in escapes:
+        json_str = json_str.replace(c, r'\u%04x' % ord(c))
+
+    # now it's safe to use mark_safe
+    return mark_safe(json_str)
 json.is_safe = True
 
 
