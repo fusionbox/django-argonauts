@@ -125,6 +125,10 @@ class Behavior(models.Model):
         # Everything in declared_fields was pulled out by our metaclass, time
         # to add them back in
         for parent in cls.mro():
+            if cls._meta.proxy:
+                # Proxy models already had their fields added via the parent
+                # model, so don't add them again.
+                continue
             try:
                 declared_fields = parent.declared_fields
             except AttributeError:  # Model itself doesn't have declared_fields

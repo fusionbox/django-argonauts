@@ -146,6 +146,20 @@ class TestTimestampable(unittest.TestCase):
         self.assertTrue(isinstance(fields['updated_at'], models.DateTimeField))
 
 
+    def test_proxy(self):
+        class TestProxyParentModel(Timestampable):
+            pass
+        class TestProxyProxyModel(TestProxyParentModel):
+            class Meta:
+                proxy = True
+        field_names = [i.attname for i in TestProxyProxyModel._meta.fields]
+
+        # without careful treatment, proxy models
+        # could have fields added twice. verify that
+        # there are no duplicate field names.
+        self.assertTrue(len(set(field_names)) == len(field_names))
+
+
 class TestValidation(unittest.TestCase):
     def test_bare(self):
         class ValidationTestModel(Validation):
