@@ -18,7 +18,7 @@ class BlogContextMixin(object):
     def get_context_data(self, *args, **kwargs):
         context = super(BlogContextMixin, self).get_context_data(*args, **kwargs)
         # lambda makes it lazy
-        context['blogs_for_left_nav'] = lambda: Blog.objects.published().year_month_groups()
+        context['blogs_for_left_nav'] = lambda: Blog.objects.published().defer('tags').year_month_groups()
         context['blogs_cache_version'] = lambda: cache.get('fusionbox.blog.all_blogs.version')
         return context
 
