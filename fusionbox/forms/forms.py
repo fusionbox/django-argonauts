@@ -79,11 +79,11 @@ class SearchForm(BaseChangeListForm):
     def get_queryset(self):
         qs = super(SearchForm, self).get_queryset()
 
+        qs = self.pre_search(qs)
+
         # Ensure that the form is valid
         if not self.is_valid():
             return qs
-
-        qs = self.pre_search(qs)
 
         # Do Searching
         q = self.cleaned_data.get('q', None).strip()
@@ -239,11 +239,11 @@ class SortForm(BaseChangeListForm):
     def get_queryset(self):
         qs = super(SortForm, self).get_queryset()
 
+        qs = self.pre_sort(qs)
+
         # Ensure that the form is valid
         if not self.is_valid():
             return qs
-
-        qs = self.pre_sort(qs)
 
         # Do Sorting
         sorts = self.cleaned_data.get('sort', [])
@@ -364,11 +364,11 @@ class FilterForm(BaseChangeListForm):
     def get_queryset(self):
         qs = super(FilterForm, self).get_queryset()
 
+        qs = self.pre_filter(qs)
+
         #  Ensure that the form is valid
         if not self.is_valid():
             return qs
-
-        qs = self.pre_filter(qs)
 
         # Do filtering
         for field, column_name in self.FILTERS.items():
