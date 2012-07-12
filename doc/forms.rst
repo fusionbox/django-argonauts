@@ -1,5 +1,14 @@
-Form Fields
-===========
+Forms Module
+============
+
+Forms
+-----
+
+.. automodule:: fusionbox.forms.forms
+    :members: BaseChangeListForm, SearchForm, FilterForm, SortForm, CsvForm
+
+Fields
+------
 
 .. automodule:: fusionbox.forms.fields
     :members: MonthField
