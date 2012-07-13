@@ -289,33 +289,34 @@ class FilterForm(BaseChangeListForm):
 
     # Example Usage
 
-    class UserFilterForm(FilterForm):
-        FILTERS = {
-            'active': 'is_active',
-            'date_joined': 'date_joined__gte',
-            'published': None, # Custom filtering
-            }
-        model = User
+    ::
 
-        PUBLISHED_CHOICES = (
-                ('', 'All'),
-                ('before', 'Before Today'),
-                ('after', 'After Today'),
-                )
+        class UserFilterForm(FilterForm):
+            FILTERS = {
+                'active': 'is_active',
+                'date_joined': 'date_joined__gte',
+                'published': None, # Custom filtering
+                }
+            model = User
 
-        active = forms.BooleanField(required=False)
-        date_joined = forms.DateTimeField(required=False)
-        published = forms.ChoiceField(choices=PUBLISHED_CHOICES, widget=forms.HiddenInput())
+            PUBLISHED_CHOICES = (
+                    ('', 'All'),
+                    ('before', 'Before Today'),
+                    ('after', 'After Today'),
+                    )
 
-        def pre_filter(self, queryset):
-            published = self.cleaned_data.get('published')
-            if published == '':
-                return queryset
-            elif published == 'before':
-                return queryset.filter(published_at__lte=datetime.datetime.now())
-            elif published == 'after':
-                return queryset.filter(published_at__gte=datetime.datetime.now())
+            active = forms.BooleanField(required=False)
+            date_joined = forms.DateTimeField(required=False)
+            published = forms.ChoiceField(choices=PUBLISHED_CHOICES, widget=forms.HiddenInput())
 
+            def pre_filter(self, queryset):
+                published = self.cleaned_data.get('published')
+                if published == '':
+                    return queryset
+                elif published == 'before':
+                    return queryset.filter(published_at__lte=datetime.datetime.now())
+                elif published == 'after':
+                    return queryset.filter(published_at__gte=datetime.datetime.now())
 
     `FILTERS` defines a mapping of form fields to queryset filters.
 
