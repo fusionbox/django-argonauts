@@ -29,7 +29,6 @@ import markdown
 
 from django.template.loader import get_template
 from django.template import Context
-from django.core.mail import send_mail
 from django.contrib.sites.models import Site
 from django.core.mail import EmailMultiAlternatives
 from django.utils.safestring import mark_safe
@@ -41,24 +40,23 @@ try:
 except AttributeError:
     EMAIL_LAYOUT = None
 
-def send_markdown_mail(template,
+
+def create_markdown_mail(template,
                        context,
                        to=None,
                        subject=None,
                        from_address=settings.SERVER_EMAIL,
                        layout=EMAIL_LAYOUT):
-
     """
-    The top-level email-sending function.
+    Creates a message from a markdown template and returns it as an
+    `EmailMultiAlternatives` object.
     """
-
     if layout is None:
         raise ValueError('layout was not defined by settings.EMAIL_LAYOUT and none was provided')
 
     meta, raw, html = render_template(template, context, layout)
 
-    # these let the template override the caller, should it be the
-    # other way around?
+    # this lets the template override the caller
     subject = meta.get('subject', subject)
     if not subject:
         raise Exception("Template didn't give a subject and neither did you")
@@ -74,7 +72,16 @@ def send_markdown_mail(template,
     msg = EmailMultiAlternatives(subject, raw, from_address, to)
     msg.attach_alternative(html, 'text/html')
 
+    return msg
+
+
+def send_markdown_mail(*args, **kwargs):
+    """
+    Creates a message and sends it.
+    """
+    msg = create_markdown_mail(*args, **kwargs)
     return msg.send()
+
 
 def render_template(template, context, layout):
     """
@@ -104,6 +111,8 @@ def render_template(template, context, layout):
     return (meta, md, html)
 
 front_matter_re = re.compile('(\s*\n)?^---\n(.*)\n---$\n*', re.MULTILINE | re.DOTALL)
+
+
 def extract_frontmatter(str):
     r"""
     Given a string with YAML style front matter, returns the parsed header and
