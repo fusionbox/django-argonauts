@@ -22,17 +22,25 @@ class IterDict(SortedDict):
 
 class BaseChangeListForm(forms.Form):
     """
-    Base class for SearchForm, FilterForm, and SortForm mixin classes for
-    displaying, sorting, searching and filtering a model.
+    Base class for all `ChangeListForms`.
     """
     error_css_class = 'error'
     required_css_class = 'required'
 
     def __init__(self, *args, **kwargs):
+        """
+        Takes an option named argument `queryset` as the base queryset used in
+        the `get_queryset` method.
+        """
         self.queryset = kwargs.pop('queryset', None)
         super(BaseChangeListForm, self).__init__(*args, **kwargs)
 
     def get_queryset(self):
+        """
+        If the form was initialized with a queryset, this method returns that
+        queryset.  Otherwise it returns `Model.objects.all()` for whatever
+        model was defined for the form.
+        """
         if self.queryset is None:
             return self.model.objects.all()
         return self.queryset
@@ -72,11 +80,16 @@ class SearchForm(BaseChangeListForm):
 
     def post_search(self, qs):
         """
-        Hook for modifying the queryset after the search
+        Hook for modifying the queryset after the search.  Will not be called
+        on an invalid form.
         """
         return qs
 
     def get_queryset(self):
+        """
+        Constructs an '__contains' or '__icontains' filter across all of the
+        fields listed in `SEARCH_FIELDS`.
+        """
         qs = super(SearchForm, self).get_queryset()
 
         qs = self.pre_search(qs)
@@ -178,6 +191,9 @@ class SortForm(BaseChangeListForm):
         return sorts
 
     def headers(self):
+        """
+        Access to the headers template object.
+        """
         headers = IterDict()
         if self.is_valid():
             sorts = self.cleaned_data.get('sort', '')
@@ -232,11 +248,16 @@ class SortForm(BaseChangeListForm):
 
     def post_sort(self, qs):
         """
-        Hook for doing post-sort modification of the queryset
+        Hook for doing post-sort modification of the queryset.  Will not be
+        called on an invalid form.
         """
         return qs
 
     def get_queryset(self):
+        """
+        Returns an ordered queryset, sorted based on the values submitted in
+        the sort parameter.
+        """
         qs = super(SortForm, self).get_queryset()
 
         qs = self.pre_sort(qs)
@@ -298,9 +319,6 @@ class FilterForm(BaseChangeListForm):
 
     `FILTERS` defines a mapping of form fields to queryset filters.
 
-    The `pre_filter` and `post_filter` function hooks allow you to do custom
-    filtering that does not correspond directly to column values
-
     When displaying in the template, this form also provides you with url querystrings for all of your filters.
 
     `form.filters` is a dictionary of all of the filters defined on your form.
@@ -321,7 +339,7 @@ class FilterForm(BaseChangeListForm):
     def filters(self):
         """
         Generates a dictionary of filters with proper queryset links to
-        maintian multiple filters
+        maintian multiple filters.
         """
         filters = IterDict()
         for key in self.FILTERS:
@@ -357,7 +375,9 @@ class FilterForm(BaseChangeListForm):
 
     def post_filter(self, qs):
         """
-        Hook for doing post-filter modification to the queryset
+        Hook for doing post-filter modification to the queryset.  This is also
+        the place where any custom filtering should take place.  Will not be
+        called on an invalid form.
         """
         return qs
 
