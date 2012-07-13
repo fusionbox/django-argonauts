@@ -220,7 +220,7 @@ def json(a):
     json_str = simplejson.dumps(a, default=more_json)
 
     # Escape all the XML/HTML special characters.
-    escapes = ['<', '>', '&',]
+    escapes = ['<', '>', '&']
     for c in escapes:
         json_str = json_str.replace(c, r'\u%04x' % ord(c))
 
