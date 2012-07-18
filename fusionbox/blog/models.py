@@ -33,12 +33,15 @@ class Blog(behaviors.Timestampable, behaviors.SEO, behaviors.Publishable):
     objects = QuerySetManager()
     tagged = tagging.managers.ModelTaggedItemManager()
 
+    class Meta:
+        ordering = ('created_at', )
+
     def __unicode__(self):
         return self.title
 
 
     class QuerySet(behaviors.AdminSearchableQueryset):
-        search_fields = ('title', 'author__first_name', 'author__last_name', 'body', 'tags')
+        search_fields = ('title', 'author__first_name', 'author__last_name', 'summary', 'body', 'tags')
 
         def published(self):
             # duplicated from behaviors.Publishable because we need a method, not an extra manager
