@@ -1,7 +1,7 @@
 {% load fusionbox_tags %}
 {% load cache %}
 
-{% cache 999999 blog_left_nav blogs_cache_version %}
+{% cache 999999 blog_left_nav blogs_cache_version 2 %}
 <ul class="blogs_nav">
 {% for year, months in blogs_for_left_nav.items %}
   <li><a class="year" href="#">{{ year }}</a>
@@ -25,6 +25,7 @@
   $('.blogs_nav .year, .blogs_nav .month').click(function(event) {
     var $this = $(this);
     $this.next().find('> li').toggle();
+    $this.next().toggle();
     event.preventDefault();
     event.stopPropagation();
   });
