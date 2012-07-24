@@ -3,13 +3,13 @@
 
 {% cache 999999 blog_left_nav blogs_cache_version 2 %}
 <ul class="blogs_nav">
-{% for year, months in blogs_for_left_nav.items %}
+{% for year, months in blogs_for_left_nav.items reversed %}
   <li><a class="year" href="#">{{ year }}</a>
     <ul>
-      {% for month, blogs in months.items %}
+      {% for month, blogs in months.items  reversed %}
         <li><a class="month" href="#">{{ month|month_name }}</a>
           <ul>
-            {% for blog in blogs %}
+            {% for blog in blogs reversed %}
               <li><a href="{{blog.get_absolute_url}}">{{blog.title}}</a></li>
             {% endfor %}
           </ul>

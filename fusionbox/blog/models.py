@@ -57,7 +57,7 @@ class Blog(behaviors.Timestampable, behaviors.SEO, behaviors.Publishable):
             # should use defer('tags'), but that causes a bug. See the
             # BlogTest.test_year_month_groups for a test that'll fail when
             # defer is used here.
-            for obj in self.reverse():
+            for obj in self:
                 res[obj.created_at.year][obj.created_at.month].append(obj)
 
             # defaultdicts don't work right in django templates (.items # resolves as ['items'])
