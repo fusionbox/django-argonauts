@@ -3,9 +3,15 @@ from django.core.exceptions import ValidationError
 A list of very common passwords and a function for validating that passwords are not too common.
 """
 
+
 def validate_password(pw):
     if pw in COMMON_PASSWORDS:
-        raise ValidationError('Your password is too common. Please choose another.')
+        raise ValidationError(
+                'Your password is too common. Please avoid proper '
+                'nouns, characters in obvious patterns, or any list '
+                'of characters that form a pattern on the keyboard.'
+                )
+
 
 #!comment: This list has been compiled by Solar Designer of Openwall Project,
 #!comment: http://www.openwall.com/wordlists/
