@@ -254,7 +254,8 @@ def us_dollars(value):
     """
     Returns the value formatted as whole US dollars.
 
-    Example:
+    Example::
+
         if value = -20000
         {{ value|us_dollars }} => -$20,000
     """
@@ -278,13 +279,12 @@ def us_cents(value, places=1):
     Returns the value formatted as US cents.  May specify decimal places for
     fractional cents.
 
-    Example:
-        where c means cents symbol:
+    ::
 
-        if value = -20.125
+        # if value = -20.125
         {{ value|us_cents }} => -20.1 \u00a2
 
-        if value = 0.082
+        # if value = 0.082
         {{ value|us_cents:3 }} => 0.082 \u00a2
     """
     # Try to convert to float
@@ -318,11 +318,12 @@ def us_dollars_and_cents(value, cent_places=2):
     include extra digits for fractional cents.  This is common when displaying
     utility rates, for instance.
 
-    Example:
-        if value = -20000.125
+    Example::
+
+        # if value = -20000.125
         {{ value|us_dollars_and_cents }} => -$20,000.13
 
-        if value = 0.082  (8.2 cents)
+        # if value = 0.082  (8.2 cents)
         {{ value|us_dollars_and_cents:3 }} => $0.082
     """
     # Try to convert to Decimal
@@ -355,12 +356,13 @@ def add_commas(value, round=0):
     places.  Humanize's intcomma is not adequate since it does not allow
     formatting of real numbers.
 
-    Example:
-        if value = 20000
+    Example::
+
+        # if value = 20000
         {{ value|add_commas }} => 20,000
         {{ value|add_commas:3 }} => 20,000.000
 
-        if value = 1234.5678
+        # if value = 1234.5678
         {{ value|add_commas:2 }} => 1,234.57
     """
     # Decimals honor locale settings correctly
@@ -385,47 +387,19 @@ def add_commas(value, round=0):
 
 
 @register.filter
-def naturalduration(time, show_minutes=None):
-    """
-    Displays a time delta in a form that is more human-readable.  Accepts a
-    datetime.timedelta object.  Microseconds in timedelta objects are ignored.
-    The `show_minutes` argument specifies whether or not to include the number
-    of minutes in the display.  If it evaluates to false, minutes are not
-    included and are rounded into the number of hours.
-
-    Example:
-        if time = datetime.timedelta(2, 7280, 142535)
-        {{ time|naturalduration }} => 2 days, 2 hours
-        {{ time|naturalduration:"minutes" }} => 2 days, 2 hours, 1 minute
-    """
-    days = time.days
-    hours = int(time.seconds / 3600) if show_minutes else int(round(time.seconds / 3600.0))
-    minutes = int((time.seconds % 3600) / 60) if show_minutes else 0
-
-    display = []
-    if days:
-        display.append('{0} days'.format(days))
-    if hours:
-        display.append('{0} hours'.format(hours))
-    if minutes:
-        display.append('{0} minutes'.format(minutes))
-
-    return ', '.join(display)
-
-
-@register.filter
 def pluralize_with(count, noun):
     """
     Pluralizes ``noun`` depending on ``count``.  Returns only the
     noun, either pluralized or not pluralized.
 
-    Usage:
+    Usage::
+
         {{ number_of_cats|pluralize_with:"cat" }}
 
-    Outputs:
-        number_of_cats == 0: "0 cats"
-        number_of_cats == 1: "1 cat"
-        number_of_cats == 2: "2 cats"
+        # Outputs::
+        # number_of_cats == 0: "0 cats"
+        # number_of_cats == 1: "1 cat"
+        # number_of_cats == 2: "2 cats"
 
     Requires the ``inflect`` module.  If it isn't available, this filter
     will not be loaded.

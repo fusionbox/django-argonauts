@@ -8,15 +8,16 @@ class QuerySetManager(models.Manager):
     managers and queryset classes.
 
     Example Usage
+    ::
 
-    from django.db.models.query import QuerySet
-    from fusionbox.db.models import QuerySetManager
+        from django.db.models.query import QuerySet
+        from fusionbox.db.models import QuerySetManager
 
-    class Foo(models.Model):
-        objects = QuerySetManager()
-        class QuerySet(QuerySet):
-            def published(self):
-                return self.filter(is_published=True)
+        class Foo(models.Model):
+            objects = QuerySetManager()
+            class QuerySet(QuerySet):
+                def published(self):
+                    return self.filter(is_published=True)
     """
     use_for_related_fields = True
     def get_query_set(self):

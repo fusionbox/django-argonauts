@@ -5,7 +5,6 @@ import warnings
 
 from collections import defaultdict
 
-from django.forms.forms import BaseForm
 from django.conf import settings
 from django.template import TemplateDoesNotExist, RequestContext
 from django.http import Http404, HttpResponse
@@ -44,6 +43,11 @@ class GenericTemplateFinderMiddleware(object):
     autolocate a template for otherwise 404 responses.
     """
     def process_response(self, request, response):
+        """
+        Ensures that
+        404 raised from view functions are not caught by
+        ``GenericTemplateFinderMiddleware``.
+        """
         if response.status_code == 404 and not getattr(request, '_generic_template_finder_middleware_view_found', False):
             try:
                 return generic_template_finder_view(request)
@@ -60,36 +64,6 @@ class GenericTemplateFinderMiddleware(object):
         it threw a real 404.
         """
         request._generic_template_finder_middleware_view_found = True
-
-
-class AutoErrorClassOnFormsMiddleware(object):
-    """
-    Middleware which adds an error class to all form widgets that have a field
-    error.
-
-    Requires that views return a TemplateResponse object.
-
-    Iterates through all values in the response context looking for anything
-    which inherits from django's BaseForm.  Any fields with field specific
-    errors have the class 'error' appended to their widget dictionary of
-    attributes.
-    """
-    def process_template_response(self, request, response):
-        for val in response.context_data.values():
-            if issubclass(type(val), BaseForm):
-                if val._errors:
-                    for name in val._errors.keys():
-                        if not name in val.fields:
-                            continue
-                        field = val.fields[name]
-                        cls = field.widget.attrs.get('class', '')
-                        if 'error' in cls:
-                            continue
-                        else:
-                            cls += ' error'
-                            cls = cls.strip()
-                        field.widget.attrs['class'] = cls
-        return response
 
 
 def get_redirect(redirects, path, full_uri):
@@ -237,11 +211,11 @@ class RedirectFallbackMiddleware(object):
     non 404 error, this middleware will not produce a redirect
 
     Redirects should be formatted in CSV files located in either
-    `<project_path>/redirects/` or an absolute path declared in
-    `settings.REDIRECTS_DIRECTORY`.
+    ``<project_path>/redirects/`` or an absolute path declared in
+    ``settings.REDIRECTS_DIRECTORY``.
 
-    CSV files should not contain any headers, and be in the format `source_url,
-    target_url, status_code` where `status_code` is optional and defaults to 301.
+    CSV files should not contain any headers, and be in the format ``source_url,
+    target_url, status_code`` where ``status_code`` is optional and defaults to 301.
     To issue a 410, leave off target url and status code.
     """
     def __init__(self, *args, **kwargs):

@@ -1,25 +1,4 @@
 """
-Markdown-templated email.
-
-An email template looks like this::
-
-    ---
-    subject: Hello, {{user.first_name}}
-    ---
-    Welcome to the site.
-
-When using :func:`send_markdown_mail`, its output is placed in a layout to
-produce a full html document::
-
-    <!DOCTYPE html>
-    <html>
-        <body>
-            {{content}}
-        </body>
-    </html>
-
-The default layout is specified in ``settings.EMAIL_LAYOUT``, but can be
-overridden on a per-email basis.
 """
 
 import re
@@ -49,7 +28,7 @@ def create_markdown_mail(template,
                        layout=EMAIL_LAYOUT):
     """
     Creates a message from a markdown template and returns it as an
-    `EmailMultiAlternatives` object.
+    ``EmailMultiAlternatives`` object.
     """
     if layout is None:
         raise ValueError('layout was not defined by settings.EMAIL_LAYOUT and none was provided')
@@ -77,7 +56,8 @@ def create_markdown_mail(template,
 
 def send_markdown_mail(*args, **kwargs):
     """
-    Creates a message and sends it.
+    Wrapper around :func:`create_markdown_mail` that creates and sends the
+    message in one step.
     """
     msg = create_markdown_mail(*args, **kwargs)
     return msg.send()

@@ -1,8 +1,6 @@
 Auth
 ====
 
-Intro
-------
 Authentication backend to allow you to insert your own user model into the
 built in django authentication backend.
 

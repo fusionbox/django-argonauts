@@ -22,6 +22,8 @@ Contents:
    forms
    newsletter
    fabric
+   views
+   managers
 
 Indices and tables
 ==================

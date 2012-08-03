@@ -23,8 +23,8 @@ Built in Behaviors
 ------------------
 
 .. automodule:: fusionbox.behaviors
-    :members: Behavior, Timestampable, SEO, Validation
+    :members:
 
 .. autoclass:: fusionbox.behaviors.MetaBehavior
-    :members: __new__
+    :members:
 
