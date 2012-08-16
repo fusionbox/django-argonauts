@@ -2,11 +2,19 @@ from django.db import models
 from django.core.exceptions import ImproperlyConfigured, ValidationError, NON_FIELD_ERRORS
 from django.db.models.base import ModelBase
 from django.db.models.query import QuerySet
+from django.conf import settings
 
 import copy
 import datetime
 
 from fusionbox.db.models import QuerySetManager
+
+if getattr(settings, 'USE_TZ', False):
+    from django.utils.timezone import utc
+    now = datetime.datetime.utcnow().replace(tzinfo=utc)
+else:
+    now = datetime.datetime.now
+
 
 
 class EmptyObject(object):
@@ -234,7 +242,7 @@ class Timestampable(Behavior):
 
     Added Fields:
         Field 1:
-            field: DateTimeField(default=datetime.datetime.now)
+            field: DateTimeField(default=now)
             description: Timestamps set at the creation of the instance
             default_name: created_at
         Field 2:
@@ -246,7 +254,7 @@ class Timestampable(Behavior):
     class Meta:
         abstract = True
 
-    created_at = models.DateTimeField(default=datetime.datetime.now)
+    created_at = models.DateTimeField(default=now)
     updated_at = models.DateTimeField(auto_now=True)
 
 
@@ -257,7 +265,7 @@ class PublishableManager(models.Manager):
     """
     def get_query_set(self):
         queryset = super(PublishableManager, self).get_query_set()
-        return queryset.filter(is_published=True, publish_at__lte=datetime.datetime.now())
+        return queryset.filter(is_published=True, publish_at__lte=now())
 
 
 class Publishable(Behavior):
@@ -289,7 +297,7 @@ class Publishable(Behavior):
     class Meta:
         abstract = True
 
-    publish_at = models.DateTimeField(default=datetime.datetime.now, help_text='Selecting a future date will automatically publish to the live site on that date.')
+    publish_at = models.DateTimeField(default=now, help_text='Selecting a future date will automatically publish to the live site on that date.')
     is_published = models.BooleanField(default=True, help_text='Unchecking this will take the entry off the live site regardless of publishing date')
 
     objects = models.Manager()
