@@ -461,25 +461,25 @@ class NodeListNode(template.Node):
 
 class ChoiceNode(template.Node):
     """
-    :ChoiceNode: is a lightwrapper around other nodes.  Wrapping nodes around a
-    :choice: tag flags them for randomization.  The wrapped nodes are placed in
-    an instance property called :contents:.  During render, :ChoiceNode: will
-    simply call render on its :contents: property.
+    ``ChoiceNode`` is a lightwrapper around other nodes.  Wrapping nodes around a
+    ``choice`` tag flags them for randomization.  The wrapped nodes are placed in
+    an instance property called ``contents``.  During render, ``ChoiceNode`` will
+    simply call render on its ``contents`` property.
 
-    It also supplies one helper classmethod :collect_choices: that accepts a
-    parser and returns a list of all the :Choice: nodes.
+    It also supplies one helper classmethod ``collect_choices`` that accepts a
+    parser and returns a list of all the ``Choice`` nodes.
     """
 
     def render(self, context):
         """
-        Will just call :render: on this nodes inner contents, raising the
+        Will just call ``render`` on this nodes inner contents, raising the
         appropriate exceptions from Django's template system.
         """
         return self.contents.render(context)
 
     def __init__(self, parser):
         """
-        Accepts a template parser object.  During :__init__:, the inner content
+        Accepts a template parser object.  During ``__init__``, the inner content
         nodes are parsed and placed into an instance property.
         """
         self.contents = parser.parse(('endchoice',))
@@ -488,7 +488,7 @@ class ChoiceNode(template.Node):
     @classmethod
     def collect_choices(cls, parser, endtag='endrandom'):
         """
-        Parses until :endrandom: tag is found, filtering out any non-Choice
+        Parses until ``endrandom`` tag is found, filtering out any non-Choice
         nodes.
         """
         return filter(
@@ -500,7 +500,7 @@ class ChoiceNode(template.Node):
 @register.tag
 def choice(parser, token):
     """
-    Returns a :ChoiceNode:
+    Returns a ``ChoiceNode``
     """
     return ChoiceNode(parser)
 
