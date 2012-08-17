@@ -382,6 +382,52 @@ class TestTwoBehaviors(unittest.TestCase):
         self.assertTrue(isinstance(fields['updated_at'], models.DateTimeField))
 
 
+class TestRandomTags(SimpleTestCase):
+
+    def test_random_choice_empty(self):
+        with self.assertRaises(IndexError):
+            Template(
+                    '{% load random_choice from fusionbox_tags %}'
+                    '{% random_choice %}'
+                    '{% endrandom %}'
+                    )
+
+    def test_random_choice_one(self):
+        t = Template(
+                '{% load random_choice from fusionbox_tags %}'
+                '{% load choice from fusionbox_tags %}'
+                '{% random_choice %}'
+                '{% choice %}'
+                '<p>Hello</p>'
+                '{% endchoice %}'
+                '{% endrandom %}'
+                )
+        self.assertHTMLEqual('<p>Hello</p>', t.render(Context({})))
+
+    def test_random_choice_many(self):
+        hello_count = goodbye_count = 0
+        for x in xrange(0, 1000):
+            t = Template(
+                    '{% load random_choice from fusionbox_tags %}'
+                    '{% load choice from fusionbox_tags %}'
+                    '{% random_choice %}'
+                    '{% choice %}'
+                    '<p>Hello</p>'
+                    '{% endchoice %}'
+                    '{% choice %}'
+                    '<p>Goodbye</p>'
+                    '{% endchoice %}'
+                    '{% endrandom %}'
+                    )
+            try:
+                self.assertHTMLEqual('<p>Hello</p>', t.render(Context({})))
+                hello_count += 1
+            except AssertionError:
+                self.assertHTMLEqual('<p>Goodbye</p>', t.render(Context({})))
+                goodbye_count += 1
+        print "Hello: {0}, Goodbye: {1}".format(hello_count, goodbye_count)
+
+
 class TestHighlightHereTags(unittest.TestCase):
     request = Request()
 
