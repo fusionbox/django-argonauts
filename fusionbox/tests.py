@@ -425,7 +425,11 @@ class TestRandomTags(SimpleTestCase):
             except AssertionError:
                 self.assertHTMLEqual('<p>Goodbye</p>', t.render(Context({})))
                 goodbye_count += 1
-        print "Hello: {0}, Goodbye: {1}".format(hello_count, goodbye_count)
+        print "\n----------"
+        print "`test_random_choice_many` passes with:"
+        print "Hello: %s" % hello_count
+        print "Goodbye: %s" % goodbye_count
+        print "----------"
 
 
 class TestHighlightHereTags(unittest.TestCase):
