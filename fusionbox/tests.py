@@ -479,7 +479,7 @@ class TestRandomTags(SimpleTestCase):
 
     def test_random_choice_many(self):
         hello_count = goodbye_count = 0
-        for x in xrange(0, 1000):
+        for x in xrange(0, 100):
             t = Template(
                     '{% load random_choice from fusionbox_tags %}'
                     '{% load choice from fusionbox_tags %}'
