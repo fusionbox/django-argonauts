@@ -386,6 +386,7 @@ def add_commas(value, round=0):
     # Super gross, but it works for both 2.6 and 2.7.
     return locale.format("%." + str(round) + "f", value, grouping=True)
 
+
 @register.filter
 def naturalduration(time, show_minutes=None):
     """
@@ -413,7 +414,6 @@ def naturalduration(time, show_minutes=None):
         display.append('{0} minutes'.format(minutes))
 
     return ', '.join(display)
-
 
 
 @register.filter
