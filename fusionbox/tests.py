@@ -1,7 +1,6 @@
-from pprint import pprint
-
 from django.db import models
 from django.utils import unittest
+from django.test import SimpleTestCase
 from django.template import Template, Context
 from django.http import HttpRequest as Request
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS, ImproperlyConfigured
@@ -9,7 +8,6 @@ import warnings
 
 from fusionbox.middleware import get_redirect, preprocess_redirects
 from fusionbox.behaviors import *
-from fusionbox.templatetags import fusionbox_tags
 
 
 class TestObject(object):
