@@ -438,3 +438,65 @@ def pluralize_with(count, noun):
         raise ImportError('"inflect" module is not available.  Install using `pip install inflect`.')
 
     return str(count) + " " + inflect.plural(noun, count)
+
+
+class RandomNode(template.Node):
+
+    def render(self, context):
+        return self.nodelist.render(context)
+
+    def __init__(self, nodelist):
+        self.nodelist = nodelist
+
+
+class ChoiceNode(template.Node):
+
+    def render(self, context):
+        return self.contents.render(context)
+
+    def __init__(self, parser):
+        self.contents = parser.parse(('endchoice',))
+        parser.delete_first_token()
+
+    @classmethod
+    def collect_choices(cls, parser):
+        return filter(
+                lambda node: node.__class__ is cls,
+                parser.parse(('endrandom',))
+                )
+
+
+@register.tag
+def choice(parser, token):
+    return ChoiceNode(parser)
+
+
+@register.tag
+def random_choice(parser, token):
+    """
+    Randomly picks one of the choice nodes to display.
+    """
+    choices = ChoiceNode.collect_choices(parser)
+    parser.delete_first_token()
+    try:
+        return random.choice(choices)
+    except IndexError:
+        raise IndexError(u"You must add choices to the `random_choice` block")
+
+
+@register.tag
+def random_order(parser, token):
+    """
+    Randomly orders each choice node.
+    """
+    nodelist = parser.parse(('endrandom',))
+    choices = filter(
+            lambda node: node[1].__class__ is ChoiceNode,
+            enumerate(nodelist)
+            )
+    parser.delete_first_token()
+    indexes = [i[0] for i in choices]
+    random.shuffle(indexes)
+    for choice in zip(indexes, choices):
+        nodelist[choice[0]] = choice[1][1]
+    return RandomNode(nodelist)
