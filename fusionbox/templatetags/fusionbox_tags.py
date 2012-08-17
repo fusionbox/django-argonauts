@@ -440,9 +440,19 @@ def pluralize_with(count, noun):
     return str(count) + " " + inflect.plural(noun, count)
 
 
-class RandomNode(template.Node):
+class NodeListNode(template.Node):
+    """
+    Registered tags are expected to return an instance of template.Node or a
+    subclass thereof.
+
+    An instance of this class accepts a nodelist on initialization and simply
+    renders the nodelist as render is called.
+    """
 
     def render(self, context):
+        """
+        Simply renders :self.nodelist
+        """
         return self.nodelist.render(context)
 
     def __init__(self, nodelist):
@@ -450,24 +460,48 @@ class RandomNode(template.Node):
 
 
 class ChoiceNode(template.Node):
+    """
+    :ChoiceNode: is a lightwrapper around other nodes.  Wrapping nodes around a
+    :choice: tag flags them for randomization.  The wrapped nodes are placed in
+    an instance property called :contents:.  During render, :ChoiceNode: will
+    simply call render on its :contents: property.
+
+    It also supplies one helper classmethod :collect_choices: that accepts a
+    parser and returns a list of all the :Choice: nodes.
+    """
 
     def render(self, context):
+        """
+        Will just call :render: on this nodes inner contents, raising the
+        appropriate exceptions from Django's template system.
+        """
         return self.contents.render(context)
 
     def __init__(self, parser):
+        """
+        Accepts a template parser object.  During :__init__:, the inner content
+        nodes are parsed and placed into an instance property.
+        """
         self.contents = parser.parse(('endchoice',))
         parser.delete_first_token()
 
     @classmethod
-    def collect_choices(cls, parser):
+    def collect_choices(cls, parser, endtag='endrandom'):
+        """
+        Parses until :endrandom: tag is found, filtering out any non-Choice
+        nodes.
+        """
         return filter(
                 lambda node: node.__class__ is cls,
-                parser.parse(('endrandom',))
+                parser.parse((endtag,))
                 )
 
 
 @register.tag
 def choice(parser, token):
+    """
+    Returns a :ChoiceNode:
+    """
     return ChoiceNode(parser)
 
 
@@ -499,4 +533,4 @@ def random_order(parser, token):
     random.shuffle(indexes)
     for choice in zip(indexes, choices):
         nodelist[choice[0]] = choice[1][1]
-    return RandomNode(nodelist)
+    return NodeListNode(nodelist)
