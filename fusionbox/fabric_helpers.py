@@ -9,9 +9,10 @@ from fabric.contrib.console import *
 from fabric.contrib.project import rsync_project
 
 
+env.workon_home = '/etc/python-environments'
 @_contextmanager
 def virtualenv(dir):
-    with prefix('source %s/bin/activate' % dir):
+    with prefix('source %s/%s/bin/activate' % (env.workon_home, dir)):
         yield
 
 
@@ -50,7 +51,6 @@ def update_git(branch):
 
 
 env.tld = '.com'
-env.workon_home = '/etc/python-environments/'
 def stage(pip=False, migrate=False, syncdb=False, branch=None):
     """
     stage will update the remote git version to your local HEAD, collectstatic, migrate and
@@ -64,7 +64,7 @@ def stage(pip=False, migrate=False, syncdb=False, branch=None):
         update_pip = pip or files_changed(version, "requirements.txt")
         migrate = migrate or files_changed(version, "*/migrations/* %s/settings.py requirements.txt" % env.project_name)
         syncdb = syncdb or files_changed(version, "*/settings.py")
-        with virtualenv('%s%s' % (env.workon_home, env.short_name)):
+        with virtualenv(env.short_name):
             if update_pip:
                 run("pip install -r ./requirements.txt")
             if syncdb:
