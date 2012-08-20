@@ -7,6 +7,20 @@ from fusionbox.error_logging.models import Logged404
 
 
 class FusionboxCommonMiddleware(object):
+    """
+    Impliments ``django.middleware.commom.CommonMiddleware`` broken link email
+    messages in a slightly different way.  Internal broken links still function
+    the same.  External broken links will now only trigger error emails once.
+    All broken links are also logged to the database.
+
+    To enable:
+
+    * add ``fusionbox.error_logging`` to ``INSTALLED_APPS`` add
+    * ``fusionbox.error_logging.middleware.FusionboxCommonMiddleware`` to ``MIDDLEWARE_CLASSES``
+
+    This app also registers ``fusionbox.error_logging.admin.Logged404Admin`` to
+    the django admin center.
+    """
     def __init__(self, *args, **kwargs):
         if settings.SEND_BROKEN_LINK_EMAILS:
             raise ImproperlyConfigured('FusionboxCommonMiddleware may not be active while `SEND_BROKEN_LINK_EMAILS` is set to `True`')
