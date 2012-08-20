@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.middleware import _is_ignorable_404, _is_internal_request
+from django.middleware.common import _is_ignorable_404, _is_internal_request
 from django.core.mail import mail_managers
 
 from fusionbox.error_logging.models import Logged404
