@@ -24,7 +24,7 @@ class FusionboxCommonMiddleware(object):
                 # send a note to the managers.
                 domain = request.get_host()
                 referer = request.META.get('HTTP_REFERER', None)
-                is_internal = _is_internal_request(domain, referer)
+                is_internal = bool(_is_internal_request(domain, referer))
                 path = request.get_full_path()
                 if referer and not _is_ignorable_404(path) and (is_internal or '?' not in referer):
                     logged_error, created = Logged404.objects.get_or_create(
