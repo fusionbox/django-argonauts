@@ -8,10 +8,10 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        db.create_index('logged404', ['domain', 'referer', 'path', 'is_internal'], unique=True)
+        db.create_index('error_logging_logged404', ['domain', 'referer', 'path', 'is_internal'], unique=True)
 
     def backwards(self, orm):
-        db.delete_index('logged404', ['domain', 'referer', 'path', 'is_internal'])
+        db.delete_index('error_logging_logged404', ['domain', 'referer', 'path', 'is_internal'])
 
     models = {
         'error_logging.logged404': {
