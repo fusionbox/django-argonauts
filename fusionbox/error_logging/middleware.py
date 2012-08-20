@@ -40,4 +40,4 @@ class FusionboxCommonMiddleware(object):
                             "Referrer: %s\nRequested URL: %s\nUser agent: %s\nIP address: %s\n" \
                                       % (referer, request.get_full_path(), ua, ip),
                                       fail_silently=True)
-                return response
+        return response
