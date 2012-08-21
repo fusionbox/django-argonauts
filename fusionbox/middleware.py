@@ -139,7 +139,7 @@ class Redirect(object):
         self._errors = self._errors or {}
         if self.status_code < 300 or self.status_code > 399 and not self.status_code == 410:
             self.add_error(
-                    'status_code', 
+                    'status_code',
                     "ERROR: {redirect.filename}:{redirect.line_number} - Non 3xx/410 status code({redirect.status_code})".format(redirect=self),
                     )
 
@@ -150,7 +150,7 @@ def preprocess_redirects(lines, raise_errors=True):
     Redirect objects from them, and validates the redirects, returning a
     dictionary of Redirect objects.
     """
-    error_messages = defaultdict(list) 
+    error_messages = defaultdict(list)
     warning_messages = defaultdict(list)
 
     processed_redirects = {}
@@ -163,7 +163,7 @@ def preprocess_redirects(lines, raise_errors=True):
 
         # Catch duplicate declaration of source urls.
         if redirect.source in processed_redirects:
-            first = processed_redirects[redirect.source]
+            processed_redirects[redirect.source]
             warning_messages[redirect.source].append("WARNING: {filename}:{line_number} -  Duplicate declaration of url".format(**line))
         processed_redirects[redirect.source] = redirect
 
@@ -184,7 +184,7 @@ def preprocess_redirects(lines, raise_errors=True):
                 error_messages[redirect.source].append('ERROR: {redirect.filename}:{redirect.line_number} - Circular redirect: {redirect.source} => {redirect.target}'.format(redirect=redirect))
             elif to_url.netloc and not redirect.parsed_source.netloc:
                 warning_messages[redirect.source].append('WARNING: {redirect.filename}:{redirect.line_number}: - Possible circular redirect if hosting on domain {redirect.parsed_target.netloc}: {redirect.source} => {redirect.target}'.format(redirect=redirect))
-    
+
     # Check for circular redirects.
     for source, redirect in processed_redirects.items():
         validate_redirect(redirect)
