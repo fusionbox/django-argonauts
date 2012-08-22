@@ -1,6 +1,8 @@
 import csv
+
 from django.http import HttpResponse
 from django.forms.models import fields_for_model
+from django.contrib import admin
 
 class CsvAdmin(object):
     """
@@ -22,3 +24,25 @@ class CsvAdmin(object):
         for obj in queryset.all():
             writer.writerow([getattr(obj, field) for field in fields])
         return response
+
+
+class SingletonAdmin(admin.ModelAdmin):
+    """
+    Admin class for 'singleton' models, that should only have one instance
+    across the site, like a single homepage video.
+
+    Allows adding objects only when there are none existing. After that it only
+    allows changing. Never allows deletion.
+    """
+
+    def has_add_permission(self, request, *args, **kwargs):
+        return self.model._default_manager.count() == 0
+
+    def has_delete_permission(self, request, *args, **kwargs):
+        return False
+
+    def get_actions(self, request):
+        actions = super(SingletonAdmin, self).get_actions(request)
+        if 'delete_selected' in actions:
+            del actions['delete_selected']
+        return actions

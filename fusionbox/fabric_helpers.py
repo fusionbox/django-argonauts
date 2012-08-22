@@ -9,9 +9,10 @@ from fabric.contrib.console import *
 from fabric.contrib.project import rsync_project
 
 
+env.workon_home = '/etc/python-environments'
 @_contextmanager
 def virtualenv(dir):
-    with prefix('source %s/bin/activate' % dir):
+    with prefix('source %s/%s/bin/activate' % (env.workon_home, dir)):
         yield
 
 
@@ -38,7 +39,8 @@ def update_git(branch):
     try:
         loc = tempfile.mkdtemp()
         put(StringIO(local('git rev-parse %s' % branch, capture=True) + "\n"), 'static/.git_version.txt', mode=0775)
-        local("git archive %s | tar xf - -C %s" % (branch, loc))
+        local("cd `git rev-parse --show-toplevel` && git archive %s | tar xf - -C %s" % (branch, loc))
+        local("chmod -R g+rwX %s" % (loc)) # force group permissions
         # env.cwd is documented as private, but I'm not sure how else to do this
         with settings(warn_only=True):
             loc = loc + '/' # without this, the temp directory will get uploaded instead of just its contents
@@ -62,7 +64,7 @@ def stage(pip=False, migrate=False, syncdb=False, branch=None):
         update_pip = pip or files_changed(version, "requirements.txt")
         migrate = migrate or files_changed(version, "*/migrations/* %s/settings.py requirements.txt" % env.project_name)
         syncdb = syncdb or files_changed(version, "*/settings.py")
-        with virtualenv('/var/python-environments/%s' % env.short_name):
+        with virtualenv(env.short_name):
             if update_pip:
                 run("pip install -r ./requirements.txt")
             if syncdb:

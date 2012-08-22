@@ -1,7 +1,6 @@
-from pprint import pprint
-
 from django.db import models
 from django.utils import unittest
+from django.test import SimpleTestCase
 from django.template import Template, Context
 from django.http import HttpRequest as Request
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS, ImproperlyConfigured
@@ -9,7 +8,6 @@ import warnings
 
 from fusionbox.middleware import get_redirect, preprocess_redirects
 from fusionbox.behaviors import *
-from fusionbox.templatetags import fusionbox_tags
 
 
 class TestObject(object):
@@ -382,6 +380,129 @@ class TestTwoBehaviors(unittest.TestCase):
 
         self.assertTrue(isinstance(fields['created_at'], models.DateTimeField))
         self.assertTrue(isinstance(fields['updated_at'], models.DateTimeField))
+
+
+class TestRandomTags(SimpleTestCase):
+
+    def test_random_order_empty(self):
+        t = Template(
+            '{% load random_order from fusionbox_tags %}'
+            '{% random_order %}'
+            '{% endrandom %}')
+        self.assertHTMLEqual('', t.render(Context({})))
+
+    def test_random_order_one(self):
+        t = Template(
+            '{% load random_order from fusionbox_tags %}'
+            '{% load choice from fusionbox_tags %}'
+            '{% random_order %}'
+            '{% choice %}'
+            '<p>Hello</p>'
+            '{% endchoice %}'
+            '{% endrandom %}')
+        self.assertHTMLEqual('<p>Hello</p>', t.render(Context({})))
+
+    def test_random_order_mixed_many(self):
+        hello_count = goodbye_count = 0
+        for x in xrange(0, 100):
+            t = Template(
+                '{% load random_order from fusionbox_tags %}'
+                '{% load choice from fusionbox_tags %}'
+                '{% random_order %}'
+                '<p>Candy</p>'
+                '{% choice %}'
+                '<p>Hello</p>'
+                '{% endchoice %}'
+                '<p>Bacon</p>'
+                '{% choice %}'
+                '<p>Goodbye</p>'
+                '{% endchoice %}'
+                '<p>Donuts</p>'
+                '{% endrandom %}')
+            try:
+                self.assertHTMLEqual('<p>Candy</p><p>Hello</p><p>Bacon</p><p>Goodbye</p><p>Donuts</p>', t.render(Context({})))
+                hello_count += 1
+            except AssertionError:
+                self.assertHTMLEqual('<p>Candy</p><p>Goodbye</p><p>Bacon</p><p>Hello</p><p>Donuts</p>', t.render(Context({})))
+                goodbye_count += 1
+        print "\n----------"
+        print "`test_random_order_mixed_many` passes with:"
+        print "Hello First: %s" % hello_count
+        print "Goodbye First: %s" % goodbye_count
+        print "----------"
+
+    def test_random_order_seq_many(self):
+        hello_count = goodbye_count = 0
+        for x in xrange(0, 100):
+            t = Template(
+                '{% load random_order from fusionbox_tags %}'
+                '{% load choice from fusionbox_tags %}'
+                '{% random_order %}'
+                '{% choice %}'
+                '<p>Hello</p>'
+                '{% endchoice %}'
+                '{% choice %}'
+                '<p>Goodbye</p>'
+                '{% endchoice %}'
+                '{% endrandom %}')
+            try:
+                self.assertHTMLEqual('<p>Hello</p><p>Goodbye</p>', t.render(Context({})))
+                hello_count += 1
+            except AssertionError:
+                self.assertHTMLEqual('<p>Goodbye</p><p>Hello</p>', t.render(Context({})))
+                goodbye_count += 1
+        print "\n----------"
+        print "`test_random_order_seq_many` passes with:"
+        print "Hello First: %s" % hello_count
+        print "Goodbye First: %s" % goodbye_count
+        print "----------"
+
+    def test_random_choice_empty(self):
+        with self.assertRaises(IndexError):
+            Template(
+                    '{% load random_choice from fusionbox_tags %}'
+                    '{% random_choice %}'
+                    '{% endrandom %}'
+                    )
+
+    def test_random_choice_one(self):
+        t = Template(
+                '{% load random_choice from fusionbox_tags %}'
+                '{% load choice from fusionbox_tags %}'
+                '{% random_choice %}'
+                '{% choice %}'
+                '<p>Hello</p>'
+                '{% endchoice %}'
+                '{% endrandom %}'
+                )
+        self.assertHTMLEqual('<p>Hello</p>', t.render(Context({})))
+
+    def test_random_choice_many(self):
+        hello_count = goodbye_count = 0
+        for x in xrange(0, 100):
+            t = Template(
+                    '{% load random_choice from fusionbox_tags %}'
+                    '{% load choice from fusionbox_tags %}'
+                    '{% random_choice %}'
+                    '{% choice %}'
+                    '<p>Hello</p>'
+                    '{% endchoice %}'
+                    '{% choice %}'
+                    '<p>Goodbye</p>'
+                    '{% endchoice %}'
+                    '{% endrandom %}'
+                    )
+            try:
+                self.assertHTMLEqual('<p>Hello</p>', t.render(Context({})))
+                hello_count += 1
+            except AssertionError:
+                self.assertHTMLEqual('<p>Goodbye</p>', t.render(Context({})))
+                goodbye_count += 1
+        print "\n----------"
+        print "`test_random_choice_many` passes with:"
+        print "Hello: %s" % hello_count
+        print "Goodbye: %s" % goodbye_count
+        print "----------"
 
 
 class TestHighlightHereTags(unittest.TestCase):

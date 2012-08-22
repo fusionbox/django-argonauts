@@ -1,4 +1,5 @@
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
+import random
 
 # `setlocale` is not threadsafe
 import locale
@@ -195,6 +196,9 @@ def attr(obj, arg1):
 
 
 def more_json(obj):
+    """
+    Allows decimals and objects with `to_json` methods to be serialized.
+    """
     if isinstance(obj, Decimal):
         return float(obj)
     if hasattr(obj, 'to_json'):
@@ -204,7 +208,25 @@ def more_json(obj):
 
 @register.filter
 def json(a):
-    return mark_safe(simplejson.dumps(a, default=more_json))
+    """
+    Output the json encoding of its argument.
+
+    This will escape all the HTML/XML special characters with their unicode
+    escapes, so it is safe to be output anywhere except for inside a tag
+    attribute.
+
+    If the output needs to be put in an attribute, entitize the output of this
+    filter.
+    """
+    json_str = simplejson.dumps(a, default=more_json)
+
+    # Escape all the XML/HTML special characters.
+    escapes = ['<', '>', '&']
+    for c in escapes:
+        json_str = json_str.replace(c, r'\u%04x' % ord(c))
+
+    # now it's safe to use mark_safe
+    return mark_safe(json_str)
 json.is_safe = True
 
 
@@ -233,7 +255,8 @@ def us_dollars(value):
     """
     Returns the value formatted as whole US dollars.
 
-    Example:
+    Example::
+
         if value = -20000
         {{ value|us_dollars }} => -$20,000
     """
@@ -257,13 +280,12 @@ def us_cents(value, places=1):
     Returns the value formatted as US cents.  May specify decimal places for
     fractional cents.
 
-    Example:
-        where c means cents symbol:
+    ::
 
-        if value = -20.125
+        # if value = -20.125
         {{ value|us_cents }} => -20.1 \u00a2
 
-        if value = 0.082
+        # if value = 0.082
         {{ value|us_cents:3 }} => 0.082 \u00a2
     """
     # Try to convert to float
@@ -297,11 +319,12 @@ def us_dollars_and_cents(value, cent_places=2):
     include extra digits for fractional cents.  This is common when displaying
     utility rates, for instance.
 
-    Example:
-        if value = -20000.125
+    Example::
+
+        # if value = -20000.125
         {{ value|us_dollars_and_cents }} => -$20,000.13
 
-        if value = 0.082  (8.2 cents)
+        # if value = 0.082  (8.2 cents)
         {{ value|us_dollars_and_cents:3 }} => $0.082
     """
     # Try to convert to Decimal
@@ -334,12 +357,13 @@ def add_commas(value, round=0):
     places.  Humanize's intcomma is not adequate since it does not allow
     formatting of real numbers.
 
-    Example:
-        if value = 20000
+    Example::
+
+        # if value = 20000
         {{ value|add_commas }} => 20,000
         {{ value|add_commas:3 }} => 20,000.000
 
-        if value = 1234.5678
+        # if value = 1234.5678
         {{ value|add_commas:2 }} => 1,234.57
     """
     # Decimals honor locale settings correctly
@@ -398,13 +422,14 @@ def pluralize_with(count, noun):
     Pluralizes ``noun`` depending on ``count``.  Returns only the
     noun, either pluralized or not pluralized.
 
-    Usage:
+    Usage::
+
         {{ number_of_cats|pluralize_with:"cat" }}
 
-    Outputs:
-        number_of_cats == 0: "0 cats"
-        number_of_cats == 1: "1 cat"
-        number_of_cats == 2: "2 cats"
+        # Outputs::
+        # number_of_cats == 0: "0 cats"
+        # number_of_cats == 1: "1 cat"
+        # number_of_cats == 2: "2 cats"
 
     Requires the ``inflect`` module.  If it isn't available, this filter
     will not be loaded.
@@ -413,3 +438,99 @@ def pluralize_with(count, noun):
         raise ImportError('"inflect" module is not available.  Install using `pip install inflect`.')
 
     return str(count) + " " + inflect.plural(noun, count)
+
+
+class NodeListNode(template.Node):
+    """
+    Registered tags are expected to return an instance of template.Node or a
+    subclass thereof.
+
+    An instance of this class accepts a nodelist on initialization and simply
+    renders the nodelist as render is called.
+    """
+
+    def render(self, context):
+        """
+        Simply renders :self.nodelist
+        """
+        return self.nodelist.render(context)
+
+    def __init__(self, nodelist):
+        self.nodelist = nodelist
+
+
+class ChoiceNode(template.Node):
+    """
+    ``ChoiceNode`` is a lightwrapper around other nodes.  Wrapping nodes around a
+    ``choice`` tag flags them for randomization.  The wrapped nodes are placed in
+    an instance property called ``contents``.  During render, ``ChoiceNode`` will
+    simply call render on its ``contents`` property.
+
+    It also supplies one helper classmethod ``collect_choices`` that accepts a
+    parser and returns a list of all the ``Choice`` nodes.
+    """
+
+    def render(self, context):
+        """
+        Will just call ``render`` on this nodes inner contents, raising the
+        appropriate exceptions from Django's template system.
+        """
+        return self.contents.render(context)
+
+    def __init__(self, parser):
+        """
+        Accepts a template parser object.  During ``__init__``, the inner content
+        nodes are parsed and placed into an instance property.
+        """
+        self.contents = parser.parse(('endchoice',))
+        parser.delete_first_token()
+
+    @classmethod
+    def collect_choices(cls, parser, endtag='endrandom'):
+        """
+        Parses until ``endrandom`` tag is found, filtering out any non-Choice
+        nodes.
+        """
+        return filter(
+                lambda node: node.__class__ is cls,
+                parser.parse((endtag,))
+                )
+
+
+@register.tag
+def choice(parser, token):
+    """
+    Returns a ``ChoiceNode``
+    """
+    return ChoiceNode(parser)
+
+
+@register.tag
+def random_choice(parser, token):
+    """
+    Randomly picks one of the choice nodes to display.
+    """
+    choices = ChoiceNode.collect_choices(parser)
+    parser.delete_first_token()
+    try:
+        return random.choice(choices)
+    except IndexError:
+        raise IndexError(u"You must add choices to the `random_choice` block")
+
+
+@register.tag
+def random_order(parser, token):
+    """
+    Randomly orders each choice node.
+    """
+    nodelist = parser.parse(('endrandom',))
+    choices = filter(
+            lambda node: node[1].__class__ is ChoiceNode,
+            enumerate(nodelist)
+            )
+    parser.delete_first_token()
+    indexes = [i[0] for i in choices]
+    random.shuffle(indexes)
+    for choice in zip(indexes, choices):
+        nodelist[choice[0]] = choice[1][1]
+    return NodeListNode(nodelist)
