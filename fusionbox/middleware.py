@@ -12,6 +12,7 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import render_to_response
 from django.views.decorators.csrf import requires_csrf_token
 from django.core.exceptions import ImproperlyConfigured
+from django.contrib.sites.models import get_current_site
 
 
 @requires_csrf_token
@@ -165,7 +166,7 @@ class Redirect(object):
         self._errors = self._errors or {}
         if self.status_code < 300 or self.status_code > 399 and not self.status_code == 410:
             self.add_error(
-                    'status_code', 
+                    'status_code',
                     "ERROR: {redirect.filename}:{redirect.line_number} - Non 3xx/410 status code({redirect.status_code})".format(redirect=self),
                     )
 
@@ -176,7 +177,7 @@ def preprocess_redirects(lines, raise_errors=True):
     Redirect objects from them, and validates the redirects, returning a
     dictionary of Redirect objects.
     """
-    error_messages = defaultdict(list) 
+    error_messages = defaultdict(list)
     warning_messages = defaultdict(list)
 
     processed_redirects = {}
@@ -210,7 +211,7 @@ def preprocess_redirects(lines, raise_errors=True):
                 error_messages[redirect.source].append('ERROR: {redirect.filename}:{redirect.line_number} - Circular redirect: {redirect.source} => {redirect.target}'.format(redirect=redirect))
             elif to_url.netloc and not redirect.parsed_source.netloc:
                 warning_messages[redirect.source].append('WARNING: {redirect.filename}:{redirect.line_number}: - Possible circular redirect if hosting on domain {redirect.parsed_target.netloc}: {redirect.source} => {redirect.target}'.format(redirect=redirect))
-    
+
     # Check for circular redirects.
     for source, redirect in processed_redirects.items():
         validate_redirect(redirect)
@@ -262,8 +263,10 @@ class RedirectFallbackMiddleware(object):
         return lines
 
     def process_response(self, request, response):
-        if response.status_code != 404:
-            return response  # No need to check for a redirect for non-404 responses.
+        if response.status_code != 404 and get_current_site(request).domain == request.get_host():
+            # No need to check for a redirect for non-404 responses, as long as
+            # it's our Site.
+            return response
         path = request.get_full_path()
         full_uri = request.build_absolute_uri()
 
