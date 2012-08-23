@@ -11,9 +11,9 @@ from fusionbox.db.models import QuerySetManager
 
 if getattr(settings, 'USE_TZ', False):
     from django.utils.timezone import utc
-    now = datetime.datetime.utcnow().replace(tzinfo=utc)
+    now = lambda: datetime.datetime.utcnow().replace(tzinfo=utc)
 else:
-    now = datetime.datetime.now()
+    now = datetime.datetime.now
 
 
 class EmptyObject(object):
