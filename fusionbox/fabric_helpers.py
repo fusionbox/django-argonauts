@@ -9,7 +9,7 @@ from fabric.contrib.console import *
 from fabric.contrib.project import rsync_project
 
 
-env.workon_home = '/etc/python-environments'
+env.workon_home = '/var/python-environments'
 @_contextmanager
 def virtualenv(dir):
     with prefix('source %s/%s/bin/activate' % (env.workon_home, dir)):
