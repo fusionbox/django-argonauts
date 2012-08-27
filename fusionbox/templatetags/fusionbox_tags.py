@@ -508,29 +508,70 @@ def choice(parser, token):
 @register.tag
 def random_choice(parser, token):
     """
-    Randomly picks one of the choice nodes to display.
-    """
-    choices = ChoiceNode.collect_choices(parser)
-    parser.delete_first_token()
-    try:
-        return random.choice(choices)
-    except IndexError:
-        raise IndexError(u"You must add choices to the `random_choice` block")
+    Randomly orders each choice node.  If an integer is supplied as an
+    argument, we will limit our choices to that number.  A special argument
+    value, "all", will randomly sort all the choices without limit.
+    "all" is the default behavior.
 
+    ::
 
-@register.tag
-def random_order(parser, token):
+    {% random %}
+    {% choice %}A{% endchoice %}
+    {% choice %}B{% endchoice %}
+    {% choice %}C{% endchoice %}
+    {% endrandom %}
+
+    If R = random.choice
+    Outputs: R({A, B, C})
+
+    {% random 2 %}
+    {% choice %}A{% endchoice %}
+    {% choice %}B{% endchoice %}
+    {% choice %}C{% endchoice %}
+    {% endrandom %}
+
+    If R = random.choice
+    r1 = R({A, B, C})
+    r2 = R({A, B, C} - r1)
+
+    Outputs: r1 || r2, where '||' is string concat.
     """
-    Randomly orders each choice node.
-    """
+    tag_tokens = token.split_contents()
+    # Collect nodes into a list.
     nodelist = parser.parse(('endrandom',))
+    # Filter out the choice nodes, preserving their index in the nodelist.
     choices = filter(
             lambda node: node[1].__class__ is ChoiceNode,
             enumerate(nodelist)
             )
+    # Collect limit argument
+    try:
+        limit = int(tag_tokens[1])
+    except ValueError:
+            raise template.TemplateSyntaxError(
+                    u"Argument to random tag must be an integer. \
+                            Received %s." % tag_tokens[1])
+    except IndexError:
+        limit = len(choices)
+    # After collecting the choice nodes, set them as None in the
+    # original nodelist. We are essentially marking them for later as "do not
+    # use".
+    for choice in choices:
+        nodelist[choice[0]] = None
     parser.delete_first_token()
+    # Shuffle indices and assign each choice node a new index.
     indexes = [i[0] for i in choices]
-    random.shuffle(indexes)
-    for choice in zip(indexes, choices):
+    indexes.sort()
+    random.shuffle(choices)
+    new_order_choices = zip(indexes, choices)
+    # Iterate over choices in their new order, setting them in the nodelist
+    for cnt, choice in enumerate(new_order_choices):
+        if cnt >= limit:
+            break
         nodelist[choice[0]] = choice[1][1]
-    return NodeListNode(nodelist)
+    # Return a "NodeListNode" of all items in nodelist that have been reset.
+    new_nodelist = template.NodeList(
+            [node for node in nodelist if node is not None])
+    return NodeListNode(new_nodelist)
+
+register.tag("random", random_choice)
