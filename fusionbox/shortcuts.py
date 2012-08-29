@@ -1,5 +1,4 @@
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponseBadRequest, HttpResponseNotFound
 from django.conf import settings
 from django.http import Http404
 
@@ -8,9 +7,11 @@ if 'pure_pagination' in settings.INSTALLED_APPS:
 else:
     from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+
 def get_permission_or_403(callable, *args, **kwargs):
     if not callable(*args, **kwargs):
         raise PermissionDenied
+
 
 def get_object_page_or_throw(queryset, request, page_param='page', page_size_param='page_size', page_size_default=10):
     page = request.GET.get(page_param, 1)

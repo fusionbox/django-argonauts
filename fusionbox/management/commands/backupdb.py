@@ -66,7 +66,7 @@ class Command(BaseCommand):
             args += ["--port=%s" % port]
         if db:
             args += [db]
-        c = 'pg_dump %s > %s' % (' '.join(args), outfile)
+        c = 'pg_dump %s | gzip > %s' % (' '.join(args), outfile)
         print c
         pipe = popen2.Popen4(c)
         if password:

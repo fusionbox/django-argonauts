@@ -3,6 +3,7 @@ from django.middleware.csrf import get_token
 
 import hashlib
 
+
 class UncaptchaBase(object):
     def __init__(self, request, *args, **kwargs):
         super(UncaptchaBase, self).__init__(*args, **kwargs)
@@ -16,8 +17,10 @@ class UncaptchaBase(object):
             raise forms.ValidationError("Incorrect uncaptcha value")
         return value
 
+
 class UncaptchaForm(UncaptchaBase, forms.Form):
     uncaptcha = forms.CharField(required = False)
+
 
 class UncaptchaModelForm(UncaptchaBase, forms.ModelForm):
     uncaptcha = forms.CharField(required = False)
