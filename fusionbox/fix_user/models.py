@@ -29,6 +29,15 @@ UserCreationForm.base_fields['username'].widget.attrs['maxlength'] = 255 # html
 UserCreationForm.base_fields['username'].validators[0].limit_value = 255
 UserCreationForm.base_fields['username'].help_text = _("Required. 255 characters or fewer. Letters, numbers and @/./+/-/_ characters")
 
+old_save_user_create_form = UserCreationForm.save
+def save_user_create_form(self, commit=True, *args, **kwargs):
+    obj = old_save_user_create_form(self, commit=False, *args, **kwargs)
+    obj.email = obj.username
+    if commit:
+        obj.save()
+    return obj
+UserCreationForm.save = save_user_create_form
+
 from django.contrib.auth.forms import UserChangeForm
 
 UserChangeForm.base_fields['username'].max_length = 255
@@ -40,6 +49,14 @@ UserChangeForm.base_fields['email'].max_length = 255
 UserChangeForm.base_fields['email'].widget.attrs['maxlength'] = 255 # html
 UserChangeForm.base_fields['email'].validators[0].limit_value = 255
 
+old_save_user_change_form = UserChangeForm.save
+def save_user_change_form(self, commit=True, *args, **kwargs):
+    obj = old_save_user_change_form(self, commit=False, *args, **kwargs)
+    obj.email = obj.username
+    if commit:
+        obj.save()
+    return obj
+UserChangeForm.save = save_user_change_form
 
 from fusionbox.passwords import validate_password
 from django.contrib.auth.forms import SetPasswordForm
