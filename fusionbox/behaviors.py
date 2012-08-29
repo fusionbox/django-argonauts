@@ -11,10 +11,9 @@ from fusionbox.db.models import QuerySetManager
 
 if getattr(settings, 'USE_TZ', False):
     from django.utils.timezone import utc
-    now = datetime.datetime.utcnow().replace(tzinfo=utc)
+    now = lambda: datetime.datetime.utcnow().replace(tzinfo=utc)
 else:
     now = datetime.datetime.now
-
 
 
 class EmptyObject(object):
@@ -265,7 +264,7 @@ class PublishableManager(models.Manager):
     """
     def get_query_set(self):
         queryset = super(PublishableManager, self).get_query_set()
-        return queryset.filter(is_published=True, publish_at__lte=now())
+        return queryset.filter(is_published=True, publish_at__lte=now)
 
 
 class Publishable(Behavior):
