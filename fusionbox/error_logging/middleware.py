@@ -20,6 +20,8 @@ class FusionboxCommonMiddleware(object):
 
     * add ``fusionbox.error_logging`` to ``INSTALLED_APPS`` add
     * ``fusionbox.error_logging.middleware.FusionboxCommonMiddleware`` to ``MIDDLEWARE_CLASSES``
+    * in your settings.py set ``SEND_BROKEN_LINK_EMAILS`` to ``False``
+    * in your settings.py set ``FUSIONBOX_SEND_BROKEN_LINK_EMAILS`` to ``True``
 
     This app also registers ``fusionbox.error_logging.admin.Logged404Admin`` to
     the django admin center.
