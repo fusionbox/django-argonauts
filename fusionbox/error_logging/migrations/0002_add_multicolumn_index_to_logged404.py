@@ -3,15 +3,22 @@ import datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
+from django.core.exceptions import DatabaseError
 
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        db.create_index('error_logging_logged404', ['domain', 'referer', 'path', 'is_internal'], unique=True)
+        try:
+            db.create_index('error_logging_logged404', ['domain', 'referer', 'path', 'is_internal'], unique=True)
+        except DatabaseError:
+            pass
 
     def backwards(self, orm):
-        db.delete_index('error_logging_logged404', ['domain', 'referer', 'path', 'is_internal'])
+        try:
+            db.delete_index('error_logging_logged404', ['domain', 'referer', 'path', 'is_internal'])
+        except DatabaseError:
+            pass
 
     models = {
         'error_logging.logged404': {
