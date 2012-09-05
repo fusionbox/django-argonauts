@@ -25,7 +25,6 @@ except AttributeError:
 #
 #       attachments: ['foo.pdf']
 #
-#
 # In your email template.
 EMAIL_ATTACHMENT_ROOT = getattr(
         settings,

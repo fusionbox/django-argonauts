@@ -9,7 +9,6 @@ from django.db import models
 from django.db.models.base import ModelBase
 from django.db.models.query import QuerySet
 
-
 from fusionbox.db.models import QuerySetManager
 
 if getattr(settings, 'USE_TZ', False):
@@ -132,6 +131,10 @@ class Behavior(models.Model):
         # Everything in declared_fields was pulled out by our metaclass, time
         # to add them back in
         for parent in cls.mro():
+            if cls._meta.proxy:
+                # Proxy models already had their fields added via the parent
+                # model, so don't add them again.
+                continue
             try:
                 declared_fields = parent.declared_fields
             except AttributeError:  # Model itself doesn't have declared_fields

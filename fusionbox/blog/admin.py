@@ -48,3 +48,7 @@ class BlogModerator(CommentModerator):
         messages.success(request, 'Your comment was submitted for moderation.')
 
 moderator.register(Blog, BlogModerator)
+
+
+from tagging.models import TaggedItem
+admin.site.unregister(TaggedItem)
