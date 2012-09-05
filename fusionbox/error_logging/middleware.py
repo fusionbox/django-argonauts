@@ -13,6 +13,9 @@ class FusionboxCommonMiddleware(object):
     the same.  External broken links will now only trigger error emails once.
     All broken links are also logged to the database.
 
+    ``FusionboxCommonMiddleware`` is not compatable with the ``mysql`` database
+    backend due to length limitations for the database index.
+
     To enable:
 
     * add ``fusionbox.error_logging`` to ``INSTALLED_APPS`` add
