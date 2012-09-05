@@ -3,7 +3,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.middleware.common import _is_ignorable_404, _is_internal_request
 from django.core.mail import mail_managers
 
-from fusionbox.error_logging.models import Logged404
+from fusionbox.error_logging.models import Logged404, hash_args
 
 
 class FusionboxCommonMiddleware(object):
@@ -44,12 +44,19 @@ class FusionboxCommonMiddleware(object):
                 is_internal = bool(_is_internal_request(domain, referer))
                 path = request.get_full_path()
                 if referer and not _is_ignorable_404(path) and (is_internal or '?' not in referer):
-                    logged_error, created = Logged404.objects.get_or_create(
+                    error_hash = hash_args(domain, referer, is_internal, path)
+                    try:
+                        Logged404.objects.get(hash=error_hash)
+                        created = False
+                    except Logged404.DoesNotExist:
+                        Logged404.objects.create(
                             domain=domain,
                             referer=referer,
                             is_internal=is_internal,
                             path=path,
                             )
+                        created = True
+
                     if is_internal or created:
                         ua = request.META.get('HTTP_USER_AGENT', '<none>')
                         ip = request.META.get('REMOTE_ADDR', '<none>')
