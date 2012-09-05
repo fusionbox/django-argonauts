@@ -2,14 +2,21 @@ import operator
 import copy
 import datetime
 
-from django.db import models
+from django.conf import settings
+from django.contrib.admin.util import lookup_needs_distinct
 from django.core.exceptions import ImproperlyConfigured, ValidationError, NON_FIELD_ERRORS
+from django.db import models
 from django.db.models.base import ModelBase
 from django.db.models.query import QuerySet
-from django.contrib.admin.util import lookup_needs_distinct
 
 
 from fusionbox.db.models import QuerySetManager
+
+if getattr(settings, 'USE_TZ', False):
+    from django.utils.timezone import utc
+    now = lambda: datetime.datetime.utcnow().replace(tzinfo=utc)
+else:
+    now = datetime.datetime.now
 
 
 class EmptyObject(object):
@@ -161,7 +168,6 @@ class Behavior(models.Model):
                 except TypeError:
                     setattr(cls, behavior, type(behavior, tuple(parent_settings + [object]), {}))
 
-
     @classmethod
     def base_behaviors(cls):
         behaviors = []
@@ -171,13 +177,32 @@ class Behavior(models.Model):
         return behaviors
 
 
-class ManagedQuerySet(Behavior):
+class QuerySetManagerModel(Behavior):
     """
     This behavior is meant to be used in conjunction with
-    `fusionbox.db.models.QuerySetManager`
+    :class:`fusionbox.db.models.QuerySetManager`
 
     A class which inherits from this class will any inner QuerySet classes
-    found in the `mro` merged into a single class
+    found in the `mro` merged into a single class.
+
+    Given the following Parent class::
+
+        class Parent(models.Model):
+            class QuerySet(QuerySet):
+                def get_active(self):
+                    ...
+
+    The following two Child classes are equivalent::
+
+        class Child(Parent):
+            class QuerySet(Parent.QuerySet):
+                def get_inactive(self):
+                    ...
+
+        class Child(QuerySetManagerModel, Parent):
+            class QuerySet(QuerySet):
+                def get_inactive(self):
+                    ...
     """
 
     objects = QuerySetManager()
@@ -191,7 +216,8 @@ class ManagedQuerySet(Behavior):
     @classmethod
     def merge_parent_settings(cls):
         """
-        Merge QuerySet classes
+        Automatically merges all parent QuerySet classes to preserve custom
+        defined QuerySet methods
         """
         # get a list of all of the inner QuerySet classes from the bases
         querysets = [getattr(parent, 'QuerySet', False) for parent in cls.__bases__]
@@ -204,9 +230,12 @@ class ManagedQuerySet(Behavior):
             # Create the new inner QuerySet class and put it on the new child.
             cls.QuerySet = type('QuerySet', tuple(querysets), {})
         # Conditional bailout since ManageQuerySet is not defined during it's instantiation
-        if cls.__name__ == 'ManagedQuerySet':
+        if cls.__name__ == 'QuerySetManagerModel':
             return
-        return super(ManagedQuerySet, cls).merge_parent_settings()
+        return super(QuerySetManagerModel, cls).merge_parent_settings()
+
+# To preserve backwards compatability
+ManagedQuerySet = QuerySetManagerModel
 
 
 class Timestampable(Behavior):
@@ -215,7 +244,7 @@ class Timestampable(Behavior):
 
     Added Fields:
         Field 1:
-            field: DateTimeField(default=datetime.datetime.now)
+            field: DateTimeField(default=now)
             description: Timestamps set at the creation of the instance
             default_name: created_at
         Field 2:
@@ -227,7 +256,7 @@ class Timestampable(Behavior):
     class Meta:
         abstract = True
 
-    created_at = models.DateTimeField(default=datetime.datetime.now)
+    created_at = models.DateTimeField(default=now)
     updated_at = models.DateTimeField(auto_now=True)
 
 
@@ -238,7 +267,7 @@ class PublishableManager(models.Manager):
     """
     def get_query_set(self):
         queryset = super(PublishableManager, self).get_query_set()
-        return queryset.filter(is_published=True, publish_at__lte=datetime.datetime.now())
+        return queryset.filter(is_published=True, publish_at__lte=now)
 
 
 class Publishable(Behavior):
@@ -270,7 +299,7 @@ class Publishable(Behavior):
     class Meta:
         abstract = True
 
-    publish_at = models.DateTimeField(default=datetime.datetime.now, help_text='Selecting a future date will automatically publish to the live site on that date.')
+    publish_at = models.DateTimeField(default=now, help_text='Selecting a future date will automatically publish to the live site on that date.')
     is_published = models.BooleanField(default=True, help_text='Unchecking this will take the entry off the live site regardless of publishing date')
 
     objects = models.Manager()
@@ -324,30 +353,32 @@ class Validation(Behavior):
     """
     Base class for adding complex validation behavior to a model.
 
-    By inheriting from Validation, your model can have ``validate`` and ``validate_field`` methods.
+    By inheriting from Validation, your model can have ``validate`` and
+    ``validate_<field>`` methods.
 
-    ``validate`` is for generic validations, and for ``NON_FIELD_ERRORS``, errors that do not belong to any
+    :func:`validate` is for generic validations, and for ``NON_FIELD_ERRORS``, errors that do not belong to any
     one field.  In this method you can raise a ValidationError that contains a single error message, a list of
     errors, or - if the messages **are** associated with a field - a dictionary of field-names to message-list.
 
-    You can also write ``validate_field`` methods for any columns that need custom validation.  This is for convience,
+    You can also write ``validate_<field>`` methods for any columns that need custom validation.  This is for convience,
     since it is easier and more intuitive to raise an 'invalid value' from within one of these methods, and have it
     automatically associated with the correct field.
 
     Even if you don't implement custom validation methods, Validation changes the normal behavior of ``save`` so that
     validation **always** occurs.  This makes it easy to write APIs without having to understand the ``clean``, ``full_clean``,
-    and ``clean_fields`` methods that must called in django.  If a validation error occurs, the exception will **not** be
+    and :func:`clean_fields` methods that must called in django.  If a validation error occurs, the exception will **not** be
     caught, it is up to you to catch it in your view or API.
 
-    For convience, two additional methods are added to your model.
-
-    * ``validation_errors`` returns a dictionary of errors
-    * ``is_valid`` returns True or False
     """
     class Meta:
         abstract = True
 
     def clean_fields(self, exclude=None):
+        """
+        Must be manually called in Django.
+
+        Calls any ``validate_<field>`` methods defined on the Model.
+        """
         errors = {}
         try:
             super(Validation, self).clean_fields(exclude)
@@ -383,9 +414,15 @@ class Validation(Behavior):
         super(Validation, self).save(*args, **kwargs)
 
     def is_valid(self):
+        """
+        Returns ``True`` or ``False``
+        """
         return not self.validation_errors()
 
     def validation_errors(self):
+        """
+        Returns a dictionary of errors.
+        """
         try:
             self.full_clean()
             return {}

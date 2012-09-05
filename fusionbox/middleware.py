@@ -5,13 +5,13 @@ import warnings
 
 from collections import defaultdict
 
-from django.forms.forms import BaseForm
 from django.conf import settings
 from django.template import TemplateDoesNotExist, RequestContext
 from django.http import Http404, HttpResponse
 from django.shortcuts import render_to_response
 from django.views.decorators.csrf import requires_csrf_token
 from django.core.exceptions import ImproperlyConfigured
+from django.contrib.sites.models import get_current_site
 
 
 @requires_csrf_token
@@ -44,6 +44,11 @@ class GenericTemplateFinderMiddleware(object):
     autolocate a template for otherwise 404 responses.
     """
     def process_response(self, request, response):
+        """
+        Ensures that
+        404 raised from view functions are not caught by
+        ``GenericTemplateFinderMiddleware``.
+        """
         if response.status_code == 404 and not getattr(request, '_generic_template_finder_middleware_view_found', False):
             try:
                 return generic_template_finder_view(request)
@@ -60,36 +65,6 @@ class GenericTemplateFinderMiddleware(object):
         it threw a real 404.
         """
         request._generic_template_finder_middleware_view_found = True
-
-
-class AutoErrorClassOnFormsMiddleware(object):
-    """
-    Middleware which adds an error class to all form widgets that have a field
-    error.
-
-    Requires that views return a TemplateResponse object.
-
-    Iterates through all values in the response context looking for anything
-    which inherits from django's BaseForm.  Any fields with field specific
-    errors have the class 'error' appended to their widget dictionary of
-    attributes.
-    """
-    def process_template_response(self, request, response):
-        for val in response.context_data.values():
-            if issubclass(type(val), BaseForm):
-                if val._errors:
-                    for name in val._errors.keys():
-                        if not name in val.fields:
-                            continue
-                        field = val.fields[name]
-                        cls = field.widget.attrs.get('class', '')
-                        if 'error' in cls:
-                            continue
-                        else:
-                            cls += ' error'
-                            cls = cls.strip()
-                        field.widget.attrs['class'] = cls
-        return response
 
 
 def get_redirect(redirects, path, full_uri):
@@ -165,7 +140,7 @@ class Redirect(object):
         self._errors = self._errors or {}
         if self.status_code < 300 or self.status_code > 399 and not self.status_code == 410:
             self.add_error(
-                    'status_code', 
+                    'status_code',
                     "ERROR: {redirect.filename}:{redirect.line_number} - Non 3xx/410 status code({redirect.status_code})".format(redirect=self),
                     )
 
@@ -176,7 +151,7 @@ def preprocess_redirects(lines, raise_errors=True):
     Redirect objects from them, and validates the redirects, returning a
     dictionary of Redirect objects.
     """
-    error_messages = defaultdict(list) 
+    error_messages = defaultdict(list)
     warning_messages = defaultdict(list)
 
     processed_redirects = {}
@@ -189,7 +164,7 @@ def preprocess_redirects(lines, raise_errors=True):
 
         # Catch duplicate declaration of source urls.
         if redirect.source in processed_redirects:
-            first = processed_redirects[redirect.source]
+            processed_redirects[redirect.source]
             warning_messages[redirect.source].append("WARNING: {filename}:{line_number} -  Duplicate declaration of url".format(**line))
         processed_redirects[redirect.source] = redirect
 
@@ -210,7 +185,7 @@ def preprocess_redirects(lines, raise_errors=True):
                 error_messages[redirect.source].append('ERROR: {redirect.filename}:{redirect.line_number} - Circular redirect: {redirect.source} => {redirect.target}'.format(redirect=redirect))
             elif to_url.netloc and not redirect.parsed_source.netloc:
                 warning_messages[redirect.source].append('WARNING: {redirect.filename}:{redirect.line_number}: - Possible circular redirect if hosting on domain {redirect.parsed_target.netloc}: {redirect.source} => {redirect.target}'.format(redirect=redirect))
-    
+
     # Check for circular redirects.
     for source, redirect in processed_redirects.items():
         validate_redirect(redirect)
@@ -237,11 +212,11 @@ class RedirectFallbackMiddleware(object):
     non 404 error, this middleware will not produce a redirect
 
     Redirects should be formatted in CSV files located in either
-    `<project_path>/redirects/` or an absolute path declared in
-    `settings.REDIRECTS_DIRECTORY`.
+    ``<project_path>/redirects/`` or an absolute path declared in
+    ``settings.REDIRECTS_DIRECTORY``.
 
-    CSV files should not contain any headers, and be in the format `source_url,
-    target_url, status_code` where `status_code` is optional and defaults to 301.
+    CSV files should not contain any headers, and be in the format ``source_url,
+    target_url, status_code`` where ``status_code`` is optional and defaults to 301.
     To issue a 410, leave off target url and status code.
     """
     def __init__(self, *args, **kwargs):
@@ -262,8 +237,10 @@ class RedirectFallbackMiddleware(object):
         return lines
 
     def process_response(self, request, response):
-        if response.status_code != 404:
-            return response  # No need to check for a redirect for non-404 responses.
+        if response.status_code != 404 and get_current_site(request).domain == request.get_host():
+            # No need to check for a redirect for non-404 responses, as long as
+            # it's our Site.
+            return response
         path = request.get_full_path()
         full_uri = request.build_absolute_uri()
 

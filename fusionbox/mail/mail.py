@@ -1,25 +1,4 @@
 """
-Markdown-templated email.
-
-An email template looks like this::
-
-    ---
-    subject: Hello, {{user.first_name}}
-    ---
-    Welcome to the site.
-
-When using :func:`send_markdown_mail`, its output is placed in a layout to
-produce a full html document::
-
-    <!DOCTYPE html>
-    <html>
-        <body>
-            {{content}}
-        </body>
-    </html>
-
-The default layout is specified in ``settings.EMAIL_LAYOUT``, but can be
-overridden on a per-email basis.
 """
 
 import re
@@ -54,24 +33,22 @@ EMAIL_ATTACHMENT_ROOT = getattr(
         os.path.join(settings.PROJECT_PATH, '../attachments/'))
 
 
-def send_markdown_mail(template,
+def create_markdown_mail(template,
                        context,
                        to=None,
                        subject=None,
                        from_address=settings.SERVER_EMAIL,
                        layout=EMAIL_LAYOUT):
-
     """
-    The top-level email-sending function.
+    Creates a message from a markdown template and returns it as an
+    ``EmailMultiAlternatives`` object.
     """
-
     if layout is None:
         raise ValueError('layout was not defined by settings.EMAIL_LAYOUT and none was provided')
 
     meta, raw, html = render_template(template, context, layout)
 
-    # these let the template override the caller, should it be the
-    # other way around?
+    # this lets the template override the caller
     subject = meta.get('subject', subject)
     if not subject:
         raise Exception("Template didn't give a subject and neither did you")
@@ -93,6 +70,15 @@ def send_markdown_mail(template,
             msg.attach(*attachment)
     msg.attach_alternative(html, 'text/html')
 
+    return msg
+
+
+def send_markdown_mail(*args, **kwargs):
+    """
+    Wrapper around :func:`create_markdown_mail` that creates and sends the
+    message in one step.
+    """
+    msg = create_markdown_mail(*args, **kwargs)
     return msg.send()
 
 
@@ -125,6 +111,8 @@ def render_template(template, context, layout):
 
 
 front_matter_re = re.compile('(\s*\n)?^---\n(.*)\n---$\n*', re.MULTILINE | re.DOTALL)
+
+
 def extract_frontmatter(str):
     r"""
     Given a string with YAML style front matter, returns the parsed header and

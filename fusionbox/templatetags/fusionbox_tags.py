@@ -1,4 +1,5 @@
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
+import random
 
 # `setlocale` is not threadsafe
 import locale
@@ -197,6 +198,9 @@ def attr(obj, arg1):
 
 
 def more_json(obj):
+    """
+    Allows decimals and objects with `to_json` methods to be serialized.
+    """
     if isinstance(obj, Decimal):
         return float(obj)
     if hasattr(obj, 'to_json'):
@@ -206,7 +210,25 @@ def more_json(obj):
 
 @register.filter
 def json(a):
-    return mark_safe(simplejson.dumps(a, default=more_json))
+    """
+    Output the json encoding of its argument.
+
+    This will escape all the HTML/XML special characters with their unicode
+    escapes, so it is safe to be output anywhere except for inside a tag
+    attribute.
+
+    If the output needs to be put in an attribute, entitize the output of this
+    filter.
+    """
+    json_str = simplejson.dumps(a, default=more_json)
+
+    # Escape all the XML/HTML special characters.
+    escapes = ['<', '>', '&']
+    for c in escapes:
+        json_str = json_str.replace(c, r'\u%04x' % ord(c))
+
+    # now it's safe to use mark_safe
+    return mark_safe(json_str)
 json.is_safe = True
 
 
@@ -235,7 +257,8 @@ def us_dollars(value):
     """
     Returns the value formatted as whole US dollars.
 
-    Example:
+    Example::
+
         if value = -20000
         {{ value|us_dollars }} => -$20,000
     """
@@ -259,13 +282,12 @@ def us_cents(value, places=1):
     Returns the value formatted as US cents.  May specify decimal places for
     fractional cents.
 
-    Example:
-        where c means cents symbol:
+    ::
 
-        if value = -20.125
+        # if value = -20.125
         {{ value|us_cents }} => -20.1 \u00a2
 
-        if value = 0.082
+        # if value = 0.082
         {{ value|us_cents:3 }} => 0.082 \u00a2
     """
     # Try to convert to float
@@ -299,11 +321,12 @@ def us_dollars_and_cents(value, cent_places=2):
     include extra digits for fractional cents.  This is common when displaying
     utility rates, for instance.
 
-    Example:
-        if value = -20000.125
+    Example::
+
+        # if value = -20000.125
         {{ value|us_dollars_and_cents }} => -$20,000.13
 
-        if value = 0.082  (8.2 cents)
+        # if value = 0.082  (8.2 cents)
         {{ value|us_dollars_and_cents:3 }} => $0.082
     """
     # Try to convert to Decimal
@@ -330,18 +353,19 @@ def us_dollars_and_cents(value, cent_places=2):
 
 
 @register.filter
-def add_commas(value, round=None):
+def add_commas(value, round=0):
     """
     Add commas to a numeric value, while rounding it to a specific number of
     places.  Humanize's intcomma is not adequate since it does not allow
     formatting of real numbers.
 
-    Example:
-        if value = 20000
+    Example::
+
+        # if value = 20000
         {{ value|add_commas }} => 20,000
         {{ value|add_commas:3 }} => 20,000.000
 
-        if value = 1234.5678
+        # if value = 1234.5678
         {{ value|add_commas:2 }} => 1,234.57
     """
     # Decimals honor locale settings correctly
@@ -354,13 +378,12 @@ def add_commas(value, round=None):
             raise e
     except TypeError:
         return FORMAT_TAG_ERROR_VALUE
-    # Round the value if necessary
-    if round != None:
-        if round > 0:
-            format = Decimal('1.' + round * '0')
-        else:
-            format = Decimal('1')
-        value = value.quantize(format, rounding=ROUND_HALF_UP)
+    # Round the value
+    if round > 0:
+        format = Decimal('1.' + round * '0')
+    else:
+        format = Decimal('1')
+    value = value.quantize(format, rounding=ROUND_HALF_UP)
     # Locale settings properly format Decimals with commas
     # Super gross, but it works for both 2.6 and 2.7.
     return locale.format("%." + str(round) + "f", value, grouping=True)
@@ -401,13 +424,14 @@ def pluralize_with(count, noun):
     Pluralizes ``noun`` depending on ``count``.  Returns only the
     noun, either pluralized or not pluralized.
 
-    Usage:
+    Usage::
+
         {{ number_of_cats|pluralize_with:"cat" }}
 
-    Outputs:
-        number_of_cats == 0: "0 cats"
-        number_of_cats == 1: "1 cat"
-        number_of_cats == 2: "2 cats"
+        # Outputs::
+        # number_of_cats == 0: "0 cats"
+        # number_of_cats == 1: "1 cat"
+        # number_of_cats == 2: "2 cats"
 
     Requires the ``inflect`` module.  If it isn't available, this filter
     will not be loaded.
@@ -421,6 +445,7 @@ def pluralize_with(count, noun):
 @register.filter
 def month_name(month_number):
     return calendar.month_name[month_number]
+
 
 @register.filter('model_to_dict')
 def model_to_dict_filter(instance, fields=None):
@@ -443,3 +468,140 @@ def model_to_dict_filter(instance, fields=None):
         return [(k, data_dict[k]) for k in fields]
     else:
         return data_dict.items()
+
+
+class NodeListNode(template.Node):
+    """
+    Registered tags are expected to return an instance of template.Node or a
+    subclass thereof.
+
+    An instance of this class accepts a nodelist on initialization and simply
+    renders the nodelist as render is called.
+    """
+
+    def render(self, context):
+        """
+        Simply renders :self.nodelist
+        """
+        return self.nodelist.render(context)
+
+    def __init__(self, nodelist):
+        self.nodelist = nodelist
+
+
+class ChoiceNode(template.Node):
+    """
+    ``ChoiceNode`` is a lightwrapper around other nodes.  Wrapping nodes around a
+    ``choice`` tag flags them for randomization.  The wrapped nodes are placed in
+    an instance property called ``contents``.  During render, ``ChoiceNode`` will
+    simply call render on its ``contents`` property.
+
+    It also supplies one helper classmethod ``collect_choices`` that accepts a
+    parser and returns a list of all the ``Choice`` nodes.
+    """
+
+    def render(self, context):
+        """
+        Will just call ``render`` on this nodes inner contents, raising the
+        appropriate exceptions from Django's template system.
+        """
+        return self.contents.render(context)
+
+    def __init__(self, parser):
+        """
+        Accepts a template parser object.  During ``__init__``, the inner content
+        nodes are parsed and placed into an instance property.
+        """
+        self.contents = parser.parse(('endchoice',))
+        parser.delete_first_token()
+
+    @classmethod
+    def collect_choices(cls, parser, endtag='endrandom'):
+        """
+        Parses until ``endrandom`` tag is found, filtering out any non-Choice
+        nodes.
+        """
+        return filter(
+                lambda node: node.__class__ is cls,
+                parser.parse((endtag,))
+                )
+
+
+@register.tag
+def choice(parser, token):
+    """
+    Returns a ``ChoiceNode``
+    """
+    return ChoiceNode(parser)
+
+
+@register.tag
+def random_choice(parser, token):
+    """
+    Randomly orders each choice node.  If an integer is supplied as an
+    argument, we will limit our choices to that number.  A special argument
+    value, "all", will randomly sort all the choices without limit.
+    "all" is the default behavior.
+
+    ::
+
+    {% random %}
+    {% choice %}A{% endchoice %}
+    {% choice %}B{% endchoice %}
+    {% choice %}C{% endchoice %}
+    {% endrandom %}
+
+    If R = random.choice
+    Outputs: R({A, B, C})
+
+    {% random 2 %}
+    {% choice %}A{% endchoice %}
+    {% choice %}B{% endchoice %}
+    {% choice %}C{% endchoice %}
+    {% endrandom %}
+
+    If R = random.choice
+    r1 = R({A, B, C})
+    r2 = R({A, B, C} - r1)
+
+    Outputs: r1 || r2, where '||' is string concat.
+    """
+    tag_tokens = token.split_contents()
+    # Collect nodes into a list.
+    nodelist = parser.parse(('endrandom',))
+    # Filter out the choice nodes, preserving their index in the nodelist.
+    choices = filter(
+            lambda node: node[1].__class__ is ChoiceNode,
+            enumerate(nodelist)
+            )
+    # Collect limit argument
+    try:
+        limit = int(tag_tokens[1])
+    except ValueError:
+            raise template.TemplateSyntaxError(
+                    u"Argument to random tag must be an integer. \
+                            Received %s." % tag_tokens[1])
+    except IndexError:
+        limit = len(choices)
+    # After collecting the choice nodes, set them as None in the
+    # original nodelist. We are essentially marking them for later as "do not
+    # use".
+    for choice in choices:
+        nodelist[choice[0]] = None
+    parser.delete_first_token()
+    # Shuffle indices and assign each choice node a new index.
+    indexes = [i[0] for i in choices]
+    indexes.sort()
+    random.shuffle(choices)
+    new_order_choices = zip(indexes, choices)
+    # Iterate over choices in their new order, setting them in the nodelist
+    for cnt, choice in enumerate(new_order_choices):
+        if cnt >= limit:
+            break
+        nodelist[choice[0]] = choice[1][1]
+    # Return a "NodeListNode" of all items in nodelist that have been reset.
+    new_nodelist = template.NodeList(
+            [node for node in nodelist if node is not None])
+    return NodeListNode(new_nodelist)
+
+register.tag("random", random_choice)
