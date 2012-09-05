@@ -3,22 +3,18 @@ import datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
-from django.db import DatabaseError
+from django.conf import settings
 
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        try:
+        if settings.DATABASER['default']['engine'] == 'django.db.backends.postgresql_psycopg2':
             db.create_index('error_logging_logged404', ['domain', 'referer', 'path', 'is_internal'], unique=True)
-        except DatabaseError:
-            pass
 
     def backwards(self, orm):
-        try:
+        if settings.DATABASER['default']['engine'] == 'django.db.backends.postgresql_psycopg2':
             db.delete_index('error_logging_logged404', ['domain', 'referer', 'path', 'is_internal'])
-        except DatabaseError:
-            pass
 
     models = {
         'error_logging.logged404': {
