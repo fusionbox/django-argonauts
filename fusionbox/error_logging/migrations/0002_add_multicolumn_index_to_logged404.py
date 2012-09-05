@@ -3,7 +3,7 @@ import datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
-from django.core.exceptions import DatabaseError
+from django.db import DatabaseError
 
 
 class Migration(SchemaMigration):
