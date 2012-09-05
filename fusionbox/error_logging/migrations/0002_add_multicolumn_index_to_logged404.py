@@ -9,11 +9,11 @@ from django.conf import settings
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        if settings.DATABASER['default']['engine'] == 'django.db.backends.postgresql_psycopg2':
+        if settings.DATABASES['default']['engine'] == 'django.db.backends.postgresql_psycopg2':
             db.create_index('error_logging_logged404', ['domain', 'referer', 'path', 'is_internal'], unique=True)
 
     def backwards(self, orm):
-        if settings.DATABASER['default']['engine'] == 'django.db.backends.postgresql_psycopg2':
+        if settings.DATABASES['default']['engine'] == 'django.db.backends.postgresql_psycopg2':
             db.delete_index('error_logging_logged404', ['domain', 'referer', 'path', 'is_internal'])
 
     models = {
