@@ -2,13 +2,12 @@ import operator
 import copy
 import datetime
 
-from django.db import models
+from django.conf import settings
+from django.contrib.admin.util import lookup_needs_distinct
 from django.core.exceptions import ImproperlyConfigured, ValidationError, NON_FIELD_ERRORS
+from django.db import models
 from django.db.models.base import ModelBase
 from django.db.models.query import QuerySet
-from django.contrib.admin.util import lookup_needs_distinct
-from django.conf import settings
-
 
 from fusionbox.db.models import QuerySetManager
 

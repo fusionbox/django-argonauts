@@ -446,6 +446,7 @@ def pluralize_with(count, noun):
 def month_name(month_number):
     return calendar.month_name[month_number]
 
+
 @register.filter('model_to_dict')
 def model_to_dict_filter(instance, fields=None):
     """
@@ -467,6 +468,7 @@ def model_to_dict_filter(instance, fields=None):
         return [(k, data_dict[k]) for k in fields]
     else:
         return data_dict.items()
+
 
 class NodeListNode(template.Node):
     """
