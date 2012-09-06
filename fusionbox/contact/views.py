@@ -11,7 +11,7 @@ from fusionbox.contact.forms import ContactForm
 from fusionbox.contact.models import Recipient
 
 def index(request, template='contact/index.html',
-        email_template='mail/contact_form_submission.md',
+        email_template='mail/contact_form_submission.html',
         contact_form=ContactForm, extra_context={}):
     """
     View that displays the contact form and handles contact form submissions
