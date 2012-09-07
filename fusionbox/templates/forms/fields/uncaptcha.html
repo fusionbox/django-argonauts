@@ -1,0 +1,17 @@
+<fieldset id="{{ html_id }}_container">
+  <label for="{{ html_id }}">Uncaptcha: </label>
+  <input{{ attrs }}>
+  <span id="{{ html_id }}-help">Please copy &quot;{{ csrf_token }}&quot; into the field labeled &quot;Uncaptcha&quot;</span>
+</fieldset>
+{{ widget.id }}
+<script type="text/javascript">
+  /* Copies the csrf_token into the uncaptcha field and hides the uncaptcha
+     fieldset */
+  var uncaptcha_fieldset = document.getElementById("{{ html_id }}_container");
+  uncaptcha_fieldset.style.visibility = 'hidden';
+  var csrf_token = document.getElementsByName('csrfmiddlewaretoken');
+  if ( csrf_token.length ) {
+    var uncaptcha= document.getElementById("{{ html_id }}");
+    uncaptcha.value = csrf_token[0].value;
+  }
+</script>
