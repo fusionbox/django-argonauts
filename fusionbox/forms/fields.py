@@ -10,6 +10,9 @@ import datetime
 from functools import partial
 
 from django import forms
+from django.forms.util import flatatt
+from django.template.loader import render_to_string
+from django.utils.safestring import mark_safe
 
 from fusionbox.forms.widgets import MultiFileWidget
 
@@ -82,3 +85,28 @@ class MultiFileField(forms.FileField):
             return map(curry_super, data)
         except TypeError:
             return None
+
+
+class UncaptchaWidget(forms.HiddenInput):
+    """
+    Renders as a TextInput and helptext instructing the user to copy the
+    csrf_token into the input.  These elements are automagically hidden with
+    javascript and the csrf_token copied into the input.
+    """
+    def render(self, name, value, attrs=None):
+        final_attr = self.build_attrs(attrs, type=forms.TextInput.input_type, name=name)
+        if value:
+            final_attr['value'] = value
+        context = {
+                'widget': self,
+                'attrs': mark_safe(flatatt(final_attr)),
+                'html_id': attrs['id'],
+                }
+        return render_to_string('forms/fields/uncaptcha.html', context)
+
+
+class UncaptchaField(forms.CharField):
+    """
+    Extension of Charfield with ``UncaptchaWidget`` as its default widget.
+    """
+    widget = UncaptchaWidget
