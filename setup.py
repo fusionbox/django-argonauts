@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os
 import re
-from setuptools import setup
+from setuptools import setup, find_packages
 
 __doc__="""
 Useful stuff for django
@@ -18,20 +18,13 @@ setup(name='django-fusionbox',
     keywords='django boilerplate',
     long_description=__doc__,
     url='https://github.com/fusionbox/django-fusionbox',
-    packages=[
-        'fusionbox', 'fusionbox.auth', 'fusionbox.contact', 'fusionbox.db',
-        'fusionbox.error_logging', 'fusionbox.error_logging.migrations',
-        'fusionbox.fix_user', 'fusionbox.forms', 'fusionbox.mail',
-        'fusionbox.newsletter', 'fusionbox.newsletter.templatetags',
-        'fusionbox.panels', 'fusionbox.panels.user_panel',
-        'fusionbox.templatetags', 'fusionbox.management',
-        'fusionbox.management.commands'
-        ],
+    packages=find_packages(),
     package_data={
         'fusionbox': ['static/js/*'],
         'fusionbox.panels.user_panel': ['templates/*',],
         'fusionbox.newsletter': ['templates/newsletter/*',]
         },
+    namespace_packages=['fusionbox'],
     platforms = "any",
     license='BSD',
     classifiers=[
