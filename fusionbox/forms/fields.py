@@ -89,20 +89,11 @@ class MultiFileField(forms.FileField):
 
 class UncaptchaWidget(forms.HiddenInput):
     """
-    Renders as a TextInput and helptext instructing the user to copy the
-    csrf_token into the input.  These elements are automagically hidden with
-    javascript and the csrf_token copied into the input.
+    Renders as an empty string.  To render this field use the uncaptcha
+    template tag.
     """
     def render(self, name, value, attrs=None):
-        final_attr = self.build_attrs(attrs, type=forms.TextInput.input_type, name=name)
-        if value:
-            final_attr['value'] = value
-        context = {
-                'widget': self,
-                'attrs': mark_safe(flatatt(final_attr)),
-                'html_id': attrs['id'],
-                }
-        return render_to_string('forms/fields/uncaptcha.html', context)
+        return ''
 
 
 class UncaptchaField(forms.CharField):
