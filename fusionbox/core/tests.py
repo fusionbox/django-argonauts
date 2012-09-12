@@ -238,7 +238,7 @@ class TestSEO(unittest.TestCase):
     def test_nonsense_config(self):
         class Test13Model(SEO):
             blahblah = 'foo'
-            asdf = models.CharField()
+            asdf = models.CharField(max_length=255)
 
         x = Test13Model()
 

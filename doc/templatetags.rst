@@ -41,5 +41,5 @@ On ``/blog/``, it is::
 Code
 ----
 
-.. automodule:: fusionbox.templatetags.fusionbox_tags
+.. automodule:: fusionbox.core.templatetags.fusionbox_tags
     :members:
