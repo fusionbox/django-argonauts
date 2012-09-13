@@ -44,7 +44,7 @@ def update_git(branch):
         # env.cwd is documented as private, but I'm not sure how else to do this
         with settings(warn_only=True):
             loc = loc + '/' # without this, the temp directory will get uploaded instead of just its contents
-            rsync_project(env.cwd, loc, extra_opts='--chmod=g=rwX,a+rX')
+            rsync_project(env.cwd, loc, extra_opts='--chmod=g=rwX,a+rX -l')
     finally:
         shutil.rmtree(loc)
     return remote_head
