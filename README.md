@@ -14,4 +14,4 @@ Contributions to `django-fusionbox` are welcome provided they adhere to the foll
 
 ## Documentation
 
-http://fusionbox.github.com/django-fusionbox/
+http://django-fusionbox.readthedocs.org/

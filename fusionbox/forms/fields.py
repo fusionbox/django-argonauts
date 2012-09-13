@@ -10,6 +10,9 @@ import datetime
 from functools import partial
 
 from django import forms
+from django.forms.util import flatatt
+from django.template.loader import render_to_string
+from django.utils.safestring import mark_safe
 
 from fusionbox.forms.widgets import MultiFileWidget
 
@@ -82,3 +85,19 @@ class MultiFileField(forms.FileField):
             return map(curry_super, data)
         except TypeError:
             return None
+
+
+class UncaptchaWidget(forms.HiddenInput):
+    """
+    Renders as an empty string.  To render this field use the uncaptcha
+    template tag.
+    """
+    def render(self, name, value, attrs=None):
+        return ''
+
+
+class UncaptchaField(forms.CharField):
+    """
+    Extension of Charfield with ``UncaptchaWidget`` as its default widget.
+    """
+    widget = UncaptchaWidget

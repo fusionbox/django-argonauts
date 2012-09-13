@@ -89,7 +89,6 @@ TEMPLATE_LOADERS = (
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
-    'fusionbox.error_logging.middleware.FusionboxCommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -127,7 +126,6 @@ INSTALLED_APPS = (
     'djangosecure',
 
     # Apps to be tested
-    'fusionbox.error_logging',
     'test_app',
 )
 
@@ -160,9 +158,7 @@ LOGGING = {
     }
 }
 
-#SEND_BROKEN_LINK_EMAILS = True
-# Use django-fusionbox error reporting
-FUSIONBOX_SEND_BROKEN_LINK_EMAILS = True
+SEND_BROKEN_LINK_EMAILS = True
 
 # SEND EMAILS TO FILE BACKEND
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'

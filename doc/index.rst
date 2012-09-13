@@ -24,6 +24,7 @@ Contents:
    fabric
    views
    managers
+   http
 
 Indices and tables
 ==================
