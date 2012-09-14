@@ -11,11 +11,15 @@ from django.db.models.query import QuerySet
 
 from fusionbox.db.models import QuerySetManager
 
+now = datetime.datetime.now
+
 if getattr(settings, 'USE_TZ', False):
-    from django.utils.timezone import utc
-    now = lambda: datetime.datetime.utcnow().replace(tzinfo=utc)
-else:
-    now = datetime.datetime.now
+    # Django 1.3 does not have the django.utils.timezone module.
+    try:
+        from django.utils.timezone import utc
+        now = lambda: datetime.datetime.utcnow().replace(tzinfo=utc)
+    except ImportError:
+        pass
 
 
 class EmptyObject(object):
