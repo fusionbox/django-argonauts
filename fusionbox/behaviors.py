@@ -3,13 +3,30 @@ import copy
 import datetime
 
 from django.conf import settings
-from django.contrib.admin.util import lookup_needs_distinct
 from django.core.exceptions import ImproperlyConfigured, ValidationError, NON_FIELD_ERRORS
 from django.db import models
 from django.db.models.base import ModelBase
 from django.db.models.query import QuerySet
 
 from fusionbox.db.models import QuerySetManager
+
+
+try:
+    from django.contrib.admin.util import lookup_needs_distinct
+except ImportError: 
+    def lookup_needs_distinct(opts, lookup_path):
+        """
+        Returns True if 'distinct()' should be used to query the given lookup path.
+        """
+        field_name = lookup_path.split('__', 1)[0]
+        field = opts.get_field_by_name(field_name)[0]
+        if ((hasattr(field, 'rel') and
+             isinstance(field.rel, models.ManyToManyRel)) or
+            (isinstance(field, models.related.RelatedObject) and
+             not field.field.unique)):
+             return True
+        return False
+
 
 now = datetime.datetime.now
 
