@@ -7,6 +7,7 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 import re
 import warnings
+import calendar
 
 inflect = None
 try:
@@ -17,6 +18,7 @@ except ImportError:
 
 from django import template
 from django.conf import settings
+from django.forms.models import model_to_dict
 
 from BeautifulSoup import BeautifulSoup
 from django.utils import simplejson
@@ -438,6 +440,34 @@ def pluralize_with(count, noun):
         raise ImportError('"inflect" module is not available.  Install using `pip install inflect`.')
 
     return str(count) + " " + inflect.plural(noun, count)
+
+
+@register.filter
+def month_name(month_number):
+    return calendar.month_name[month_number]
+
+
+@register.filter('model_to_dict')
+def model_to_dict_filter(instance, fields=None):
+    """
+    Given a model instance, returns the items() of its dictionary
+    representation.
+
+    Good for form emails::
+
+        {% for name, value in model_instance|model_to_dict:"name,comment" %}
+        {{ name }}: {{ value }
+        {% endfor %}
+    """
+
+    if fields:
+        fields = fields.split(',')
+    data_dict = model_to_dict(instance, fields=fields)
+    if fields:
+        # put fields in order
+        return [(k, data_dict[k]) for k in fields]
+    else:
+        return data_dict.items()
 
 
 class NodeListNode(template.Node):

@@ -2,6 +2,7 @@
 """
 
 import re
+import os.path
 
 import yaml
 import markdown
@@ -18,6 +19,17 @@ try:
     EMAIL_LAYOUT = settings.EMAIL_LAYOUT
 except AttributeError:
     EMAIL_LAYOUT = None
+
+# Where should attachment locations be relative to?
+# Allows you to say::
+#
+#       attachments: ['foo.pdf']
+#
+# In your email template.
+EMAIL_ATTACHMENT_ROOT = getattr(
+        settings,
+        'EMAIL_ATTACHMENT_ROOT',
+        os.path.join(settings.PROJECT_PATH, '../attachments/'))
 
 
 def create_markdown_mail(template,
@@ -49,6 +61,12 @@ def create_markdown_mail(template,
     from_address = meta.get('from', from_address)
 
     msg = EmailMultiAlternatives(subject, raw, from_address, to)
+    for attachment in meta.get('attachments', []):
+        if isinstance(attachment, basestring):
+            # filename
+            msg.attach_file(os.path.join(EMAIL_ATTACHMENT_ROOT, attachment))
+        else:
+            msg.attach(*attachment)
     msg.attach_alternative(html, 'text/html')
 
     return msg
@@ -89,6 +107,7 @@ def render_template(template, context, layout):
     context.pop()
 
     return (meta, md, html)
+
 
 front_matter_re = re.compile('(\s*\n)?^---\n(.*)\n---$\n*', re.MULTILINE | re.DOTALL)
 

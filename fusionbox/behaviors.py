@@ -1,11 +1,13 @@
-from django.db import models
-from django.core.exceptions import ImproperlyConfigured, ValidationError, NON_FIELD_ERRORS
-from django.db.models.base import ModelBase
-from django.db.models.query import QuerySet
-from django.conf import settings
-
+import operator
 import copy
 import datetime
+
+from django.conf import settings
+from django.contrib.admin.util import lookup_needs_distinct
+from django.core.exceptions import ImproperlyConfigured, ValidationError, NON_FIELD_ERRORS
+from django.db import models
+from django.db.models.base import ModelBase
+from django.db.models.query import QuerySet
 
 from fusionbox.db.models import QuerySetManager
 
@@ -129,6 +131,10 @@ class Behavior(models.Model):
         # Everything in declared_fields was pulled out by our metaclass, time
         # to add them back in
         for parent in cls.mro():
+            if cls._meta.proxy:
+                # Proxy models already had their fields added via the parent
+                # model, so don't add them again.
+                continue
             try:
                 declared_fields = parent.declared_fields
             except AttributeError:  # Model itself doesn't have declared_fields
@@ -427,3 +433,31 @@ class Validation(Behavior):
             if hasattr(e, 'message_dict'):
                 return e.message_dict
             return {NON_FIELD_ERRORS: e.messages}
+
+
+def construct_search(field_name):
+    if field_name.startswith('^'):
+        return "%s__istartswith" % field_name[1:]
+    elif field_name.startswith('='):
+        return "%s__iexact" % field_name[1:]
+    elif field_name.startswith('@'):
+        return "%s__search" % field_name[1:]
+    else:
+        return "%s__icontains" % field_name
+
+
+class AdminSearchableQueryset(models.query.QuerySet):
+    def search(self, query):
+        orm_lookups = [construct_search(str(search_field))
+                       for search_field in self.search_fields]
+        for bit in query.split():
+            or_queries = [models.Q(**{orm_lookup: bit})
+                          for orm_lookup in orm_lookups]
+            self = self.filter(reduce(operator.or_, or_queries))
+
+        for search_spec in orm_lookups:
+            if lookup_needs_distinct(self.model._meta, search_spec):
+                self = self.distinct()
+                break
+
+        return self
