@@ -34,11 +34,13 @@ class MultiFileWidget(FileInput):
             - name (of uploaded file)
             - size (in bytes)
         """
-        return u"""
-<p class="uploaded_image">
-<a href="" class="remove_input">x</a> <span class="filename">
-${ name }</span> <span class="filesize">[${ size } bytes]</span>
-</p>"""
+        # TODO make this into a template.
+        return u"""function(file){
+return '<p class="uploaded_image">\
+<a href="" class="remove_input">x</a> <span class="filename">\
+ ' + file.name + '</span> <span class="filesize">[' + file.size + ' bytes]</span>\
+<span class="preview"><img class="preview"></span>\
+</p>';}"""
 
     def tmpl_id(self, name):
         """
@@ -55,21 +57,17 @@ ${ name }</span> <span class="filesize">[${ size } bytes]</span>
 
     def render(self, name, value, attrs=None):
         attrs.update({"multiple": ""})
-        tmpl_id = self.tmpl_id(name)
         container_id = self.container_id(name)
-        tmpl = u'<script id="{tmpl_id}" type="jquery-tmpl">{tmpl}</script>'\
-                .format(tmpl_id=tmpl_id,
-                        tmpl=self.render_jquery_tmpl_func(attrs))
         input_tag = super(FileInput, self).render(name, None, attrs=attrs)
         container = u'<div id="%s"></div>' % container_id
         binding = u"""
 <script type="text/javascript">
-jQuery('input[type=file]').multifile('#{container_id}', '#{tmpl_id}');
-</script>""".format(tmpl_id=tmpl_id, container_id=container_id)
+  $('input[name={name}]').multifile('#{container_id}', {tmpl_func}, true);
+</script>""".format(name=name, tmpl_func=self.render_jquery_tmpl(attrs),
+                    container_id=container_id)
 
-        return mark_safe(u"{tmpl}{input}{container}{binding}"\
+        return mark_safe(u"{input}{container}{binding}"\
                 .format(
-                    tmpl=tmpl,
                     input=input_tag,
                     container=container,
                     binding=binding
