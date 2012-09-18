@@ -20,7 +20,7 @@ setup(name='django-fusionbox',
     url='https://github.com/fusionbox/django-fusionbox',
     packages=find_packages(),
     package_data={
-        'fusionbox': ['static/js/*'],
+        'fusionbox.core': ['static/js/*', 'templates/forms/fields/*'],
         'fusionbox.panels.user_panel': ['templates/*',],
         'fusionbox.newsletter': ['templates/newsletter/*',]
         },
