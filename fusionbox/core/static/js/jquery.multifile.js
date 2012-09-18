@@ -1,38 +1,34 @@
-;(function($, global, undefined)
-{
-  
-  $.fn.multifile = function(container, template)
+/**
+ * jquery.multifile.js
+ * by Rocky Meza
+ *
+ * Multifile is a plugin that provides a better interface for
+ * uploading more than one file at a time.
+ */
+;(function($, global, undefined){
+  $.fn.multifile = function(container, templateCb)
   {
-    var $container = $(container)
-      , $template  = $(template)
-      , addInput   = function(event)
+    var $container
+      , addInput = function(event)
         {
           var $this = $(this)
-            , new_input = $this.clone(true, false).val('');
+            , new_input = $this.clone(true, false);
 
           $this
             .unbind(event)
+            .hide()
             .after(new_input);
-        }
-      , addInputAndRemover = function(event)
-        {
-          var $this = $(this);
 
-          addInput.apply(this, arguments);
+          templateCb = templateCb || $.fn.multifile.templateCb;
 
-          $this.hide();
-
-          for ( var i = 0, _len = this.files.length; i < _len; i++ )
-          {
-            $template
-              .tmpl(this.files[i])
-              .appendTo($container)
-              .find('.remove_input')
-                .bind('click.multifile', bindRemoveInput($this));
-          }
+          templateCb($.fn.multifile.getFileObject(this))
+            .appendTo($container)
+            .find('.multifile_remove_input')
+              .bind('click.multifile', bindRemoveInput($this));
         }
       , bindRemoveInput = function($input)
         {
+          // TODO: make this customizable
           return function(event)
           {
             $input.remove();
@@ -42,23 +38,62 @@
           };
         };
 
+    if ( container )
+    {
+      if ( typeof container == 'string' )
+        $container = $(container);
+      else
+        $container = container;
+    }
+    else
+    {
+      $container = $('<div class="multifile_container" />');
+      this.after($container);
+    }
+
     return this.each(function(index, elem)
     {
-      // detect FileList support
-      if ( !!global.FileList )
-      {
-        $(this)
-          .bind('change.multifile', addInputAndRemover)
-          ;
-      }
+      $(this)
+        .bind('change.multifile', addInput)
+        ;
+    });
+  };
+
+  $.fn.multifile.templateCb = function(file)
+  {
+    return $('<p class="uploaded_image"> \
+      <a href="" class="multifile_remove_input">x</a> \
+      <span class="filename">'+ file.name +'</span> \
+    </p>')
+  };
+
+  $.fn.multifile.getFileObject = function(input)
+  {
+    var file = {};
+    // check for HTML5 FileList support
+    if ( !!global.FileList )
+    {
+      if ( input.files.length == 1 )
+        file = input.files[0];
       else
       {
-        $(this)
-          .bind('change.multifile', addInput)
-          ;
-        
-        $container.hide();
+        file._multiple = true;
+
+        // We do this in order to support `multiple` files.
+        // You can't display them separately because they 
+        // belong to only one file input.  It is impossible
+        // to remove just one of the files.
+        file.name = input.files[0].name;
+        for (var i = 1, _len = input.files.length; i < _len; i++)
+          file.name += ', ' + input.files[i].name;
       }
-    });
-  }
+    }
+    else
+    {
+      file._html4 = true;
+      file.name = input.value;
+    }
+
+    return file;
+  };
 })(jQuery, this);
