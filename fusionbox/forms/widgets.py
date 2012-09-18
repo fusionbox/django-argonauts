@@ -33,7 +33,8 @@ class MultiFileWidget(FileInput):
 
     def render(self, name, value, attrs=None):
         """
-
+        Renders the multifile field template and returns the result as the
+        rendered version of this field.
         """
         attrs.update({"multiple": ""})
         container_id = self.container_id(name)
