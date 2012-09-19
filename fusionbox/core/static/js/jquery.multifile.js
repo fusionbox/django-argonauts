@@ -65,7 +65,7 @@
     '<p class="uploaded_image"> \
       <a href="" class="multifile_remove_input">x</a> \
     </p>')
-      .append( $('<span>').attrs('class', 'filename').text(file.name) );
+      .append( $('<span>').attr('class', 'filename').text(file.name) );
   };
 
   $.fn.multifile.getFileObject = function(input)
