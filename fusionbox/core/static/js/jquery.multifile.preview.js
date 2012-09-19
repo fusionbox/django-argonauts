@@ -1,37 +1,35 @@
-;(function($, global, $multifile)
+;(function($, global, multifile_plugin)
 {
+  var _parent_templateCb = multifile_plugin.templateCb;
+
   if ( !global.FileReader )
     return;
 
-  $multifile.templateCb = function(file)
+  multifile_plugin.templateCb = function(file)
   {
-    var $tmpl = $('<p class="uploaded_image"> \
-      <a href="" class="multifile_remove_input">x</a> \
-      <span class="filename"></span> \
-      <img class="multifile_preview" /> \
-      <a class="multifile_preview"></a> \
-    </p>')
-      , fr = new FileReader();
-    $tmpl.find('span.filename').text(file.name);
-    fr.onload = $multifile.fileReaderCb($tmpl, file);
-    fr.readAsDataURL(file);
-    return $tmpl;
+    return multifile_plugin.fileReaderCb(_parent_templateCb, file);
   };
 
-  $multifile.image_filter = /^(?:image\/bmp|image\/cis\-cod|image\/gif|image\/ief|image\/jpeg|image\/jpeg|image\/jpeg|image\/pipeg|image\/png|image\/svg\+xml|image\/tiff|image\/x\-cmu\-raster|image\/x\-cmx|image\/x\-icon|image\/x\-portable\-anymap|image\/x\-portable\-bitmap|image\/x\-portable\-graymap|image\/x\-portable\-pixmap|image\/x\-rgb|image\/x\-xbitmap|image\/x\-xpixmap|image\/x\-xwindowdump)$/i;
+  multifile_plugin.image_filter = /^(?:image\/bmp|image\/cis\-cod|image\/gif|image\/ief|image\/jpeg|image\/jpeg|image\/jpeg|image\/pipeg|image\/png|image\/svg\+xml|image\/tiff|image\/x\-cmu\-raster|image\/x\-cmx|image\/x\-icon|image\/x\-portable\-anymap|image\/x\-portable\-bitmap|image\/x\-portable\-graymap|image\/x\-portable\-pixmap|image\/x\-rgb|image\/x\-xbitmap|image\/x\-xpixmap|image\/x\-xwindowdump)$/i;
 
-  $multifile.fileReaderCb = function($tmpl, file_obj)
+  multifile_plugin.fileReaderCb = function(templateCb, file)
   {
-    return function(event)
+    var fr = new FileReader()
+      , $tmpl = templateCb(file)
+      , $img;
+    fr.onload = function(event)
     {
-      if ( $multifile.image_filter.test(file_obj.type) )
-        $tmpl.find('img.multifile_preview')
-          .attr('src', event.target.result);
-      else
-        $tmpl.find('a.multifile_preview')
-          .attr('href', event.target.result)
-          .text('Preview');
+      if ( multifile_plugin.image_filter.test(file.type) )
+      {
+        $img = $('<img />').attr({
+          'class': 'multifile_preview',
+          'src': event.target.result
+          });
+        $tmpl.append($img);
+      }
     };
+    fr.readAsDataURL(file);
+    return $tmpl;
   };
 
 })(jQuery, this, $.fn.multifile);

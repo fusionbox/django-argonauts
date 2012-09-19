@@ -61,10 +61,11 @@
 
   $.fn.multifile.templateCb = function(file)
   {
-    return $('<p class="uploaded_image"> \
+    return $(
+    '<p class="uploaded_image"> \
       <a href="" class="multifile_remove_input">x</a> \
-      <span class="filename">'+ file.name +'</span> \
     </p>')
+      .append( $('<span>').attrs('class', 'filename').text(file.name) );
   };
 
   $.fn.multifile.getFileObject = function(input)
