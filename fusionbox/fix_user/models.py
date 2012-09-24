@@ -51,16 +51,19 @@ def new_init(self, *args, **kwargs):
     else:
         data = {}
     ret = old_init(self, *args, **kwargs)
-    self.fields['email'].label = 'Username'
-    self.fields['email'].max_length = 255
-    self.fields['email'].validators[0].limit_value = 255
-    self.fields['email'].help_text = _("This will be set to the email")
-    self.fields['email'].widget.attrs['maxlength'] = 254  # html
-    self.fields['email'].widget.attrs['readonly'] = 'readonly'
-    self.fields['email'].widget.attrs['disabled'] = 'disabled'
+    try:
+        self.fields['email'].label = 'Username'
+        self.fields['email'].max_length = 255
+        self.fields['email'].validators[0].limit_value = 255
+        self.fields['email'].help_text = _("This will be set to the email")
+        self.fields['email'].widget.attrs['maxlength'] = 254  # html
+        self.fields['email'].widget.attrs['readonly'] = 'readonly'
+        self.fields['email'].widget.attrs['disabled'] = 'disabled'
 
-    if data:
-        data[self['email'].name] = data[self['username'].name]
+        if data:
+            data[self['email'].name] = data[self['username'].name]
+    except KeyError:
+        pass
     return ret
 
 UserChangeForm.__init__ = new_init
