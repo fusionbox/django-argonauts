@@ -10,9 +10,6 @@ import datetime
 from functools import partial
 
 from django import forms
-from django.forms.util import flatatt
-from django.template.loader import render_to_string
-from django.utils.safestring import mark_safe
 
 from fusionbox.forms.widgets import MultiFileWidget
 
@@ -28,6 +25,7 @@ class MonthField(forms.TypedChoiceField):
                 [(i, "%s - %s" % (i, calendar.month_name[i]))
                         for i in range(1, 13)]
         self.coerce = int
+
 
 class FutureYearField(forms.TypedChoiceField):
     """
@@ -101,3 +99,20 @@ class UncaptchaField(forms.CharField):
     Extension of Charfield with ``UncaptchaWidget`` as its default widget.
     """
     widget = UncaptchaWidget
+
+
+class NoAutocompleteCharField(forms.CharField):
+    """
+    :class:`NoAutocompleteCharField` is a subclass of ``CharField`` that sets
+    the ``autocomplete`` attribute to ``off``.  This is suitable for credit
+    card numbers and other such sensitive information.
+
+    This should be used in conjunction with the `sensitive_post_parameters
+    <https://docs.djangoproject.com/en/dev/howto/error-reporting/#sensitive_post_parameters>`
+    decorator.
+    """
+    def widget_attrs(self, *args, **kwargs):
+        ret = super(NoAutocompleteCharField, self).widget_attrs(*args, **kwargs) or {}
+        ret['autocomplete'] = 'off'
+
+        return ret

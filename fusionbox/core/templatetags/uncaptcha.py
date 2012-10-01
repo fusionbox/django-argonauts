@@ -9,10 +9,10 @@ def uncaptcha(context, form=None):
     """
     Renders the uncaptcha field for a form.
     """
-    if form is None:
-        field = context['form']['uncaptcha']
-    else:
+    if form:
         field = form['uncaptcha']
+    else:
+        field = context['form']['uncaptcha']
 
     context['field'] = field
 
