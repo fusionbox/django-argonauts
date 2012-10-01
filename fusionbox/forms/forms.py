@@ -73,7 +73,7 @@ class SearchForm(BaseChangeListForm):
     """
     SEARCH_FIELDS = tuple()
     CASE_SENSITIVE = False
-    q = forms.CharField(label="Search", required=False, min_length=3)
+    q = forms.CharField(label="Search", required=False)
 
     def pre_search(self, qs):
         """
