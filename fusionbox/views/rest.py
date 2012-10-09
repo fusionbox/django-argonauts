@@ -2,6 +2,7 @@
 View classes to help facilitate the creation of REST APIs
 """
 import json
+import datetime
 from decimal import Decimal
 
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -15,6 +16,9 @@ def more_json(obj):
     """
     if isinstance(obj, Decimal):
         return str(obj)
+    if isinstance(obj, datetime.date):
+        # this catch both date and datetime
+        return obj.isoformat()
     if hasattr(obj, 'to_json'):
         return obj.to_json()
     raise TypeError("%r is not JSON serializable" % (obj,))
