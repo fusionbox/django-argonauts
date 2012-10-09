@@ -2,26 +2,11 @@
 View classes to help facilitate the creation of REST APIs
 """
 import json
-import datetime
-from decimal import Decimal
 
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, Http404
 from django.views.generic.base import View
-
-
-def more_json(obj):
-    """
-    Allows decimals and objects with ``to_json`` methods to be serialized.
-    """
-    if isinstance(obj, Decimal):
-        return str(obj)
-    if isinstance(obj, datetime.date):
-        # this catch both date and datetime
-        return obj.isoformat()
-    if hasattr(obj, 'to_json'):
-        return obj.to_json()
-    raise TypeError("%r is not JSON serializable" % (obj,))
 
 
 class JsonResponseMixin(object):
@@ -53,7 +38,7 @@ class JsonResponseMixin(object):
         except (AttributeError, TypeError):
             pass
 
-        return json.dumps(obj, default=more_json)
+        return json.dumps(obj, cls=DjangoJSONEncoder)
 
     def http_method_not_allowed(self, *args, **kwargs):
         """
