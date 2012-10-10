@@ -9,6 +9,23 @@ from django.http import HttpResponse, Http404
 from django.views.generic.base import View
 
 
+class JSONEncoder(DjangoJSONEncoder):
+    """
+    Like django's JSONEncoder, but supports objects with `to_json` methods.
+    """
+    def default(self, o):
+        try:
+            o = o.to_json()
+        except AttributeError:
+            pass
+        try:
+            o = [o.to_json() for i in o]
+        except (AttributeError, TypeError):
+            pass
+
+        return super(JSONEncoder, self).default(o)
+
+
 class JsonResponseMixin(object):
     """
     Sets the response MIME type to ``application/json`` and serializes the
@@ -38,7 +55,7 @@ class JsonResponseMixin(object):
         except (AttributeError, TypeError):
             pass
 
-        return json.dumps(obj, cls=DjangoJSONEncoder)
+        return json.dumps(obj, cls=JSONEncoder)
 
     def http_method_not_allowed(self, *args, **kwargs):
         """
