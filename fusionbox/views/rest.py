@@ -2,22 +2,28 @@
 View classes to help facilitate the creation of REST APIs
 """
 import json
-from decimal import Decimal
 
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, Http404
 from django.views.generic.base import View
 
 
-def more_json(obj):
+class JSONEncoder(DjangoJSONEncoder):
     """
-    Allows decimals and objects with ``to_json`` methods to be serialized.
+    Like django's JSONEncoder, but supports objects with `to_json` methods.
     """
-    if isinstance(obj, Decimal):
-        return str(obj)
-    if hasattr(obj, 'to_json'):
-        return obj.to_json()
-    raise TypeError("%r is not JSON serializable" % (obj,))
+    def default(self, o):
+        try:
+            o = o.to_json()
+        except AttributeError:
+            pass
+        try:
+            o = [o.to_json() for i in o]
+        except (AttributeError, TypeError):
+            pass
+
+        return super(JSONEncoder, self).default(o)
 
 
 class JsonResponseMixin(object):
@@ -39,17 +45,7 @@ class JsonResponseMixin(object):
         Handles serialization of the object, calling ``to_json`` method if it
         exits on the object.
         """
-        try:
-            obj = obj.to_json()
-        except AttributeError:
-            pass
-
-        try:
-            obj = [i.to_json() for i in obj]
-        except (AttributeError, TypeError):
-            pass
-
-        return json.dumps(obj, default=more_json)
+        return json.dumps(obj, cls=JSONEncoder)
 
     def http_method_not_allowed(self, *args, **kwargs):
         """
