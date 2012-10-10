@@ -45,16 +45,6 @@ class JsonResponseMixin(object):
         Handles serialization of the object, calling ``to_json`` method if it
         exits on the object.
         """
-        try:
-            obj = obj.to_json()
-        except AttributeError:
-            pass
-
-        try:
-            obj = [i.to_json() for i in obj]
-        except (AttributeError, TypeError):
-            pass
-
         return json.dumps(obj, cls=JSONEncoder)
 
     def http_method_not_allowed(self, *args, **kwargs):
