@@ -116,3 +116,12 @@ class NoAutocompleteCharField(forms.CharField):
         ret['autocomplete'] = 'off'
 
         return ret
+
+
+class USDCurrencyField(forms.DecimalField):
+    """
+    Form field for entering dollar amounts. Allows an optional leading dollar
+    sign, which gets stripped.
+    """
+    def clean(self, value):
+        return super(USDCurrencyField, self).clean(value.lstrip('$'))
