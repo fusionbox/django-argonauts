@@ -4,9 +4,10 @@ View classes to help facilitate the creation of REST APIs
 import json
 
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, Http404
 from django.views.generic.base import View
+
+from fusionbox.core.serializers import FusionboxJSONEncoder
 
 
 class JsonResponseMixin(object):
@@ -25,20 +26,10 @@ class JsonResponseMixin(object):
 
     def serialize(self, obj):
         """
-        Handles serialization of the object, calling ``to_json`` method if it
-        exits on the object.
+        Returns a json serialized string object encoded using
+        `fusionbox.core.serializers.FusionboxJSONEncoder`.
         """
-        try:
-            obj = obj.to_json()
-        except AttributeError:
-            pass
-
-        try:
-            obj = [i.to_json() for i in obj]
-        except (AttributeError, TypeError):
-            pass
-
-        return json.dumps(obj, cls=DjangoJSONEncoder)
+        return json.dumps(obj, cls=FusionboxJSONEncoder)
 
     def http_method_not_allowed(self, *args, **kwargs):
         """

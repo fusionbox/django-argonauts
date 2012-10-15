@@ -8,6 +8,7 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 import re
 import warnings
 import calendar
+from json import dumps as json_dumps
 
 inflect = None
 try:
@@ -21,10 +22,11 @@ from django.conf import settings
 from django.forms.models import model_to_dict
 
 from BeautifulSoup import BeautifulSoup
-from django.utils import simplejson
 from django.utils.safestring import mark_safe
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.core.exceptions import ImproperlyConfigured
+
+from fusionbox.core.serializers import FusionboxJSONEncoder
 
 register = template.Library()
 
@@ -197,17 +199,6 @@ def attr(obj, arg1):
     return obj
 
 
-def more_json(obj):
-    """
-    Allows decimals and objects with `to_json` methods to be serialized.
-    """
-    if isinstance(obj, Decimal):
-        return float(obj)
-    if hasattr(obj, 'to_json'):
-        return obj.to_json()
-    raise TypeError("%r is not JSON serializable" % (obj,))
-
-
 @register.filter
 def json(a):
     """
@@ -220,7 +211,7 @@ def json(a):
     If the output needs to be put in an attribute, entitize the output of this
     filter.
     """
-    json_str = simplejson.dumps(a, default=more_json)
+    json_str = json_dumps(a, cls=FusionboxJSONEncoder)
 
     # Escape all the XML/HTML special characters.
     escapes = ['<', '>', '&']
