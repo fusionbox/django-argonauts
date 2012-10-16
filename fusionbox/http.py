@@ -2,7 +2,7 @@ import json
 
 from django.http import HttpResponseRedirect, HttpResponse
 
-from fusionbox.core.serializers.json import FusionboxJSONEncoder
+from fusionbox.core.serializers import FusionboxJSONEncoder
 
 
 class HttpResponseSeeOther(HttpResponseRedirect):
