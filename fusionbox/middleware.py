@@ -1,5 +1,4 @@
 import os
-import csv
 import urlparse
 import warnings
 
@@ -13,6 +12,8 @@ from django.shortcuts import render_to_response
 from django.views.decorators.csrf import requires_csrf_token
 from django.core.exceptions import ImproperlyConfigured
 from django.contrib.sites.models import get_current_site
+
+from fusionbox.unicode_csv import csv
 
 
 @requires_csrf_token
