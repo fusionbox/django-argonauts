@@ -15,14 +15,27 @@ class CsvAdmin(object):
 
     actions = ('export_csv',)
 
+    @staticmethod
+    def get_csvable_value(obj, field):
+        field_val = getattr(obj, field)
+        try:
+            field_val = u','.join([
+                    unicode(val) for val in field_val.all()
+                ])
+        except AttributeError:
+            pass
+        return field_val
+
     def export_csv(self, request, queryset):
         fields = self.csv_fields or self.fields or fields_for_model(self.model).keys()
         response = HttpResponse(mimetype='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=%s.csv' % self.model._meta.db_table
+        response['Content-Disposition'] = ('attachment; filename=%s.csv'
+                                           % self.model._meta.db_table)
         writer = csv.unicode_writer(response)
         writer.writerow(fields)
         for obj in queryset.all():
-            writer.writerow([getattr(obj, field) for field in fields])
+            writer.writerow([self.get_csvable_value(obj, field)
+                             for field in fields])
         return response
 
 
