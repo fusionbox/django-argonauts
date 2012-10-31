@@ -31,9 +31,11 @@ class UnicodeReader:
     def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
         f = UTF8Recoder(f, encoding)
         self.reader = csv.reader(f, dialect=dialect, **kwds)
+        self.line_num = 0
 
     def next(self):
         row = self.reader.next()
+        self.line_num = self.reader.line_num
         return [unicode(s, "utf-8") for s in row]
 
     def __iter__(self):
@@ -47,7 +49,6 @@ class UnicodeWriter:
     """
 
     def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
-        # Redirect output to a queue
         self.queue = cStringIO.StringIO()
         self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
         self.stream = f
@@ -55,19 +56,28 @@ class UnicodeWriter:
 
     def writerow(self, row):
         self.writer.writerow([unicode(s).encode("utf-8") for s in row])
-        # Fetch UTF-8 output from the queue ...
         data = self.queue.getvalue()
         data = data.decode("utf-8")
-        # ... and reencode it into the target encoding
         data = self.encoder.encode(data)
-        # write to the target stream
         self.stream.write(data)
-        # empty queue
         self.queue.truncate(0)
 
     def writerows(self, rows):
         for row in rows:
             self.writerow(row)
 
-csv.unicode_writer = UnicodeWriter
-csv.unicode_reader = UnicodeReader
+
+class UnicodeDictWriter(csv.DictWriter):
+    def __init__(self, f, fieldnames, restkey="", extrasaction="raise",
+                 dialect="excel", encoding="utf-8", *args, **kwargs):
+        csv.DictWriter.__init__(self, f, fieldnames, restkey, extrasaction,
+                                dialect, *args, **kwargs)
+        self.writer = UnicodeWriter(f, dialect, encoding=encoding, *args, **kwargs)
+
+
+class UnicodeDictReader(csv.DictReader):
+    def __init__(self, f, fieldnames=None, restkey=None, restval=None,
+                 dialect="excel", encoding="utf-8", *args, **kwargs):
+        csv.DictReader.__init__(self, f, fieldnames, restkey, restval,
+                                dialect, *args, **kwargs)
+        self.reader = UnicodeReader(f, dialect, encoding=encoding, *args, **kwargs)
