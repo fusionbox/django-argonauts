@@ -22,6 +22,6 @@ class JsonResponse(HttpResponse):
 
 
     def __init__(self, context, *args, **kwargs):
-        content = json.dumps(context, default=FusionboxJSONEncoder)
+        content = json.dumps(context, cls=FusionboxJSONEncoder)
         super(JsonResponse, self).__init__(content, *args, **kwargs)
         self['Content-Type'] = 'application/json'
