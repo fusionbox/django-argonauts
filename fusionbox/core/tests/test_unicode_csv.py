@@ -7,34 +7,34 @@ from fusionbox.unicode_csv import UnicodeReader, UnicodeWriter
 class UnicodeDictReaderTests(unittest.TestCase):
 
     def test_unicode_fieldnames(self):
-        from fusionbox.unicode_csv import UnicodeDictReader
+        from fusionbox.unicode_csv import DictReader
         s = StringIO('"\xe2\x98\x83"')
-        fb_reader = UnicodeDictReader(s)
+        fb_reader = DictReader(s)
         self.assertEquals(fb_reader.fieldnames, [u'\u2603'])
 
     def test_readrow_unicode(self):
-        from fusionbox.unicode_csv import UnicodeDictReader
+        from fusionbox.unicode_csv import DictReader
         s = StringIO('"test"\r\n"\xe2\x98\x83"')
-        fb_reader = UnicodeDictReader(s)
+        fb_reader = DictReader(s)
         self.assertEquals(fb_reader.next(), {'test': u'\u2603'})
 
 
 class UnicodeDictWriterTests(unittest.TestCase):
 
     def test_write_headers(self):
-        from fusionbox.unicode_csv import UnicodeDictWriter
+        from fusionbox.unicode_csv import DictWriter
         headers = [u'\u2603']
         result = StringIO()
-        fb_writer = UnicodeDictWriter(result, headers)
+        fb_writer = DictWriter(result, headers)
         fb_writer.writeheader()
         self.assertEquals(result.getvalue(), '\xe2\x98\x83\r\n')
 
     def test_writerow(self):
-        from fusionbox.unicode_csv import UnicodeDictWriter
+        from fusionbox.unicode_csv import DictWriter
         result = StringIO()
         row_to_write = {u'\u2603': u'\u2603'}
         headers = [u'\u2603']
-        fb_writer = UnicodeDictWriter(result, headers)
+        fb_writer = DictWriter(result, headers)
         fb_writer.writeheader()
         fb_writer.writerow(row_to_write)
         self.assertEquals(result.getvalue(), '\xe2\x98\x83\r\n\xe2\x98\x83\r\n')

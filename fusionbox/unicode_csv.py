@@ -3,7 +3,7 @@ Unicode Readers and Writers for use with the stdlib's csv module.
 
 See <http://docs.python.org/library/csv.html> for details.
 """
-import csv
+from csv import *
 import codecs
 import cStringIO
 
@@ -30,10 +30,10 @@ class UnicodeReader:
     which is encoded in the given encoding.
     """
 
-    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwargs):
+    def __init__(self, f, dialect=excel, encoding="utf-8", **kwargs):
         f = UnicodeRecoder(f, encoding)
         self.encoding = encoding
-        self.reader = csv.reader(f, dialect=dialect, **kwargs)
+        self.reader = reader(f, dialect=dialect, **kwargs)
         self.line_num = 0
 
     def next(self):
@@ -51,9 +51,9 @@ class UnicodeWriter:
     which is encoded in the given encoding.
     """
 
-    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwargs):
+    def __init__(self, f, dialect=excel, encoding="utf-8", **kwargs):
         self.queue = cStringIO.StringIO()
-        self.writer = csv.writer(self.queue, dialect=dialect, **kwargs)
+        self.writer = writer(self.queue, dialect=dialect, **kwargs)
         self.stream = f
         self.encoding = encoding
         self.encoder = codecs.getincrementalencoder(encoding)()
@@ -71,17 +71,19 @@ class UnicodeWriter:
             self.writerow(row)
 
 
-class UnicodeDictWriter(csv.DictWriter):
+class DictWriter(DictWriter):
     def __init__(self, f, fieldnames, restkey="", extrasaction="raise",
                  dialect="excel", encoding="utf-8", *args, **kwargs):
-        csv.DictWriter.__init__(self, f, fieldnames, restkey, extrasaction,
+        from csv import DictWriter
+        DictWriter.__init__(self, f, fieldnames, restkey, extrasaction,
                                 dialect, *args, **kwargs)
         self.writer = UnicodeWriter(f, dialect, encoding=encoding, *args, **kwargs)
 
 
-class UnicodeDictReader(csv.DictReader):
+class DictReader(DictReader):
     def __init__(self, f, fieldnames=None, restkey=None, restval=None,
                  dialect="excel", encoding="utf-8", *args, **kwargs):
-        csv.DictReader.__init__(self, f, fieldnames, restkey, restval,
-                                dialect, *args, **kwargs)
+        from csv import DictReader
+        DictReader.__init__(self, f, fieldnames, restkey, restval,
+                            dialect, *args, **kwargs)
         self.reader = UnicodeReader(f, dialect, encoding=encoding, *args, **kwargs)
