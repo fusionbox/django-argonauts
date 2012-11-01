@@ -30,10 +30,10 @@ class UnicodeReader:
     which is encoded in the given encoding.
     """
 
-    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
+    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwargs):
         f = UnicodeRecoder(f, encoding)
         self.encoding = encoding
-        self.reader = csv.reader(f, dialect=dialect, **kwds)
+        self.reader = csv.reader(f, dialect=dialect, **kwargs)
         self.line_num = 0
 
     def next(self):
@@ -51,9 +51,9 @@ class UnicodeWriter:
     which is encoded in the given encoding.
     """
 
-    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwds):
+    def __init__(self, f, dialect=csv.excel, encoding="utf-8", **kwargs):
         self.queue = cStringIO.StringIO()
-        self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
+        self.writer = csv.writer(self.queue, dialect=dialect, **kwargs)
         self.stream = f
         self.encoding = encoding
         self.encoder = codecs.getincrementalencoder(encoding)()
