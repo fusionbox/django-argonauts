@@ -72,4 +72,6 @@ class Command(BaseCommand):
         if password:
             pipe.tochild.write('%s\n' % password)
             pipe.tochild.close()
+        retcode = pipe.wait()
+        assert retcode == 0
         print "Backed up %s; Load with `cat %s | gunzip | psql %s`" % (db, pipes.quote(outfile), ' '.join(args))
