@@ -68,11 +68,11 @@ def stage(pip=False, migrate=False, syncdb=False, branch=None):
             if update_pip:
                 run("pip install -r ./requirements.txt")
             if syncdb:
-                run("./manage.py syncdb")
+                run("python manage.py syncdb")
             if migrate:
-                run("./manage.py backupdb")
-                run("./manage.py migrate")
-            run("./manage.py collectstatic --noinput")
+                run("python manage.py backupdb")
+                run("python manage.py migrate")
+            run("python manage.py collectstatic --noinput")
         run("sudo touch /etc/vassals/%s.ini" % env.short_name)
 
 def deploy():
