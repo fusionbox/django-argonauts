@@ -13,7 +13,7 @@ from django.views.decorators.csrf import requires_csrf_token
 from django.core.exceptions import ImproperlyConfigured
 from django.contrib.sites.models import get_current_site
 
-from fusionbox.unicode_csv import csv
+from fusionbox import unicode_csv as csv
 
 
 @requires_csrf_token
