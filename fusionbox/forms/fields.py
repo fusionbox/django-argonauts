@@ -82,7 +82,7 @@ class MultiFileField(forms.FileField):
                     initial=initial)
             return map(curry_super, data)
         except TypeError:
-            return None
+            return []
 
 
 class UncaptchaWidget(forms.HiddenInput):
