@@ -44,7 +44,7 @@ class Command(BaseCommand):
                     'port': config.get('PORT', None),
                 }
             # PostgreSQL command and args
-            elif config['ENGINE'] == 'django.db.backends.postgresql_psycopg2':
+            elif config['ENGINE'] in ('django.db.backends.postgresql_psycopg2', 'django.contrib.gis.db.backends.postgis'):
                 backup_cmd = self.do_postgresql_backup
                 backup_kwargs = {
                     'timestamp_file': os.path.join(BACKUP_DIR, '{0}-{1}.pgsql.gz'.format(database_name, current_time)),
