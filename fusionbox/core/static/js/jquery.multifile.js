@@ -14,6 +14,9 @@
           var $this = $(this)
             , new_input = $this.clone(true, false);
 
+          // newer versions of Firefox don't clear this on clone
+          new_input[0].value = '';
+
           $this
             .unbind(event)
             .hide()
