@@ -211,7 +211,11 @@ def json(a):
     If the output needs to be put in an attribute, entitize the output of this
     filter.
     """
-    json_str = json_dumps(a, cls=FusionboxJSONEncoder)
+    kwargs = {}
+    if settings.DEBUG:
+        kwargs['indent'] = 4
+        kwargs['separators'] = (',', ': ')
+    json_str = json_dumps(a, cls=FusionboxJSONEncoder, **kwargs)
 
     # Escape all the XML/HTML special characters.
     escapes = ['<', '>', '&']
