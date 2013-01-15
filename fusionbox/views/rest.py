@@ -6,6 +6,7 @@ import json
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import HttpResponse, Http404
 from django.views.generic.base import View
+from django.conf import settings
 
 from fusionbox.core.serializers import FusionboxJSONEncoder
 
@@ -29,7 +30,11 @@ class JsonResponseMixin(object):
         Returns a json serialized string object encoded using
         `fusionbox.core.serializers.FusionboxJSONEncoder`.
         """
-        return json.dumps(obj, cls=FusionboxJSONEncoder)
+        kwargs = {}
+        if settings.DEBUG:
+            kwargs['indent'] = 4
+            kwargs['separators'] = (',', ': ')
+        return json.dumps(obj, cls=FusionboxJSONEncoder, **kwargs)
 
     def http_method_not_allowed(self, *args, **kwargs):
         """
