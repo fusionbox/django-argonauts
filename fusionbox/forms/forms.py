@@ -5,6 +5,7 @@ import urllib
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.forms.util import ErrorList, ErrorDict
 from django.db import models
 from django.db.models import Q
 from django.utils.datastructures import SortedDict
@@ -20,6 +21,29 @@ class IterDict(SortedDict):
     def __iter__(self):
         for name in self.keys():
             yield self[name]
+
+
+class CSSClassMixin(object):
+    error_css_class = 'error'
+    required_css_class = 'required'
+
+
+class NonBraindamagedErrorMixin(object):
+    """
+    Form mixin for easier field based error messages.
+    """
+    def field_error(self, name, error):
+        self._errors = self._errors or ErrorDict()
+        self._errors.setdefault(name, ErrorList())
+        self._errors[name].append(error)
+
+
+class BaseForm(NonBraindamagedErrorMixin, CSSClassMixin, forms.Form):
+    pass
+
+
+class BaseModelForm(NonBraindamagedErrorMixin, CSSClassMixin, forms.ModelForm):
+    pass
 
 
 class BaseChangeListForm(forms.Form):
