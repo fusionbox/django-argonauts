@@ -6,6 +6,7 @@ import urllib
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms.util import ErrorList, ErrorDict
+from django.utils.functional import cached_property
 from django.db import models
 from django.db.models import Q
 from django.utils.datastructures import SortedDict
@@ -19,8 +20,8 @@ class IterDict(SortedDict):
     through the values rather than keys.
     """
     def __iter__(self):
-        for name in self.keys():
-            yield self[name]
+        for key in super(IterDict, self).__iter__():
+            yield self[key]
 
 
 class CSSClassMixin(object):
@@ -38,11 +39,46 @@ class NonBraindamagedErrorMixin(object):
         self._errors[name].append(error)
 
 
-class BaseForm(NonBraindamagedErrorMixin, CSSClassMixin, forms.Form):
+class FieldsetMixin(NonBraindamagedErrorMixin):
+    """
+    Form mixin for grouping sets of fields together for both errors and
+    rendering.  Declaration of fieldsets follows that of ModelAdmin.
+    """
+    FIELDSETS = tuple()
+
+    def get_fieldsets(self):
+        return self.FIELDSETS
+
+    def fieldset_error(self, name, error):
+        fieldset = self.fieldsets[name]
+        fieldset.errors = getattr(fieldset, 'errors', ErrorList())
+        fieldset.errors.append(error)
+        self.field_error(name, error)
+
+    @cached_property
+    def fieldsets(self):
+        fieldsets = IterDict()
+        for fieldset_name, fieldset in self.get_fieldsets():
+            fieldsets[fieldset_name] = IterDict({
+                'name': fieldset_name,
+                'fields': IterDict([(field, self[field]) for field in fieldset.get('fields', [])]),
+                'css_classes': ' '.join(fieldset.get('css_classes', [])),
+                'template_name': fieldset.get('template_name'),
+            }.items())
+        return fieldsets
+
+
+class BaseForm(FieldsetMixin, CSSClassMixin, forms.Form):
+    """
+    A 'Better' base Form class.
+    """
     pass
 
 
-class BaseModelForm(NonBraindamagedErrorMixin, CSSClassMixin, forms.ModelForm):
+class BaseModelForm(FieldsetMixin, CSSClassMixin, forms.ModelForm):
+    """
+    A 'Better' base ModelForm class.
+    """
     pass
 
 
