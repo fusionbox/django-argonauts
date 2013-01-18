@@ -10,6 +10,9 @@ import datetime
 from functools import partial
 
 from django import forms
+from django.contrib.auth.forms import ReadOnlyPasswordHashWidget
+from django.utils.safestring import mark_safe
+from django.forms.util import flatatt
 
 from fusionbox.forms.widgets import MultiFileWidget
 
@@ -38,7 +41,7 @@ class FutureYearField(forms.TypedChoiceField):
         number_of_years = kwargs.pop('number_of_years', 6)
         super(FutureYearField, self).__init__(*args, **kwargs)
         self.choices = [('', ' -- ')] + \
-                [(i%100, str(i))
+                [(i % 100, str(i))
                         for i in range(datetime.datetime.now().year, datetime.datetime.now().year + number_of_years)]
         self.coerce = int
 
@@ -125,3 +128,18 @@ class USDCurrencyField(forms.DecimalField):
     """
     def clean(self, value):
         return super(USDCurrencyField, self).clean(value.lstrip('$'))
+
+
+class BetterReadOnlyPasswordHashWidget(ReadOnlyPasswordHashWidget):
+    """
+    A more user friendly password hash field for use with the displaying
+    passwords in the django admin, or elsewhere.
+    """
+    def render(self, name, value, attrs):
+        final_attrs = flatatt(self.build_attrs(attrs))
+
+        hidden = u'<div{attrs}><strong>*************</strong></div>'.format(
+            attrs=final_attrs
+        )
+
+        return mark_safe(hidden)
