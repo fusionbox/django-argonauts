@@ -17,6 +17,7 @@ try:
 except ImportError:
     pass
 
+from django import forms
 from django import template
 from django.conf import settings
 from django.forms.models import model_to_dict
@@ -600,3 +601,20 @@ def random_choice(parser, token):
     return NodeListNode(new_nodelist)
 
 register.tag("random", random_choice)
+
+
+@register.filter(name='is_checkbox')
+def is_checkbox(field):
+    """
+    Boolean filter for form fields to determine if a field is using a checkbox
+    widget.
+    """
+    return isinstance(field.field.widget, forms.CheckboxInput)
+
+
+@register.simple_tag(name='pdb', takes_context=True)
+def pdb_tag(context):
+    """
+    For raising a pdb.set_trace from within a template during rendering.
+    """
+    import pdb; pdb.set_trace()  # NOQA
