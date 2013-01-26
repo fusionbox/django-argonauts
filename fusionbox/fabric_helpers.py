@@ -51,15 +51,39 @@ def update_git(branch):
 
 
 env.tld = '.com'
-def stage(pip=False, migrate=False, syncdb=False, branch=None):
+def project_tests(tests):
+    """
+    Executes each Django test suite that is defined in the `tests` list.
+
+    Django tests return status code ``1`` if they fail.  This will cause Fabric
+    to halt execution.
+    """
+    if tests is None:
+        return
+    if isinstance(tests, basestring):
+        apps_to_test = tests.split(';')
+    else:
+        apps_to_test = tests
+    cmd = "python manage.py test %s"
+    for app_label in apps_to_test:
+        local(cmd % app_label)
+
+
+def stage(pip=False, migrate=False, syncdb=False, tests=None, branch=None):
     """
     stage will update the remote git version to your local HEAD, collectstatic, migrate and
     update pip if necessary.
+
+    A test argument of a semicolon delimited list of Django test suites to run,
+    canceling staging if a test fails.
+
+    Example: ``fab stage:tests=<test_suite1>;<test_suite2>;..``
 
     Set ``env.project_name`` and ``env.short_name`` appropriately to use.
     ``env.tld`` defaults to ``.com``
     """
     with cd('/var/www/%s%s' % (env.project_name, env.tld)):
+        project_tests(tests)
         version = update_git(branch or 'HEAD')
         update_pip = pip or files_changed(version, "requirements.txt")
         migrate = migrate or files_changed(version, "*/migrations/* %s/settings.py requirements.txt" % env.project_name)
@@ -75,8 +99,9 @@ def stage(pip=False, migrate=False, syncdb=False, branch=None):
             run("python manage.py collectstatic --noinput")
         run("sudo touch /etc/vassals/%s.ini" % env.short_name)
 
+
 def deploy():
     """
-    Like stage, but always migrates, pips, and uses the live branch
+    Like stage, but always migrates, pips, tests, and uses the live branch.
     """
-    stage(True, True, True, "live")
+    stage(True, True, True, getattr(env, 'tests', None), "live")

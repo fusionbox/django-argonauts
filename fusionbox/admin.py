@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.forms.models import fields_for_model
 from django.contrib import admin
-from fusionbox.unicode_csv import csv
+from fusionbox.unicode_csv import UnicodeWriter
 
 
 class CsvAdmin(object):
@@ -31,7 +31,7 @@ class CsvAdmin(object):
         response = HttpResponse(mimetype='text/csv')
         response['Content-Disposition'] = ('attachment; filename=%s.csv'
                                            % self.model._meta.db_table)
-        writer = csv.unicode_writer(response)
+        writer = UnicodeWriter(response)
         writer.writerow(fields)
         for obj in queryset.all():
             writer.writerow([self.get_csvable_value(obj, field)

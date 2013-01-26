@@ -1,3 +1,4 @@
+{% load url from future %}
 <script language="javascript">
 (function(window, document, version, callback) {
    var j, d;
@@ -23,7 +24,7 @@
       return;
     }
 
-    target.load('{% url debug-userpanel %}?next=' + escape(location.href));
+    target.load('{% url 'debug-userpanel' %}?next=' + escape(location.href));
   });
 });
 </script>

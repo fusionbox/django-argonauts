@@ -7,7 +7,7 @@
   /* Copies the csrf_token into the uncaptcha field and hides the uncaptcha
      fieldset */
   var uncaptcha_fieldset = document.getElementById("{{ field.html_name }}_container");
-  uncaptcha_fieldset.style.visibility = 'hidden';
+  uncaptcha_fieldset.style.display = 'none';
   var csrf_token = document.getElementsByName('csrfmiddlewaretoken');
   if ( csrf_token.length ) {
     var uncaptcha= document.getElementById("{{ field.id_for_label }}");
