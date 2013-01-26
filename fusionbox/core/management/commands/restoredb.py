@@ -1,6 +1,7 @@
 """
 Adapted from http://djangosnippets.org/snippets/823/
 """
+import glob
 import os
 import pipes
 from subprocess import Popen, PIPE
@@ -8,6 +9,13 @@ from subprocess import Popen, PIPE
 from django.core.management.base import BaseCommand, CommandError
 
 from .backupdb import BACKUP_DIR
+
+
+def get_latest_file(pattern):
+    l = glob.glob(pattern)
+    l.sort()
+    l.reverse()
+    return l[0] if l else None
 
 
 def require_latest_exists(func):
@@ -34,7 +42,7 @@ def require_root_user(func):
 
 
 class Command(BaseCommand):
-    help = 'Restores each database in settings.DATABASES from latest un-timestamped db backup.'
+    help = 'Restores each database in settings.DATABASES from latest db backup.'
     can_import_settings = True
 
     class RestoreError(Exception):
@@ -53,8 +61,11 @@ class Command(BaseCommand):
             # MySQL command and args
             if config['ENGINE'] == 'django.db.backends.mysql':
                 restore_cmd = self.do_mysql_restore
+                latest_file = get_latest_file('{0}/*.mysql.gz'.format(BACKUP_DIR))
+                if not latest_file:
+                    raise CommandError('No MySQL backups found!')
                 restore_kwargs = {
-                    'latest_file': os.path.join(BACKUP_DIR, '{0}-latest.mysql.gz'.format(database_name)),
+                    'latest_file': latest_file,
                     'db': config['NAME'],
                     'user': config.get('USER', None),
                     'password': config.get('PASSWORD', None),
@@ -64,8 +75,11 @@ class Command(BaseCommand):
             # PostgreSQL command and args
             elif config['ENGINE'] == 'django.db.backends.postgresql_psycopg2':
                 restore_cmd = self.do_postgresql_restore
+                latest_file = get_latest_file('{0}/*.pgsql.gz'.format(BACKUP_DIR))
+                if not latest_file:
+                    raise CommandError('No PostgreSQL backups found!')
                 restore_kwargs = {
-                    'latest_file': os.path.join(BACKUP_DIR, '{0}-latest.pgsql.gz'.format(database_name)),
+                    'latest_file': latest_file,
                     'db': config['NAME'],
                     'user': config.get('USER', None),
                     'root_user': config.get('ROOT_USER', None),
@@ -76,8 +90,11 @@ class Command(BaseCommand):
             # SQLite command and args
             elif config['ENGINE'] == 'django.db.backends.sqlite3':
                 restore_cmd = self.do_sqlite_restore
+                latest_file = get_latest_file('{0}/*.sqlite.gz'.format(BACKUP_DIR))
+                if not latest_file:
+                    raise CommandError('No SQLite backups found!')
                 restore_kwargs = {
-                    'latest_file': os.path.join(BACKUP_DIR, '{0}-latest.sqlite.gz'.format(database_name)),
+                    'latest_file': latest_file,
                     'db_file': config['NAME'],
                 }
             # Unsupported

@@ -9,7 +9,7 @@ import time
 
 from django.core.management.base import BaseCommand
 
-BACKUP_DIR = 'backup'
+BACKUP_DIR = 'backups'
 
 
 class Command(BaseCommand):
@@ -36,7 +36,6 @@ class Command(BaseCommand):
                 backup_cmd = self.do_mysql_backup
                 backup_kwargs = {
                     'timestamp_file': os.path.join(BACKUP_DIR, '{0}-{1}.mysql.gz'.format(database_name, current_time)),
-                    'latest_file': os.path.join(BACKUP_DIR, '{0}-latest.mysql.gz'.format(database_name)),
                     'db': config['NAME'],
                     'user': config['USER'],
                     'password': config.get('PASSWORD', None),
@@ -48,7 +47,6 @@ class Command(BaseCommand):
                 backup_cmd = self.do_postgresql_backup
                 backup_kwargs = {
                     'timestamp_file': os.path.join(BACKUP_DIR, '{0}-{1}.pgsql.gz'.format(database_name, current_time)),
-                    'latest_file': os.path.join(BACKUP_DIR, '{0}-latest.pgsql.gz'.format(database_name)),
                     'db': config['NAME'],
                     'user': config['USER'],
                     'password': config.get('PASSWORD', None),
@@ -60,7 +58,6 @@ class Command(BaseCommand):
                 backup_cmd = self.do_sqlite_backup
                 backup_kwargs = {
                     'timestamp_file': os.path.join(BACKUP_DIR, '{0}-{1}.sqlite.gz'.format(database_name, current_time)),
-                    'latest_file': os.path.join(BACKUP_DIR, '{0}-latest.sqlite.gz'.format(database_name)),
                     'db_file': config['NAME'],
                 }
             # Unsupported
@@ -81,7 +78,7 @@ class Command(BaseCommand):
                 print '========== ...skipped.'
             print ''
 
-    def do_mysql_backup(self, timestamp_file, latest_file, db, user, password=None, host=None, port=None):
+    def do_mysql_backup(self, timestamp_file, db, user, password=None, host=None, port=None):
         # Build args to dump command
         dump_args = []
         dump_args += ['--user={0}'.format(pipes.quote(user))]
@@ -96,13 +93,11 @@ class Command(BaseCommand):
 
         # Build filenames
         timestamp_file = pipes.quote(timestamp_file)
-        latest_file = pipes.quote(latest_file)
 
         # Build command
-        cmd = 'mysqldump {dump_args} | gzip > {timestamp_file} && cp {timestamp_file} {latest_file}'.format(
+        cmd = 'mysqldump {dump_args} | gzip > {timestamp_file}'.format(
             dump_args=dump_args,
             timestamp_file=timestamp_file,
-            latest_file=latest_file,
         )
 
         # Execute
@@ -114,7 +109,7 @@ class Command(BaseCommand):
             dump_args=dump_args,
         )
 
-    def do_postgresql_backup(self, timestamp_file, latest_file, db, user, password=None, host=None, port=None):
+    def do_postgresql_backup(self, timestamp_file, db, user, password=None, host=None, port=None):
         # Build args to dump command
         dump_args = []
         dump_args += ['--username={0}'.format(pipes.quote(user))]
@@ -129,13 +124,11 @@ class Command(BaseCommand):
 
         # Build filenames
         timestamp_file = pipes.quote(timestamp_file)
-        latest_file = pipes.quote(latest_file)
 
         # Build command
-        cmd = 'pg_dump {dump_args} | gzip > {timestamp_file} && cp {timestamp_file} {latest_file}'.format(
+        cmd = 'pg_dump {dump_args} | gzip > {timestamp_file}'.format(
             dump_args=dump_args,
             timestamp_file=timestamp_file,
-            latest_file=latest_file,
         )
 
         # Execute
@@ -147,17 +140,15 @@ class Command(BaseCommand):
             dump_args=dump_args,
         )
 
-    def do_sqlite_backup(self, timestamp_file, latest_file, db_file):
+    def do_sqlite_backup(self, timestamp_file, db_file):
         # Build filenames
         db_file = pipes.quote(db_file)
         timestamp_file = pipes.quote(timestamp_file)
-        latest_file = pipes.quote(latest_file)
 
         # Build command
-        cmd = 'gzip < {db_file} > {timestamp_file} && cp {timestamp_file} {latest_file}'.format(
+        cmd = 'gzip < {db_file} > {timestamp_file}'.format(
             db_file=db_file,
             timestamp_file=timestamp_file,
-            latest_file=latest_file,
         )
 
         # Execute
