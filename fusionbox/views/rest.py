@@ -101,7 +101,7 @@ class RestView(JsonResponseMixin, JsonRequestMixin, View):
         except ValidationError as e:
             return self.render_to_response(e.message_dict, status=409)
         except Http404 as e:
-            return self.render_to_response(None, status=404)
+            return self.render_to_response(str(e), status=404)
         except PermissionDenied as e:
             return self.render_to_response(str(e), status=403)
         except ValueError as e:
