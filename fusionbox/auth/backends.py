@@ -14,7 +14,11 @@ def fancy_import(name):
 if getattr(settings, 'CUSTOM_USER_MODEL', False):
     User = fancy_import(settings.CUSTOM_USER_MODEL)
 else:
-    from django.contrib.auth.models import User
+    try:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+    except ImportError:
+        from django.contrib.auth.models import User
 
 
 class CustomModelBackend(ModelBackend):
