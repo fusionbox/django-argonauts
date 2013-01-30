@@ -5,7 +5,6 @@ import warnings
 from collections import defaultdict
 
 from django.conf import settings
-from django.utils.http import urlquote
 from django.template import TemplateDoesNotExist, RequestContext
 from django.http import Http404, HttpResponse, HttpResponsePermanentRedirect
 from django.shortcuts import render_to_response
@@ -34,9 +33,16 @@ def generic_template_finder_view(request, base_path=''):
             )
     for t in possibilities:
         try:
-            return render_to_response(t, context_instance=RequestContext(request))
+            response = render_to_response(t, context_instance=RequestContext(request))
         except TemplateDoesNotExist:
-            pass
+            continue
+        if t.endswith('.html') and not path.endswith(request.path) and settings.APPEND_SLASH:
+            # Emulate what CommonMiddleware does and redirect, only if:
+            # - the template we found ends in .html
+            # - the path has been modified (slash appended)
+            # - and settings.APPEND_SLASH is True
+            return HttpResponsePermanentRedirect(path)
+        return response
     raise Http404('Template not found in any of %r' % (possibilities,))
 
 
@@ -45,40 +51,6 @@ class GenericTemplateFinderMiddleware(object):
     Response middleware that uses :func:`generic_template_finder_view` to attempt to
     autolocate a template for otherwise 404 responses.
     """
-    def process_request(self, request):
-        """
-        CommonMiddleware looks in the urlconf for a url matching the path, but
-        will not find it so it just passes the request along without a
-        redirect. Under normal circumstances, this will eventually return a
-        redirect response to the client, but, with GenericTemplateFinder
-        installed, this situation will return a valid response for both slash
-        and non-slash appended urls.
-
-        See <https://github.com/fusionbox/django-fusionbox/issues/47>`_
-        """
-        host = request.get_host()
-        old_url = [host, request.path]
-        new_url = old_url[:]
-        if settings.APPEND_SLASH and not old_url[1].endswith('/'):
-            #  We call the view here to determine whether we should continue
-            #  processing or return the redirect response.
-            #  If we can't find a template, then pass the request along to the
-            #  next middleware.  Otherwise, we return the redirect response.
-            try:
-                generic_template_finder_view(request)
-            except Http404:
-                return
-            new_url[1] = new_url[1] + '/'
-            if new_url[0]:
-                newurl = "%s://%s%s" % (
-                    request.is_secure() and 'https' or 'http',
-                    new_url[0], urlquote(new_url[1]))
-            else:
-                newurl = urlquote(new_url[1])
-            if request.META.get('QUERY_STRING', ''):
-                newurl += '?' + request.META['QUERY_STRING']
-            return HttpResponsePermanentRedirect(newurl)
-
     def process_response(self, request, response):
         """
         Ensures that

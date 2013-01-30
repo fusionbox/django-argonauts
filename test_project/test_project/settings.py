@@ -93,7 +93,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-  # 'fusionbox.middleware.GenericTemplateFinderMiddleware',
+    'fusionbox.middleware.GenericTemplateFinderMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'djangosecure.middleware.SecurityMiddleware',
 )
