@@ -3,15 +3,21 @@ from django.conf import settings
 from django.contrib import auth
 from django.template.response import TemplateResponse
 from django.shortcuts import get_object_or_404
-from django.contrib.auth.models import User
+try:
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+except ImportError:
+    from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.core.exceptions import PermissionDenied
 
 from fusionbox.panels.user_panel.forms import UserForm
 
+
 def panel_enabled(request):
     return request.session.get('toolbar_user_panel_enabled', False)
+
 
 def content(request):
     user_dict = {}
@@ -28,12 +34,13 @@ def content(request):
         env['display'] = True
         env['form'] = UserForm()
         env['next'] = request.GET.get('next')
-        env['users'] = User.objects.order_by('-last_login')[:10]
+        env['users'] = User.objects.all()[:10]
         env['user_dict'] = user_dict
     else:
         env['display'] = False
 
     return TemplateResponse(request, template, env)
+
 
 @csrf_exempt
 @require_POST

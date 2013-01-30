@@ -34,5 +34,9 @@ class TestJson(unittest.TestCase):
         self.assertIn('2012-10-16', self.encode_and_decode(datetime.datetime(2012, 10, 16)))
 
     def test_queryset(self):
-        from django.contrib.auth.models import User
+        try:
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+        except ImportError:
+            from django.contrib.auth.models import User  # NOQA
         self.assertion(User.objects.filter(id=None), [])
