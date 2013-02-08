@@ -612,17 +612,6 @@ def is_checkbox(field):
     return isinstance(field.field.widget, forms.CheckboxInput)
 
 
-@register.filter(name='is_halfway')
-def is_halfway(forloop):
-    """
-    Filter for applying to a forloop template variable to determine if you are
-    `halfway` through.  For uneven loop lengths, the longer half will always be
-    the first half.
-    """
-    diff = forloop['counter0'] - forloop['revcounter0']
-    return 0 <= diff <= 1
-
-
 @register.simple_tag(name='pdb', takes_context=True)
 def pdb_tag(context):
     """
