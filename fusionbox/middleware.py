@@ -5,9 +5,9 @@ import warnings
 from collections import defaultdict
 
 from django.conf import settings
-from django.template import TemplateDoesNotExist, RequestContext
+from django.template import TemplateDoesNotExist
 from django.http import Http404, HttpResponse, HttpResponsePermanentRedirect
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.views.decorators.csrf import requires_csrf_token
 from django.core.exceptions import ImproperlyConfigured
 from django.contrib.sites.models import get_current_site
@@ -17,7 +17,7 @@ from fusionbox import unicode_csv as csv
 
 
 @requires_csrf_token
-def generic_template_finder_view(request, base_path=''):
+def generic_template_finder_view(request, base_path='', extra_context={}):
     """
     Find a template based on the request url and render it.
 
@@ -34,7 +34,7 @@ def generic_template_finder_view(request, base_path=''):
             )
     for t in possibilities:
         try:
-            response = render_to_response(t, context_instance=RequestContext(request))
+            response = render(request, t, extra_context)
         except TemplateDoesNotExist:
             continue
         if t.endswith('.html') and not path.endswith(request.path) and settings.APPEND_SLASH:
@@ -65,7 +65,7 @@ class GenericTemplateFinderMiddleware(object):
                     # request's urlconf. Set it temporarily so the template can
                     # reverse properly.
                     urlresolvers.set_urlconf(request.urlconf)
-                return generic_template_finder_view(request)
+                return generic_template_finder_view(request, extra_context=self.get_extra_context(request))
             except Http404:
                 return response
             except UnicodeEncodeError:
@@ -81,6 +81,9 @@ class GenericTemplateFinderMiddleware(object):
         it threw a real 404.
         """
         request._generic_template_finder_middleware_view_found = True
+
+    def get_extra_context(self, request):
+        return {}
 
 
 def get_redirect(redirects, path, full_uri):
