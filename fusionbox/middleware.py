@@ -11,6 +11,7 @@ from django.shortcuts import render_to_response
 from django.views.decorators.csrf import requires_csrf_token
 from django.core.exceptions import ImproperlyConfigured
 from django.contrib.sites.models import get_current_site
+from django.core import urlresolvers
 
 from fusionbox import unicode_csv as csv
 
@@ -59,11 +60,18 @@ class GenericTemplateFinderMiddleware(object):
         """
         if response.status_code == 404 and not getattr(request, '_generic_template_finder_middleware_view_found', False):
             try:
+                if hasattr(request, 'urlconf'):
+                    # Django calls response middlewares after it has unset the
+                    # request's urlconf. Set it temporarily so the template can
+                    # reverse properly.
+                    urlresolvers.set_urlconf(request.urlconf)
                 return generic_template_finder_view(request)
             except Http404:
                 return response
             except UnicodeEncodeError:
                 return response
+            finally:
+                urlresolvers.set_urlconf(None)
         else:
             return response
 
