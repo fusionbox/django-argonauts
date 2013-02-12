@@ -7,3 +7,4 @@ register = template.Library()
 def pdb(context):
     import pdb
     pdb.set_trace()
+    return ''
