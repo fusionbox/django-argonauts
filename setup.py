@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-import os
-import re
 from setuptools import setup, find_packages
 
 __doc__="""
@@ -31,7 +29,7 @@ setup(name='django-fusionbox',
         'Environment :: Web Environment',
         'Framework :: Django',
     ],
-    install_requires = ['BeautifulSoup', 'PyYAML', 'markdown'],
-    requires = ['BeautifulSoup', 'PyYAML', 'markdown'],
+    install_requires = ['BeautifulSoup', 'PyYAML', 'markdown', 'phonenumbers'],
+    requires = ['BeautifulSoup', 'PyYAML', 'markdown', 'phonenumbers'],
 )
 
