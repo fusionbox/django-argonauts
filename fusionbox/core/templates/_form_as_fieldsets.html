@@ -1,0 +1,19 @@
+{% load uncaptcha %}
+
+{% csrf_token %}
+{% if form.uncaptcha %}
+  {% uncaptcha %}
+{% endif %}
+{{ form.non_field_errors }}
+
+{% if form.fieldsets %}
+  {% for fieldset in form.fieldsets %}
+    <fieldset>
+      {% include "_fieldset_as_divs.html" %}
+    </fieldset>
+  {% endfor %}
+{% else %}
+  {% for field in form %}
+    {% include "_field_as_div.html" %}
+  {% endfor %}
+{% endif %}
