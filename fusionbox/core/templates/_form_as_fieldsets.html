@@ -8,9 +8,7 @@
 
 {% if form.fieldsets %}
   {% for fieldset in form.fieldsets %}
-    <fieldset>
       {% include "_fieldset_as_divs.html" %}
-    </fieldset>
   {% endfor %}
 {% else %}
   {% for field in form %}

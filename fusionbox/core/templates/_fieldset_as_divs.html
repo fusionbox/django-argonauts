@@ -1,10 +1,10 @@
 {% if fieldset.template_name %}
   {% include fieldset.template_name %}
 {% else %}
-  <div class="{{ fieldset.css_classes }} {{ fieldset.name }} formFieldset">
+  <fieldset class="{{ fieldset.css_classes }} {{ fieldset.name }} formFieldset">
     {{ fieldset.errors }}
     {% for field in fieldset.fields %}
       {% include "_field_as_div.html" %}
     {% endfor %}
-  </div>
+  </fieldset>
 {% endif %}
