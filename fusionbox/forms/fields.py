@@ -165,6 +165,7 @@ class PhoneNumberField(forms.CharField):
 
     def __init__(self, *args, **kwargs):
         self.allow_extension = kwargs.pop('allow_extension', True)
+        super(PhoneNumberField, self).__init__(*args, **kwargs)
 
     def clean(self, value):
         if not value:
