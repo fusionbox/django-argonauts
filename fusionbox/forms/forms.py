@@ -43,6 +43,18 @@ class FieldsetMixin(NonBraindamagedErrorMixin):
     """
     Form mixin for grouping sets of fields together for both errors and
     rendering.  Declaration of fieldsets follows that of ModelAdmin.
+
+    FIELDSETS class variable should be a list of fieldsets like for ModelAdmin.
+    For example::
+    >>> class MyForm(FieldsetMixin):
+    ...     FIELDSETS = [
+    ...        ('fieldset1', {
+    ...            'fields': ['field11', 'field12'],
+    ...        }),
+    ...        ('fieldset2', {
+    ...            'fields': ['field21', 'field22'],
+    ...        }),
+    ...     ]
     """
     FIELDSETS = tuple()
 
