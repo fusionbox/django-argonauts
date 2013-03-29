@@ -168,6 +168,7 @@ class PhoneNumberField(forms.CharField):
         super(PhoneNumberField, self).__init__(*args, **kwargs)
 
     def clean(self, value):
+        value = super(PhoneNumberField, self).clean(value)
         if not value:
             return value
         try:
