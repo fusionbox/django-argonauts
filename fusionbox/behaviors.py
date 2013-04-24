@@ -280,7 +280,7 @@ class Timestampable(Behavior):
     class Meta:
         abstract = True
 
-    created_at = models.DateTimeField(default=now, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
 
