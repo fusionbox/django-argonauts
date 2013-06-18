@@ -1,3 +1,18 @@
+################################################################################
+################################################################################
+##                                                                            ##
+##      THIS IS TOTALLY DEPRECATED DO NOT MODIFY OR IMPROVE THIS FILE,        ##
+##     EVERYTHING HERE HAS MOVED TO FUSIONBOX-FABRIC-HELPERS REPOSITORY.      ##
+##                                                                            ##
+##     BY CONTRIBUTING TO THIS FILE YOU ACCEPT AND ARE RESPONSIBLE OF THE     ##
+##                  GENOCIDE OF THOUTHANDS OF KITTENS                         ##
+##                                                                            ##
+################################################################################
+################################################################################
+
+print("DeprecationWarning: \033[1;31mdjango-fusionbox/fusionbox/fabric_helpers.py "
+      "is used somewhere in your project. Please upgrade your project.\033[0m")
+
 import tempfile
 import shutil
 from StringIO import StringIO
