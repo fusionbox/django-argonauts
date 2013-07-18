@@ -370,7 +370,7 @@ class SEO(Behavior):
             (getattr(self, self.SEO.seo_title, title),
              getattr(self, self.SEO.seo_description, description),
              getattr(self, self.SEO.seo_keywords, keywords))))
-        return mark_safe('<title>%s</title>\n<meta name="description" value="%s"/>\n<meta name="keywords" value="%s"/>' % escaped_data)
+        return mark_safe('<title>%s</title>\n<meta name="description" content="%s"/>\n<meta name="keywords" content="%s"/>' % escaped_data)
 
 
 class Validation(Behavior):
