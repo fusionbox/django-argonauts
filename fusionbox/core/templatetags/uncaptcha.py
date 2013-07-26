@@ -17,5 +17,5 @@ def uncaptcha(context, form=None):
     context['field'] = field
 
     rendered_uncaptcha = render_to_string('forms/fields/uncaptcha.html', context)
-    context.pop()
+    del context['field']
     return rendered_uncaptcha
