@@ -1,3 +1,0 @@
-Intro
-=====
-intro to fbdjango

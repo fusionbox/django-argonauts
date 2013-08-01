@@ -1,9 +1,0 @@
-Django==1.4.2
-South
-Werkzeug
-django-cachebuster
-django-compressor
-django-debug-toolbar
-django-extensions
-MySQL-python==1.2.3
-django-secure

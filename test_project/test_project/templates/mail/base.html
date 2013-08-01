@@ -1,6 +1,0 @@
-<!doctype html>
-<html>
-  <body>
-    {{ content }}
-  </body>
-</html>
