@@ -9,6 +9,7 @@ from django.views.generic.base import View
 from django.conf import settings
 
 from argonauts.serializers import JSONArgonautsEncoder
+from argonauts.http import JsonResponse
 
 
 class JsonResponseMixin(object):
@@ -23,7 +24,7 @@ class JsonResponseMixin(object):
 
         The response body will be the return value of ``self.serialize(obj)``
         """
-        return HttpResponse(self.serialize(obj), content_type='application/json', **response_kwargs)
+        return JsonResponse(self.serialize(obj), **response_kwargs)
 
     def serialize(self, obj):
         """
