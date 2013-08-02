@@ -19,7 +19,7 @@ setup(name='django-argonauts',
           'Programming Language :: Python :: 3.2',
           'Programming Language :: Python :: 3.3',
       ],
-      install_requires=['Django>=1.4'],
+      install_requires=['Django>=1.3'],
       packages=[
           'argonauts',
           'argonauts.templatetags',
