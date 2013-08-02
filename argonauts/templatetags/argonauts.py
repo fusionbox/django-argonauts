@@ -1,13 +1,9 @@
 from __future__ import absolute_import
 
-from json import dumps as json_dumps
-
 from django import template
-from django.conf import settings
-
 from django.utils.safestring import mark_safe
 
-from argonauts.serializers import JSONArgonautsEncoder
+from argonauts import dumps as json_dumps
 
 register = template.Library()
 
@@ -24,11 +20,7 @@ def json(a):
     If the output needs to be put in an attribute, entitize the output of this
     filter.
     """
-    kwargs = {}
-    if settings.DEBUG:
-        kwargs['indent'] = 4
-        kwargs['separators'] = (',', ': ')
-    json_str = json_dumps(a, cls=JSONArgonautsEncoder, **kwargs)
+    json_str = json_dumps(a)
 
     # Escape all the XML/HTML special characters.
     escapes = ['<', '>', '&']

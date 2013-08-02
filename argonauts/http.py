@@ -1,8 +1,6 @@
-import json
-
 from django.http import HttpResponseRedirect, HttpResponse
 
-from argonauts.serializers import JSONArgonautsEncoder
+from argonauts import dumps
 
 
 class HttpResponseSeeOther(HttpResponseRedirect):
@@ -20,8 +18,7 @@ class JsonResponse(HttpResponse):
             return JsonResponse({'foo': 1})
     """
 
-
     def __init__(self, context, *args, **kwargs):
-        content = json.dumps(context, cls=JSONArgonautsEncoder)
+        content = dumps(context)
         super(JsonResponse, self).__init__(content, *args, **kwargs)
         self['Content-Type'] = 'application/json'

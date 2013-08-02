@@ -4,7 +4,7 @@ import decimal
 
 from django.utils import unittest
 
-from argonauts.serializers import JSONArgonautsEncoder
+from argonauts import dumps
 
 
 class TestObject(object):
@@ -17,7 +17,7 @@ class TestObject(object):
 
 class TestJson(unittest.TestCase):
     def encode_and_decode(self, v):
-        return json.loads(json.dumps(v, cls=JSONArgonautsEncoder))
+        return json.loads(dumps(v))
 
     def assertion(self, a, b):
         self.assertEqual(self.encode_and_decode(a), b)
