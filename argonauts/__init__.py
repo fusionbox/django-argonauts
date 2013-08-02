@@ -26,5 +26,7 @@ def dumps(*args, **kwargs):
     if settings.DEBUG:
         kwargs.setdefault('indent', 4)
         kwargs.setdefault('separators', (',', ': '))
+    else:
+        kwargs.setdefault('separators', (',', ':'))
 
     return json.dumps(*args, **kwargs)
