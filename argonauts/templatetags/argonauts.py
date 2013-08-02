@@ -1,6 +1,4 @@
-# `setlocale` is not threadsafe
-import locale
-locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+from __future__ import absolute_import
 
 from json import dumps as json_dumps
 
