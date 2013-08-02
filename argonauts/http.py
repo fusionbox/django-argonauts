@@ -2,7 +2,7 @@ import json
 
 from django.http import HttpResponseRedirect, HttpResponse
 
-from fusionbox.core.serializers import FusionboxJSONEncoder
+from argonauts.serializers import JSONArgonautEncoder
 
 
 class HttpResponseSeeOther(HttpResponseRedirect):
@@ -22,6 +22,6 @@ class JsonResponse(HttpResponse):
 
 
     def __init__(self, context, *args, **kwargs):
-        content = json.dumps(context, cls=FusionboxJSONEncoder)
+        content = json.dumps(context, cls=JSONArgonautEncoder)
         super(JsonResponse, self).__init__(content, *args, **kwargs)
         self['Content-Type'] = 'application/json'

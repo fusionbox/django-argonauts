@@ -8,7 +8,7 @@ from django.http import HttpResponse, Http404
 from django.views.generic.base import View
 from django.conf import settings
 
-from fusionbox.core.serializers import FusionboxJSONEncoder
+from argonauts.serializers import JSONArgonautEncoder
 
 
 class JsonResponseMixin(object):
@@ -28,13 +28,13 @@ class JsonResponseMixin(object):
     def serialize(self, obj):
         """
         Returns a json serialized string object encoded using
-        `fusionbox.core.serializers.FusionboxJSONEncoder`.
+        `argonauts.serializers.JSONArgonautEncoder`.
         """
         kwargs = {}
         if settings.DEBUG:
             kwargs['indent'] = 4
             kwargs['separators'] = (',', ': ')
-        return json.dumps(obj, cls=FusionboxJSONEncoder, **kwargs)
+        return json.dumps(obj, cls=JSONArgonautEncoder, **kwargs)
 
     def http_method_not_allowed(self, *args, **kwargs):
         """
