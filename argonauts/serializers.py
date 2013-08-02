@@ -2,7 +2,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.query import QuerySet
 
 
-class JSONArgonautEncoder(DjangoJSONEncoder):
+class JSONArgonautsEncoder(DjangoJSONEncoder):
     """
     Handles encoding querysets and objects with ``to_json()``.
     """
@@ -15,4 +15,4 @@ class JSONArgonautEncoder(DjangoJSONEncoder):
         if isinstance(o, QuerySet):
             return list(o)
 
-        return super(JSONArgonautEncoder, self).default(o)
+        return super(JSONArgonautsEncoder, self).default(o)

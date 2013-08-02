@@ -9,7 +9,7 @@ from django.conf import settings
 
 from django.utils.safestring import mark_safe
 
-from argonauts.serializers import JSONArgonautEncoder
+from argonauts.serializers import JSONArgonautsEncoder
 
 register = template.Library()
 
@@ -30,7 +30,7 @@ def json(a):
     if settings.DEBUG:
         kwargs['indent'] = 4
         kwargs['separators'] = (',', ': ')
-    json_str = json_dumps(a, cls=JSONArgonautEncoder, **kwargs)
+    json_str = json_dumps(a, cls=JSONArgonautsEncoder, **kwargs)
 
     # Escape all the XML/HTML special characters.
     escapes = ['<', '>', '&']
