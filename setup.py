@@ -11,6 +11,7 @@ setup(name='django-argonauts',
           'Development Status :: 4 - Beta',
           'Framework :: Django',
           'Intended Audience :: Developers',
+          'License :: OSI Approved :: BSD License',
           'Topic :: Internet :: WWW/HTTP',
       ],
 
