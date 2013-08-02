@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 # `setlocale` is not threadsafe
 import locale
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
