@@ -82,3 +82,18 @@ JSON response. Thus it is compatible with generic Django views:
 handlering authentication. And at least one HTTP method.
 
 ``RestView`` implements `OPTIONS` http method, and inherits from ``JsonRequestMixin``.
+
+.. code:: python
+
+    from argonauts.views import RestView
+    from django.core.exceptions import PermissionDenied
+
+    class CrazyRestView(RestView):
+
+        def auth(self, *args, **kwargs):
+            try:
+                if self.data()['username'] == 'admin':
+                    return
+            except KeyError:
+                pass
+            raise PermissionDenied
