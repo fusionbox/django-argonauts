@@ -4,6 +4,7 @@ Django-Argonauts
 
 .. image:: https://api.travis-ci.org/fusionbox/django-argonauts.png
    :alt: Building Status
+   :target: https://travis-ci.org/fusionbox/django-argonauts
 
 
 Lightweight collection of helpers for Rest Views serving JSON.
