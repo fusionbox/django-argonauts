@@ -70,7 +70,7 @@ class RestView(JsonResponseMixin, JsonRequestMixin, View):
 
     It also implements a default response for the OPTIONS HTTP request method.
     """
-    def auth(*args, **kwargs):
+    def auth(self, *args, **kwargs):
         """
         Hook for implementing custom authentication.
 
