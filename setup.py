@@ -1,3 +1,5 @@
+import os
+
 from setuptools import setup
 
 version = __import__('argonauts').get_version()
@@ -12,11 +14,17 @@ try:
 except ImportError:
     pass
 
+def read_file(filename):
+    with open(os.path.join(os.path.dirname(__file__), filename)) as f:
+        return f.read()
+
 setup(name='django-argonauts',
       version=version,
       author="Fusionbox, Inc.",
       author_email="programmers@fusionbox.com",
       keywords="rest json views django helpers",
+      description="Lightweight collection of helpers for Rest Views serving JSON.",
+      long_description=read_file('README.rst'),
       classifiers=[
           'Development Status :: 4 - Beta',
           'Framework :: Django',
