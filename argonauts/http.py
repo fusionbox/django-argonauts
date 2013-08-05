@@ -1,10 +1,6 @@
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponse
 
 from argonauts import dumps
-
-
-class HttpResponseSeeOther(HttpResponseRedirect):
-    status_code = 303
 
 
 class JsonResponse(HttpResponse):
