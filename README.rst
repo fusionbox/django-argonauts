@@ -20,7 +20,6 @@ generate safe javascript:
 
   {% load argonauts %}
   <script type="application/javascript">
-  <!--
     (function (document) {
         var object_list = {{ object_list|json }};
         var list = document.createElement("ul");
@@ -33,7 +32,6 @@ generate safe javascript:
         }
         document.body.appendChild(list);
     })(document);
-  // -->
   </script>
 
 
