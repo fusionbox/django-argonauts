@@ -83,8 +83,10 @@ handlering authentication. And at least one HTTP method.
 
 .. code:: python
 
-    from argonauts.views import RestView
     from django.core.exceptions import PermissionDenied
+    from argonauts.views import RestView
+    from argonauts.http import JsonResponse
+    from .utils import get_action
 
     class CrazyRestView(RestView):
 
@@ -95,3 +97,8 @@ handlering authentication. And at least one HTTP method.
             except KeyError:
                 pass
             raise PermissionDenied
+
+        def post(self, *args, **kwargs):
+            action = kwargs.pop('action')
+            action_func = get_action(action)
+            return JsonResponse(action_func(self.data()))
