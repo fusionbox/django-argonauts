@@ -2,6 +2,16 @@ from setuptools import setup
 
 version = __import__('argonauts').get_version()
 
+install_requires = ['Django>=1.3']
+tests_require = []
+
+try:
+    django_version = __import__('django').VERSION
+    if django_version < (1, 4):
+        tests_require.append('django-override-settings')
+except ImportError:
+    pass
+
 setup(name='django-argonauts',
       version=version,
       author="Fusionbox, Inc.",
@@ -19,7 +29,8 @@ setup(name='django-argonauts',
           'Programming Language :: Python :: 3.2',
           'Programming Language :: Python :: 3.3',
       ],
-      install_requires=['Django>=1.3'],
+      install_requires=install_requires,
+      tests_require=tests_require,
       packages=[
           'argonauts',
           'argonauts.templatetags',
