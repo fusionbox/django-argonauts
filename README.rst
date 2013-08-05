@@ -13,8 +13,8 @@ Lightweight collection of helpers for Rest Views serving JSON.
 Filter
 ------
 
-You can serialize an object in JSON using ``|json`` filter. This is useful to
-generate safe javascript:
+You can serialize an object in JSON using the ``|json`` filter. This is useful
+to generate safe javascript:
 
 .. code:: html
 
@@ -34,6 +34,31 @@ generate safe javascript:
     })(document);
   </script>
 
+``|json`` is safe to use anywhere in XML or XHTML except in an attribute. It's
+import to use this tag rather than dumping the output of ``json.dumps`` into
+HTML, because an attacker could output a closing tag and effect an XSS attack.
+For example, if we output ``json.dumps("</script><script>console.log('xss');
+//")`` in template like this:
+
+.. code:: html
+
+  <script>
+    var somedata = {{ somedata_as_json }};
+  </script>
+
+We get:
+
+.. code:: html
+
+  <script>
+    var somedata = "</script>
+  <script>
+    console.log('xss'); //";
+  </script>
+
+This allows the attacker to inject their own JavaScript. The ``|json`` tag
+prevents this by encoding the closing ``</script>`` tag with JSON's unicode
+escapes.
 
 -----
 Views
