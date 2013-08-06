@@ -8,7 +8,7 @@ Django-Argonauts
 
 
 A lightweight collection of JSON helpers for Django. Includes a template filter
-for safely outputing JSON, views that encode and decode JSON, and a helper for
+for safely outputting JSON, views that encode and decode JSON, and a helper for
 writing simple REST views.
 
 A special JSON encoder is used to serialize QuerySets and objects with
@@ -19,7 +19,7 @@ Filter
 ------
 
 You can serialize an object in JSON using the ``|json`` filter. This is useful
-to generate safe javascript:
+to generate safe JavaScript:
 
 .. code:: html
 
@@ -32,7 +32,7 @@ to generate safe javascript:
             if (object_list.hasOwnProperty(i)) {
                 var item = document.createElement("li");
                 item.appendChild(document.createTextNode(object_list[i]);
-                list.appendChild(paragraph);
+                list.appendChild(item);
             }
         }
         document.body.appendChild(list);
@@ -106,8 +106,8 @@ JSON response. Thus it is compatible with generic Django views:
 ``RestView``
 ============
 
-``RestView`` is an abstract class. Subclasses should implement `auth()` for
-handlering authentication. And at least one HTTP method.
+``RestView`` is an abstract class. Subclasses should implement `auth()`, for
+handling authentication, and at least one HTTP method.
 
 ``RestView`` implements `OPTIONS` http method, and inherits from ``JsonRequestMixin``.
 
