@@ -78,14 +78,25 @@ views:
 
 .. code:: python
 
+    from django.db import models
     from django.views.generic.detail import BaseDetailView
     from argonauts.views import JsonResponseMixin
 
-    class JsonDetailView(JsonResponseMixin, BaseDetailView):
+    class Blog(models.Model):
+        title = models.CharField(max_length=255)
+        body = models.TextField()
+
+        def to_json(self):
+            return {
+                'title': self.title,
+                'body': self.body,
+            }
+
+    class BlogDetailView(JsonResponseMixin, BaseDetailView):
         """
         Detail view returning object serialized in JSON
         """
-        pass
+        model = Blog
 
 
 ``JsonRequestMixin``
@@ -99,7 +110,7 @@ views:
     from argonauts.views import JsonRequestMixin:
     from argonauts.http import JsonResponse
 
-    class JsonView(JsonRequestMixin, View):
+    class EchoView(JsonRequestMixin, View):
         def dispatch(self, *args, **kwargs):
             return JsonResponse(self.data())
 
@@ -120,14 +131,9 @@ handling authentication, and at least one HTTP method.
     from .utils import get_action
 
     class CrazyRestView(RestView):
-
         def auth(self, *args, **kwargs):
-            try:
-                if self.data()['username'] == 'admin':
-                    return
-            except KeyError:
-                pass
-            raise PermissionDenied
+            if not self.request.user.is_superuser:
+                raise PermissionDenied
 
         def post(self, *args, **kwargs):
             action = kwargs.pop('action')
