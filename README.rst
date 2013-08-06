@@ -72,8 +72,9 @@ Views
 ``JsonResponseMixin``
 =====================
 
-``JsonResponseMixin`` implements ``render_to_response`` method that serialize an object into a
-JSON response. Thus it is compatible with generic Django views:
+``JsonResponseMixin`` implements ``render_to_response`` method that serializes
+an object into a JSON response. Thus it is compatible with generic Django
+views:
 
 .. code:: python
 
@@ -109,13 +110,13 @@ JSON response. Thus it is compatible with generic Django views:
 ``RestView`` is an abstract class. Subclasses should implement `auth()`, for
 handling authentication, and at least one HTTP method.
 
-``RestView`` implements `OPTIONS` http method, and inherits from ``JsonRequestMixin``.
+``RestView`` implements `OPTIONS` http method, and inherits from
+``JsonRequestMixin`` and ``JsonResponseMixin``.
 
 .. code:: python
 
     from django.core.exceptions import PermissionDenied
     from argonauts.views import RestView
-    from argonauts.http import JsonResponse
     from .utils import get_action
 
     class CrazyRestView(RestView):
@@ -131,4 +132,4 @@ handling authentication, and at least one HTTP method.
         def post(self, *args, **kwargs):
             action = kwargs.pop('action')
             action_func = get_action(action)
-            return JsonResponse(action_func(self.data()))
+            return self.render_to_response(action_func(self.data()))
