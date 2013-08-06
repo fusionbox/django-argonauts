@@ -8,7 +8,7 @@ Django-Argonauts
 
 
 A lightweight collection of JSON helpers for Django. Includes a template filter
-for safely output JSON, views that encode and decode JSON, and a helper for
+for safely outputing JSON, views that encode and decode JSON, and a helper for
 writing simple REST views.
 
 A special JSON encoder is used to serialize QuerySets and objects with
