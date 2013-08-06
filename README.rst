@@ -7,7 +7,12 @@ Django-Argonauts
    :target: https://travis-ci.org/fusionbox/django-argonauts
 
 
-Lightweight collection of helpers for Rest Views serving JSON.
+A lightweight collection of JSON helpers for Django. Includes a template filter
+for safely output JSON, views that encode and decode JSON, and a helper for
+writing simple REST views.
+
+A special JSON encoder is used to serialize QuerySets and objects with
+``to_json`` methods.
 
 ------
 Filter

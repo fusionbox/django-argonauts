@@ -23,7 +23,7 @@ setup(name='django-argonauts',
       author="Fusionbox, Inc.",
       author_email="programmers@fusionbox.com",
       keywords="rest json views django helpers",
-      description="Lightweight collection of helpers for Rest Views serving JSON.",
+      description="A lightweight collection of JSON helpers for Django.",
       long_description=read_file('README.rst'),
       classifiers=[
           'Development Status :: 4 - Beta',
