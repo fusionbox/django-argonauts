@@ -7,10 +7,8 @@ class JSONArgonautsEncoder(DjangoJSONEncoder):
     Handles encoding querysets and objects with ``to_json()``.
     """
     def default(self, o):
-        try:
+        if hasattr(o, 'to_json'):
             return o.to_json()
-        except AttributeError:
-            pass
 
         if isinstance(o, QuerySet):
             return list(o)
