@@ -52,6 +52,19 @@ class TestJson(unittest.TestCase):
             from django.contrib.auth.models import User  # NOQA
         self.assertion(User.objects.filter(id=None), [])
 
+    def test_attribute_error(self):
+
+        class Klass(object):
+            def __init__(self, i):
+                self.value = i
+
+            def to_json(self):
+                # Value is an int() it doesn't have a pk
+                return {'value': self.value.pk}
+
+        with self.assertRaises(AttributeError):
+            dumps(Klass(5))
+
 
 class TestJsonTemplateFilter(unittest.TestCase):
     template = "{% load argonauts %}{{ data|json }}"
