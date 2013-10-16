@@ -4,7 +4,7 @@
 # (major, minor, bugfix, phase): (1, 1, 5, 'alpha') -> 1.0.5alpha
 # (major, minor, bugfix, phase, phaseversion): (1, 1, 0, 'rc', 5) -> 1.1.0rc5
 
-VERSION = (1, 0, 0)
+VERSION = (1, 0, 1)
 
 
 def get_version():
