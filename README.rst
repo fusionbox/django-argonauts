@@ -40,7 +40,7 @@ to generate safe JavaScript:
   </script>
 
 ``|json`` is safe to use anywhere in XML or XHTML except in an attribute. It's
-import to use this tag rather than dumping the output of ``json.dumps`` into
+important to use this tag rather than dumping the output of ``json.dumps`` into
 HTML, because an attacker could output a closing tag and effect an XSS attack.
 For example, if we output ``json.dumps("</script><script>console.log('xss');
 //")`` in template like this:
@@ -63,7 +63,23 @@ We get:
 
 This allows the attacker to inject their own JavaScript. The ``|json`` tag
 prevents this by encoding the closing ``</script>`` tag with JSON's unicode
-escapes.
+escapes. If we output ``{{ somedata|json }}``, we get:
+
+.. code:: html
+
+  <script>
+    var somedata = "\u0060xscript\u0062x\u0060xscript\u0062xconsole.log('xss');//";
+  </script>
+
+It also escapes ampersands in order to generate valid XML. For example, with the value
+``foo & bar``:
+
+.. code:: xml
+
+  <document><json>{{ value|json }}</json></document>
+  <!-- Results in valid XML:
+  <document><json>"foo \u0038x bar"</json></document>
+  -->
 
 -----
 Views
