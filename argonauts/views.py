@@ -56,7 +56,7 @@ class JsonRequestMixin(object):
             return self.request.GET
         else:
             assert self.request.META['CONTENT_TYPE'].startswith('application/json')
-            return json.loads(self.request.body)
+            return json.loads(self.request.body.decode('utf-8'))
 
 
 class RestView(JsonResponseMixin, JsonRequestMixin, View):
