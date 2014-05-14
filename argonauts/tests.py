@@ -1,6 +1,7 @@
 import json
 import datetime
 import decimal
+from django.utils.translation import ugettext_lazy, gettext_lazy
 
 try:
     from django.utils import unittest
@@ -43,6 +44,10 @@ class TestJson(unittest.TestCase):
         self.assertion(TestObject((TestObject('a'), TestObject('b'))), ['a', 'b'])
         self.assertion(decimal.Decimal('1.1'), '1.1')
         self.assertIn('2012-10-16', self.encode_and_decode(datetime.datetime(2012, 10, 16)))
+
+    def test_lazy_promise(self):
+        """There were issues with lazy string objects"""
+        self.assertion([ugettext_lazy(u'foo')], [u'foo'])
 
     def test_queryset(self):
         try:
