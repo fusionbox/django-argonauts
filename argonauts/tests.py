@@ -1,7 +1,8 @@
+# coding=utf-8
+
 import json
 import datetime
 import decimal
-from django.utils.translation import ugettext_lazy, gettext_lazy
 
 try:
     from django.utils import unittest
@@ -13,10 +14,14 @@ try:
 except ImportError: # Django < 1.4
     from override_settings import override_settings
 
+import django
 from django.template import Template, Context
 from django.utils.datastructures import SortedDict
+from django.utils.translation import ugettext_lazy
+from django.test.client import RequestFactory
 
 from argonauts import dumps
+from argonauts.views import RestView
 
 
 class TestObject(object):
@@ -101,3 +106,39 @@ class TestJsonTemplateFilter(unittest.TestCase):
     def test_compact_rendering_no_debug(self):
         rendered = self.render_dictionary()
         self.assertEqual(rendered, '{"a":"foo","b":"bar"}')
+
+
+class TestRestViewEncoding(unittest.TestCase):
+    factory = RequestFactory()
+    hello = u'你好'
+
+    def setUp(self):
+        class View(RestView):
+            auth = lambda *args, **kwargs: None
+            testcase = None
+
+            def post(self, *args, **kwargs):
+                self.testcase.assertEqual(self.data()['foo'], self.testcase.hello)
+                return self.render_to_response(self.data())
+
+        self.viewfn = View.as_view(testcase=self)
+
+    # See https://github.com/fusionbox/django-argonauts/pull/11#issuecomment-59742088
+    @unittest.skipIf(django.VERSION < (1, 5),
+                     "Django<1.5 only supports utf-8 payload encodings.")
+    def test_request_encoding(self):
+        data = '{"foo": "%s"}' % self.hello
+        # I tried to manually encode the data as big5, but the RequestFactory
+        # calls force_bytes on the data, which tries to decode the bytestring
+        # as utf-8 and then reencode as big5.
+        request = self.factory.post('/', data, content_type='application/json; charset=big5')
+        response = self.viewfn(request)
+        response_data = json.loads(response.content.decode('utf-8'))
+        self.assertEqual(response_data['foo'], self.hello)
+
+    def test_request_no_encoding(self):
+        data = '{"foo": "%s"}' % self.hello
+        request = self.factory.post('/', data, content_type='application/json')
+        response = self.viewfn(request)
+        response_data = json.loads(response.content.decode('utf-8'))
+        self.assertEqual(response_data['foo'], self.hello)
