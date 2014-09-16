@@ -25,18 +25,10 @@ to generate safe JavaScript:
 
   {% load argonauts %}
   <script type="application/javascript">
-    (function (document) {
+    (function () {
         var object_list = {{ object_list|json }};
-        var list = document.createElement("ul");
-        for (var i in object_list) {
-            if (object_list.hasOwnProperty(i)) {
-                var item = document.createElement("li");
-                item.appendChild(document.createTextNode(object_list[i]);
-                list.appendChild(item);
-            }
-        }
-        document.body.appendChild(list);
-    })(document);
+        // do something with object_list
+    })();
   </script>
 
 ``|json`` is safe to use anywhere in XML or XHTML except in an attribute. It's
@@ -48,7 +40,7 @@ For example, if we output ``json.dumps("</script><script>console.log('xss');
 .. code:: html
 
   <script>
-    var somedata = {{ somedata_as_json }};
+    var somedata = {{ somedata_as_json|safe }};
   </script>
 
 We get:
