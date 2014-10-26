@@ -57,7 +57,11 @@ class JsonRequestMixin(object):
             return self.request.GET
         else:
             assert self.request.META['CONTENT_TYPE'].startswith('application/json')
-            return json.loads(self.request.body.decode(self.request.encoding or settings.DEFAULT_CHARSET))
+            try:
+                body = self.request.body
+            except AttributeError:  # Django < 1.4
+                body = self.request.raw_post_data
+            return json.loads(body.decode(self.request.encoding or settings.DEFAULT_CHARSET))
 
 
 class RestView(JsonResponseMixin, JsonRequestMixin, View):
