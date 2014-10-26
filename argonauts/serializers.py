@@ -1,5 +1,11 @@
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.query import QuerySet
+from django.utils.functional import Promise
+
+try:
+    from django.utils.encoding import force_text
+except ImportError:  # Django < 1.4
+    from django.utils.encoding import force_unicode as force_text  # NOQA
 
 
 class JSONArgonautsEncoder(DjangoJSONEncoder):
@@ -12,5 +18,9 @@ class JSONArgonautsEncoder(DjangoJSONEncoder):
 
         if isinstance(o, QuerySet):
             return list(o)
+
+        if isinstance(o, Promise):
+            # Serialize lazy translated strings
+            return force_text(o)
 
         return super(JSONArgonautsEncoder, self).default(o)
