@@ -48,7 +48,8 @@ class TestJson(unittest.TestCase):
 
     def test_lazy_promise(self):
         """There were issues with lazy string objects"""
-        self.assertion([ugettext_lazy(u'foo')], [u'foo'])
+        self.assertion(ugettext_lazy(u'foo'), u'foo')
+        self.assertion(gettext_lazy('foo'), 'foo')
 
     def test_queryset(self):
         try:
