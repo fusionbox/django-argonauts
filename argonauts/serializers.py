@@ -1,5 +1,7 @@
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models.query import QuerySet
+from django.utils.functional import Promise
+from django.utils.encoding import force_unicode
 
 
 class JSONArgonautsEncoder(DjangoJSONEncoder):
@@ -12,5 +14,8 @@ class JSONArgonautsEncoder(DjangoJSONEncoder):
 
         if isinstance(o, QuerySet):
             return list(o)
+
+        if isinstance(o, Promise):
+            return force_unicode(o)
 
         return super(JSONArgonautsEncoder, self).default(o)
