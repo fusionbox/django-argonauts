@@ -8,15 +8,16 @@ try:
 except ImportError:  # Django >= 1.7
     import unittest
 
-try:
-    from django.test.utils import override_settings
-except ImportError: # Django < 1.4
-    from override_settings import override_settings
+from django.test.utils import override_settings
 
 from django.template import Template, Context
 from django.utils.datastructures import SortedDict
+from django.views.generic import View
+from django.test import RequestFactory
+from django.test.client import FakePayload
 
 from argonauts import dumps
+from argonauts.views import JsonRequestMixin
 
 
 class TestObject(object):
@@ -101,3 +102,25 @@ class TestJsonTemplateFilter(unittest.TestCase):
     def test_compact_rendering_no_debug(self):
         rendered = self.render_dictionary()
         self.assertEqual(rendered, '{"a":"foo","b":"bar"}')
+
+
+class TestJsonResponseMixin(unittest.TestCase):
+    def setUp(self):
+        class ViewClass(JsonRequestMixin, View):
+            def post(self, request):
+                return self.data()
+        self.view = ViewClass.as_view()
+
+    def test_decode(self):
+        data = u'\N{SNOWMAN}'
+        encoded_data = json.dumps(data).encode('utf-16')
+        # BBB: Just use RequestFactory.generic in Django >= 1.5
+        params = {
+            'wsgi.input': FakePayload(encoded_data),
+            'CONTENT_TYPE': 'application/json',
+            'CONTENT_LENGTH': len(encoded_data),
+        }
+        request = RequestFactory().post('/', **params)
+        request.encoding = 'utf-16'
+        response = self.view(request)
+        self.assertEqual(response, data)

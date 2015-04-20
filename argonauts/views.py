@@ -6,6 +6,7 @@ import json
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import HttpResponse, Http404
 from django.views.generic.base import View
+from django.conf import settings
 
 from argonauts import dumps
 
@@ -56,7 +57,8 @@ class JsonRequestMixin(object):
             return self.request.GET
         else:
             assert self.request.META['CONTENT_TYPE'].startswith('application/json')
-            return json.loads(self.request.body.decode('utf-8'))
+            charset = self.request.encoding or settings.DEFAULT_CHARSET
+            return json.loads(self.request.body.decode(charset))
 
 
 class RestView(JsonResponseMixin, JsonRequestMixin, View):
