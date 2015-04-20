@@ -4,7 +4,7 @@ python:
   - "3.3"
   - "3.4"
 env:
-  - DJANGO_PACKAGE=https://github.com/django/django/archive/stable/1.8.x.zip
+  - DJANGO_PACKAGE=https://github.com/django/django/archive/stable/1.8.x.tar.gz
   - DJANGO_PACKAGE=https://github.com/django/django/archive/stable/1.7.x.zip
   - DJANGO_PACKAGE=https://github.com/django/django/archive/stable/1.6.x.zip
 matrix:
