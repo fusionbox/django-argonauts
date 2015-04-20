@@ -14,8 +14,11 @@ except ImportError: # Django < 1.4
 
 from django.template import Template, Context
 from django.utils.datastructures import SortedDict
+from django.views.generic import View
+from django.test import RequestFactory
 
 from argonauts import dumps
+from argonauts.views import JsonRequestMixin
 
 
 class TestObject(object):
@@ -96,3 +99,19 @@ class TestJsonTemplateFilter(unittest.TestCase):
     def test_compact_rendering_no_debug(self):
         rendered = self.render_dictionary()
         self.assertEqual(rendered, '{"a":"foo","b":"bar"}')
+
+
+class TestJsonResponseMixin(unittest.TestCase):
+    def setUp(self):
+        class ViewClass(JsonRequestMixin, View):
+            def post(self, request):
+                return self.data()
+        self.view = ViewClass.as_view()
+
+    def test_decode(self):
+        data = u'\N{SNOWMAN}'
+        encoded_data = json.dumps(data).encode('utf-16')
+        request = RequestFactory().generic('POST', '/', encoded_data, CONTENT_TYPE='application/json')
+        request.encoding = 'utf-16'
+        response = self.view(request)
+        self.assertEqual(response, data)
