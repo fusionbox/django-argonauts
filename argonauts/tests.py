@@ -7,10 +7,7 @@ try:
 except ImportError:  # Django >= 1.7
     import unittest
 
-try:
-    from django.test.utils import override_settings
-except ImportError: # Django < 1.4
-    from override_settings import override_settings
+from django.test.utils import override_settings
 
 from django.template import Template, Context
 from django.utils.datastructures import SortedDict

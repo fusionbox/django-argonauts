@@ -4,15 +4,6 @@ from setuptools import setup
 
 version = __import__('argonauts').get_version()
 
-install_requires = ['Django>=1.3']
-tests_require = []
-
-try:
-    django_version = __import__('django').VERSION
-    if django_version < (1, 4):
-        tests_require.append('django-override-settings')
-except ImportError:
-    pass
 
 def read_file(filename):
     with open(os.path.join(os.path.dirname(__file__), filename)) as f:
@@ -38,8 +29,7 @@ setup(name='django-argonauts',
           'Programming Language :: Python :: 3.3',
           'Programming Language :: Python :: 3.4',
       ],
-      install_requires=install_requires,
-      tests_require=tests_require,
+      install_requires=['Django>=1.4'],
       packages=[
           'argonauts',
           'argonauts.templatetags',
