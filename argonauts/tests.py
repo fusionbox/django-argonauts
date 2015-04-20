@@ -16,6 +16,7 @@ from django.template import Template, Context
 from django.utils.datastructures import SortedDict
 from django.views.generic import View
 from django.test import RequestFactory
+from django.test.client import FakePayload
 
 from argonauts import dumps
 from argonauts.views import JsonRequestMixin
@@ -111,7 +112,13 @@ class TestJsonResponseMixin(unittest.TestCase):
     def test_decode(self):
         data = u'\N{SNOWMAN}'
         encoded_data = json.dumps(data).encode('utf-16')
-        request = RequestFactory().generic('POST', '/', encoded_data, CONTENT_TYPE='application/json')
+        # BBB: Just use RequestFactory.generic in Django >= 1.5
+        params = {
+            'wsgi.input': FakePayload(encoded_data),
+            'CONTENT_TYPE': 'application/json',
+            'CONTENT_LENGTH': len(encoded_data),
+        }
+        request = RequestFactory().post('/', **params)
         request.encoding = 'utf-16'
         response = self.view(request)
         self.assertEqual(response, data)
