@@ -3,7 +3,7 @@ import os
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
 
-version = '1.0.0'
+version = '1.1.0'
 
 
 def read_file(filename):
@@ -33,7 +33,7 @@ setup(name='django-argonauts',
       description="A lightweight collection of JSON helpers for Django.",
       long_description=read_file('README.rst'),
       classifiers=[
-          'Development Status :: 4 - Beta',
+          'Development Status :: 5 - Production/Stable',
           'Framework :: Django',
           'Intended Audience :: Developers',
           'License :: OSI Approved :: BSD License',
