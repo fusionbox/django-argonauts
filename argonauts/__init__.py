@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pkg_resources
 
-__version__ = pkg_resources.get_distribution('argonauts').version
+__version__ = pkg_resources.get_distribution('django-argonauts').version
 
 # BBB: This was here before we switch to zest.releaser.
 VERSION = tuple(__version__.split('.'))
