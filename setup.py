@@ -1,6 +1,7 @@
 import os
 
 from setuptools import setup
+from setuptools.command.test import test as TestCommand
 
 version = __import__('argonauts').get_version()
 
@@ -8,6 +9,20 @@ version = __import__('argonauts').get_version()
 def read_file(filename):
     with open(os.path.join(os.path.dirname(__file__), filename)) as f:
         return f.read()
+
+
+class PyTest(TestCommand):
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        # If we were to import outside of this function, pytest wouldn't be
+        # installed yet.
+        import pytest
+        pytest.main(self.test_args)
+
 
 setup(name='django-argonauts',
       version=version,
@@ -35,5 +50,6 @@ setup(name='django-argonauts',
           'argonauts.templatetags',
       ],
 
-      test_suite='testproject.runtests',
+      tests_require=['pytest-django', 'pytest'],
+      cmdclass = {'test': PyTest},
 )

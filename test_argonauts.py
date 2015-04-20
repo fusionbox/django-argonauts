@@ -9,6 +9,7 @@ except ImportError:  # Django >= 1.7
     import unittest
 
 from django.test.utils import override_settings
+from django.test import TestCase
 
 from django.template import Template, Context
 from django.utils.datastructures import SortedDict
@@ -28,7 +29,7 @@ class TestObject(object):
         return self.value
 
 
-class TestJson(unittest.TestCase):
+class TestJson(TestCase):
     def encode_and_decode(self, v):
         return json.loads(dumps(v))
 
@@ -73,7 +74,7 @@ class TestJson(unittest.TestCase):
             dumps(Klass(5))
 
 
-class TestJsonTemplateFilter(unittest.TestCase):
+class TestJsonTemplateFilter(TestCase):
     template = "{% load argonauts %}{{ data|json }}"
 
     def render_data(self, data):
