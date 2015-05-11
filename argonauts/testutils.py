@@ -21,10 +21,10 @@ class JsonTestClient(Client):
         else:
             resp = method_func(url, content_type='application/json', *args, **kwargs)
 
-        assert resp['Content-Type'].startswith('application/json')
+        if resp['Content-Type'].startswith('application/json'):
+            charset = resp.charset or settings.DEFAULT_CHARSET
+            resp.json = json.loads(resp.content.decode(charset))
 
-        charset = resp.charset or settings.DEFAULT_CHARSET
-        resp.json = json.loads(resp.content.decode(charset))
         return resp
 
     def __getattribute__(self, attr):
