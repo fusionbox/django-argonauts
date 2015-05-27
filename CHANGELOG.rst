@@ -4,7 +4,7 @@ Changelog
 1.1.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fixed package (include the CHANGELOG in ``MANIFEST.in``)
 
 
 1.1.2 (2015-05-27)
