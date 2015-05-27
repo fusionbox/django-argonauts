@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.1.2 (unreleased)
+1.1.2 (2015-05-27)
 ------------------
 
 - Added ``JsonTestCase`` and ``JsonTestMixin``
