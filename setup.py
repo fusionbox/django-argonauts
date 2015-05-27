@@ -31,7 +31,7 @@ setup(name='django-argonauts',
       url="https://github.com/fusionbox/django-argonauts",
       keywords="rest json views django helpers",
       description="A lightweight collection of JSON helpers for Django.",
-      long_description=read_file('README.rst'),
+      long_description=read_file('README.rst') + '\n\n' + read_file('CHANGELOG.rst'),
       classifiers=[
           'Development Status :: 5 - Production/Stable',
           'Framework :: Django',
