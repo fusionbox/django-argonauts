@@ -4,7 +4,7 @@ import functools
 from django.conf import settings
 from django.test import Client, TestCase
 
-__all__ = ['JsonTestClient', 'JsonTestCase']
+__all__ = ['JsonTestClient', 'JsonTestMixin', 'JsonTestCase']
 
 
 class JsonTestClient(Client):
@@ -34,5 +34,8 @@ class JsonTestClient(Client):
             return super(JsonTestClient, self).__getattribute__(attr)
 
 
-class JsonTestCase(TestCase):
+class JsonTestMixin(object):
     client_class = JsonTestClient
+
+class JsonTestCase(JsonTestMixin, TestCase):
+    pass
