@@ -1,10 +1,10 @@
 Changelog
 =========
 
-1.1.4 (unreleased)
+1.1.4 (2015-07-29)
 ------------------
 
-- Nothing changed yet.
+- Tests mocked http requests don't always have charset
 
 
 1.1.3 (2015-05-27)
