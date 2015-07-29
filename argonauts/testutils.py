@@ -22,7 +22,7 @@ class JsonTestClient(Client):
             resp = method_func(url, content_type='application/json', *args, **kwargs)
 
         if resp['Content-Type'].startswith('application/json') and resp.content:
-            charset = resp.charset or settings.DEFAULT_CHARSET
+            charset = resp.charset if hasattr(resp, 'charset') else settings.DEFAULT_CHARSET
             resp.json = json.loads(resp.content.decode(charset))
 
         return resp
