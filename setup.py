@@ -3,7 +3,7 @@ import os
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
 
-version = '1.1.4'
+version = '1.1.5.dev0'
 
 
 def read_file(filename):
