@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.2.0 (unreleased)
+1.2.0 (2016-09-20)
 ------------------
 
 - Add support for requests without a Content-Type header to JsonTestClient
