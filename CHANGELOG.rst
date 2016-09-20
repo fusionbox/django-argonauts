@@ -1,10 +1,11 @@
 Changelog
 =========
 
-1.1.5 (unreleased)
+1.2.0 (unreleased)
 ------------------
 
 - Add support for requests without a Content-Type header to JsonTestClient
+- Remove support for old versions of Django (<= 1.7)
 
 
 1.1.4 (2015-07-29)

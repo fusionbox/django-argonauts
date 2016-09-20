@@ -3,7 +3,7 @@ import os
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
 
-version = '1.1.5.dev0'
+version = '1.2.0.dev0'
 
 
 def read_file(filename):
@@ -45,7 +45,7 @@ setup(name='django-argonauts',
           'Programming Language :: Python :: 3.3',
           'Programming Language :: Python :: 3.4',
       ],
-      install_requires=['Django>=1.4'],
+      install_requires=['Django>=1.8'],
       packages=[
           'argonauts',
           'argonauts.templatetags',
