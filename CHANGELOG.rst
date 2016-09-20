@@ -4,7 +4,7 @@ Changelog
 1.1.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add support for requests without a Content-Type header to JsonTestClient
 
 
 1.1.4 (2015-07-29)
