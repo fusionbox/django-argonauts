@@ -92,6 +92,11 @@ class TestJsonTemplateFilter(TestCase):
 
         self.assertEqual(rendered, '"\\u003cscript\\u003ealert(\'\\u0026XSS!\');\\u003c/script\\u003e"')
 
+    def test_json_escapes_js_invalid_syntax_chracters(self):
+        rendered = self.render_data(u"\u2028\u2029")
+
+        self.assertEqual(rendered, '"\\u2028\\u2029"')
+
     @override_settings(DEBUG=True)
     def test_pretty_rendering_in_debug(self):
         rendered = self.render_dictionary()
