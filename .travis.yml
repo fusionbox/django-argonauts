@@ -11,6 +11,10 @@ env:
   - DJANGO_PACKAGE=django~=1.10.8
   - DJANGO_PACKAGE=django~=1.9.13
   - DJANGO_PACKAGE=django~=1.8.19
+matrix:
+  allow_failures:
+    - python: "2.7"
+      env: DJANGO_PACKAGE=django~=2.0
 install:
   - pip install -U pip setuptools wheel
   - pip install pytest-django pytest $DJANGO_PACKAGE .
