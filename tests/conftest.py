@@ -95,6 +95,10 @@ class Settings:
     #     'django.template.loaders.eggs.Loader',
     )
 
+    TEMPLATES = [
+        {'BACKEND': 'django.template.backends.django.DjangoTemplates'},
+    ]
+
     MIDDLEWARE_CLASSES = (
         'django.middleware.common.CommonMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
