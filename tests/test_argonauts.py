@@ -25,7 +25,7 @@ from argonauts import dumps
 from argonauts.views import JsonRequestMixin
 
 
-class TestObject(object):
+class EgObject(object):
     def __init__(self, value):
         self.value = value
 
@@ -44,10 +44,10 @@ class TestJson(TestCase):
         self.assertion([1], [1])
         self.assertion('a', 'a')
         self.assertion(12, 12)
-        self.assertion(TestObject('foo'), 'foo')
-        self.assertion([TestObject('foo'), TestObject(1)], ['foo', 1])
-        self.assertion(TestObject([TestObject('a'), TestObject('b')]), ['a', 'b'])
-        self.assertion(TestObject((TestObject('a'), TestObject('b'))), ['a', 'b'])
+        self.assertion(EgObject('foo'), 'foo')
+        self.assertion([EgObject('foo'), EgObject(1)], ['foo', 1])
+        self.assertion(EgObject([EgObject('a'), EgObject('b')]), ['a', 'b'])
+        self.assertion(EgObject((EgObject('a'), EgObject('b'))), ['a', 'b'])
         self.assertion(decimal.Decimal('1.1'), '1.1')
         self.assertIn('2012-10-16', self.encode_and_decode(datetime.datetime(2012, 10, 16)))
 
@@ -88,7 +88,7 @@ class TestJsonTemplateFilter(TestCase):
     def render_dictionary(self):
         return self.render_data(SortedDict([
             ('a', 'foo'),
-            ('b', TestObject('bar')),
+            ('b', EgObject('bar')),
         ]))
 
     def test_json_escapes_unsafe_characters(self):
