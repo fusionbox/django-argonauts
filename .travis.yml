@@ -4,11 +4,13 @@ python:
   - "3.4"
   - "3.5"
 env:
-  - DJANGO_PACKAGE=https://github.com/django/django/archive/stable/1.10.x.tar.gz
-  - DJANGO_PACKAGE=https://github.com/django/django/archive/stable/1.9.x.tar.gz
-  - DJANGO_PACKAGE=https://github.com/django/django/archive/stable/1.8.x.tar.gz
+  - DJANGO_PACKAGE=django~=1.10.8
+  - DJANGO_PACKAGE=django~=1.9.13
+  - DJANGO_PACKAGE=django~=1.8.19
 install:
-  - pip install -q $DJANGO_PACKAGE
-  - pip install  .
+  - pip install -U pip setuptools wheel
+  - pip install $DJANGO_PACKAGE .
 script:
   - python setup.py test
+cache:
+  - pip
