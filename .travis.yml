@@ -13,5 +13,4 @@ install:
   - pip install $DJANGO_PACKAGE .
 script:
   - python setup.py test
-cache:
-  - pip
+cache: pip
