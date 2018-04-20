@@ -73,6 +73,70 @@ It also escapes ampersands in order to generate valid XML. For example, with the
   <document><json>"foo \u0038x bar"</json></document>
   -->
 
+---
+Tag
+---
+
+You can also serialize multiple objects at the same time with the `{% json %}`
+template tag.
+
+To create an Array, use:
+
+.. code:: html
+
+  {% load argonauts %}
+  <script type="module">
+    const [ham, spam, eggs] = {% json ham spam eggs %};
+    // do something with ham, spam and eggs.
+  </script>
+
+To create an Object, use:
+
+.. code:: html
+
+  {% load argonauts %}
+  <script type="module">
+    const { ham, spam, eggs } = {% json ham=user spam=author eggs=owner %};
+    // do something with ham, spam and eggs.
+  </script>
+
+If you mix args and kwargs, however, you get an array-like object with
+numeric properties from the args and string properties from the kwargs.
+
+.. code:: html
+
+  {% load argonauts %}
+  <script type="module">
+    import assert from 'assert';
+    const x = {% json ham spam=author eggs=owner %};
+    const [ham] = Array.from(x);
+    const { spam, eggs, length } = x;
+    assert(length === 1);
+    const y = Array.prototype.map.call(x, v => v + 1);
+    assert.deepEqual(y, [ham+1]);
+    // do something with ham, spam and eggs.
+  </script>
+
+
+The `length` property is populated from the number of args passed to
+allow use with Array methods like Array.prototype.map or Array.from.
+You can override it, but it is likely to cause Array methods to fail:
+
+.. code:: html
+
+  {% load argonauts %}
+  <script type="module">
+    import assert from 'assert';
+    const x = {% json ham spam=author eggs=owner length='banana'%};
+    const [ham] = Array.from(x);
+    assert(typeof ham === 'undefined');
+    const { spam, eggs, length } = x;
+    assert(length === 'banana');
+    const y = Array.prototype.map.call(x, v => v + 1);
+    assert.deepEqual(y, []);
+    // do something with spam and eggs.
+  </script>
+
 -----
 Views
 -----

@@ -1,3 +1,4 @@
+import re
 import json
 import datetime
 import decimal
@@ -74,13 +75,7 @@ class TestJson(object):
             dumps(Klass(5))
 
 
-class TestJsonTemplateFilter(object):
-    template = "{% load argonauts %}{{ data|json }}"
-
-    def render_data(self, data):
-        template = Template(self.template)
-        return template.render(Context({'data': data}))
-
+class RenderingTestMixin(object):
     def render_dictionary(self):
         return self.render_data(SortedDict([
             ('a', 'foo'),
@@ -104,6 +99,45 @@ class TestJsonTemplateFilter(object):
     def test_compact_rendering_no_debug(self):
         rendered = self.render_dictionary()
         assert rendered == '{"a":"foo","b":"bar"}'
+
+
+class TestJsonTemplateFilter(RenderingTestMixin):
+    template = "{% load argonauts %}{{ data|json }}"
+
+    def render_data(self, data):
+        template = Template(self.template)
+        return template.render(Context({'data': data}))
+
+
+class TestJsonTemplateTag(RenderingTestMixin):
+    def template(self, extra, **kwargs):
+        template = "{% load argonauts %}{% json " + extra + " %}"
+        return Template(template).render(Context(kwargs))
+
+    def render_data(self, data):
+        return re.sub(
+            r'^    ',
+            '',
+            re.sub(
+                r'^{\s*"data":\s*(.*?)\s*}\s*$',
+                r'\1',
+                self.template('data=data', data=data),
+                flags=re.DOTALL,
+            ),
+            flags=re.MULTILINE,
+        )
+
+    def test_array(self):
+        assert self.template('a b c', a='1', b='2', c='3') == '["1","2","3"]'
+
+    def test_object(self):
+        assert self.template('a=c b=b c=a', a='1', b='2', c='3') == '{"a":"3","b":"2","c":"1"}'
+
+    def test_object_array(self):
+        assert self.template('a b c=d d=c', a='1', b='2', c='3', d='4') == '{"0":"1","1":"2","length":2,"c":"4","d":"3"}'
+
+    def test_object_array_length_override(self):
+        assert self.template('a b c=d d=c length=e', a='1', b='2', c='3', d='4', e='ov') == '{"0":"1","1":"2","length":"ov","c":"4","d":"3"}'
 
 
 def test_json_resonse_mixin():
