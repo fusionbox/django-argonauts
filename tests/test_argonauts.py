@@ -12,7 +12,11 @@ from django.test.utils import override_settings
 from django.test import TestCase
 
 from django.template import Template, Context
-from django.utils.datastructures import SortedDict
+try:
+    from django.utils.datastructures import SortedDict
+except ImportError:
+    from collections import OrderedDict as SortedDict
+
 from django.views.generic import View
 from django.test import RequestFactory
 from django.test.client import FakePayload
