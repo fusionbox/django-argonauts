@@ -11,19 +11,6 @@ def read_file(filename):
         return f.read()
 
 
-class PyTest(TestCommand):
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        # If we were to import outside of this function, pytest wouldn't be
-        # installed yet.
-        import pytest
-        pytest.main(self.test_args)
-
-
 setup(name='django-argonauts',
       version=version,
       author="Fusionbox, Inc.",
@@ -50,7 +37,4 @@ setup(name='django-argonauts',
           'argonauts',
           'argonauts.templatetags',
       ],
-
-      tests_require=['pytest-django', 'pytest'],
-      cmdclass = {'test': PyTest},
 )

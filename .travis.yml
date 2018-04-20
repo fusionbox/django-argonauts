@@ -10,7 +10,6 @@ env:
   - DJANGO_PACKAGE=django~=1.8.19
 install:
   - pip install -U pip setuptools wheel
-  - pip install $DJANGO_PACKAGE .
-script:
-  - python setup.py test
+  - pip install pytest-django pytest $DJANGO_PACKAGE .
+script: pytest
 cache: pip
