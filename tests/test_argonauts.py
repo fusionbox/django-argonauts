@@ -142,6 +142,9 @@ class TestJsonTemplateTag(RenderingTestMixin):
     def test_object_array_length_override(self):
         assert self.render('a b c=d d=c length=e', a='1', b='2', c='3', d='4', e='ov') == {"0":"1","1":"2","length":"ov","c":"4","d":"3"}
 
+    def test_none(self):
+        assert self.render('') == None
+
 
 def test_json_resonse_mixin():
     class ViewClass(JsonRequestMixin, View):

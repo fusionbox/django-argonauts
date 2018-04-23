@@ -26,4 +26,6 @@ def json(*args, **kwargs):
         return filters.json(args)
     if kwargs:
         return filters.json(kwargs)
+    return filters.json(None)
+
 json.is_safe = True
