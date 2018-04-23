@@ -114,6 +114,9 @@ class TestJsonTemplateTag(RenderingTestMixin):
         template = "{% load argonauts %}{% json " + extra + " %}"
         return Template(template).render(Context(kwargs))
 
+    def render(self, *args, **kwargs):
+        return json.loads(self.template(*args, **kwargs))
+
     def render_data(self, data):
         return re.sub(
             r'^    ',
@@ -128,16 +131,16 @@ class TestJsonTemplateTag(RenderingTestMixin):
         )
 
     def test_array(self):
-        assert self.template('a b c', a='1', b='2', c='3') == '["1","2","3"]'
+        assert self.render('a b c', a='1', b='2', c='3') == ["1","2","3"]
 
     def test_object(self):
-        assert self.template('a=c b=b c=a', a='1', b='2', c='3') == '{"a":"3","b":"2","c":"1"}'
+        assert self.render('a=c b=b c=a', a='1', b='2', c='3') == {"a":"3","b":"2","c":"1"}
 
     def test_object_array(self):
-        assert self.template('a b c=d d=c', a='1', b='2', c='3', d='4') == '{"0":"1","1":"2","length":2,"c":"4","d":"3"}'
+        assert self.render('a b c=d d=c', a='1', b='2', c='3', d='4') == {"0":"1","1":"2","length":2,"c":"4","d":"3"}
 
     def test_object_array_length_override(self):
-        assert self.template('a b c=d d=c length=e', a='1', b='2', c='3', d='4', e='ov') == '{"0":"1","1":"2","length":"ov","c":"4","d":"3"}'
+        assert self.render('a b c=d d=c length=e', a='1', b='2', c='3', d='4', e='ov') == {"0":"1","1":"2","length":"ov","c":"4","d":"3"}
 
 
 def test_json_resonse_mixin():
