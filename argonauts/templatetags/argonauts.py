@@ -23,7 +23,7 @@ def json(a):
     json_str = json_dumps(a)
 
     # Escape all the XML/HTML special characters.
-    escapes = ['<', '>', '&', "'"]
+    escapes = ['<', '>', '&']
     for c in escapes:
         json_str = json_str.replace(c, r'\u%04x' % ord(c))
 
