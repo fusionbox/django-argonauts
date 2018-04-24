@@ -90,7 +90,7 @@ class TestJsonTemplateFilter(TestCase):
     def test_json_escapes_unsafe_characters(self):
         rendered = self.render_data("<script>alert('&XSS!');</script>")
 
-        self.assertEqual(rendered, '"\\u003cscript\\u003ealert(\'\\u0026XSS!\');\\u003c/script\\u003e"')
+        self.assertEqual(rendered, r'"\u003cscript\u003ealert(\u0027\u0026XSS!\u0027);\u003c/script\u003e"')
 
     @override_settings(DEBUG=True)
     def test_pretty_rendering_in_debug(self):
