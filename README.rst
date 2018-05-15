@@ -63,14 +63,15 @@ escapes. If we output ``{{ somedata|json }}``, we get:
     var somedata = "\u0060xscript\u0062x\u0060xscript\u0062xconsole.log(\u0027xss\u0027);//";
   </script>
 
-Argonauts also escapes single quotes this allows you to write valid JS for tools like
-eslint-plugin-html and for use in single quoted XML or XHTML attributes:
+Argonauts also escapes single quotes this allows you to use in single quoted XML or XHTML attributes:
 
 .. code:: html
 
-  <script data-data='{{ extra|json }}'>
-    var somedata = JSON.parse('{{ somedata|json }}');
-  </script>
+  <script data-data='{{ extra|json }}' src="{% static 'app/script.js' %}></script>
+  
+.. code:: javascript
+
+  const myData = JSON.parse(document.currentScript.dataset.data);
 
 It also escapes ampersands in order to generate valid XML. For example, with the value
 ``foo & bar``:
