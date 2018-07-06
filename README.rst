@@ -31,7 +31,7 @@ to generate safe JavaScript:
     })();
   </script>
 
-``|json`` is safe to use anywhere in XML or XHTML except in a double quoted attribute. It's
+``|json`` is safe to use anywhere in XML or XHTML except in an attribute. It's
 important to use this tag rather than dumping the output of ``json.dumps`` into
 HTML, because an attacker could output a closing tag and effect an XSS attack.
 For example, if we output ``json.dumps("</script><script>console.log('xss');
@@ -60,16 +60,7 @@ escapes. If we output ``{{ somedata|json }}``, we get:
 .. code:: html
 
   <script>
-    var somedata = "\u0060xscript\u0062x\u0060xscript\u0062xconsole.log(\u0027xss\u0027);//";
-  </script>
-
-Argonauts also escapes single quotes this allows you to write valid JS for tools like
-eslint-plugin-html and for use in single quoted XML or XHTML attributes:
-
-.. code:: html
-
-  <script data-data='{{ extra|json }}'>
-    var somedata = JSON.parse('{{ somedata|json }}');
+    var somedata = "\u0060xscript\u0062x\u0060xscript\u0062xconsole.log('xss');//";
   </script>
 
 It also escapes ampersands in order to generate valid XML. For example, with the value
