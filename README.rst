@@ -2,6 +2,15 @@
 Django-Argonauts
 ================
 
+==========
+Deprecated
+==========
+
+The main feature of this library, a form of the ``json`` filter which safely
+embeds json in HTML, has been added to Django as
+`json_script <https://docs.djangoproject.com/en/4.0/ref/templates/builtins/#json-script>`_.
+Use that instead.
+
 .. image:: https://api.travis-ci.org/fusionbox/django-argonauts.png
    :alt: Building Status
    :target: https://travis-ci.org/fusionbox/django-argonauts
